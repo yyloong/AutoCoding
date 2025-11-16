@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "timestamp": "2025-11-16T22:39:31.866307",
+    "split": "debug",
+    "eval_type": "code-dev",
+    "total_papers": 3
+  },
+  "papers": [
+    {
+      "paper_id": "paper1",
+      "status": "error",
+      "score": 0,
+      "details": {
+        "traceback": "Traceback (most recent call last):\n  File \"F:\\STUDY\\NJU\\COMPUTER_SCIENCE\\AutoCode_local\\ms-agent\\projects\\code_scratch\\evaluate_paperbench.py\", line 178, in _evaluate_paper\n    rubric = json.load(f)\n  File \"C:\\Python314\\Lib\\json\\__init__.py\", line 293, in load\n    return loads(fp.read(),\n        cls=cls, object_hook=object_hook,\n        parse_float=parse_float, parse_int=parse_int,\n        parse_constant=parse_constant, object_pairs_hook=object_pairs_hook, **kw)\n  File \"C:\\Python314\\Lib\\json\\__init__.py\", line 346, in loads\n    return _default_decoder.decode(s)\n           ~~~~~~~~~~~~~~~~~~~~~~~^^^\n  File \"C:\\Python314\\Lib\\json\\decoder.py\", line 345, in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Python314\\Lib\\json\\decoder.py\", line 363, in raw_decode\n    raise JSONDecodeError(\"Expecting value\", s, err.value) from None\njson.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)\n"
+      },
+      "error": "Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "paper_id": "paper2",
+      "status": "error",
+      "score": 0,
+      "details": {
+        "traceback": "Traceback (most recent call last):\n  File \"F:\\STUDY\\NJU\\COMPUTER_SCIENCE\\AutoCode_local\\ms-agent\\projects\\code_scratch\\evaluate_paperbench.py\", line 178, in _evaluate_paper\n    rubric = json.load(f)\n  File \"C:\\Python314\\Lib\\json\\__init__.py\", line 293, in load\n    return loads(fp.read(),\n        cls=cls, object_hook=object_hook,\n        parse_float=parse_float, parse_int=parse_int,\n        parse_constant=parse_constant, object_pairs_hook=object_pairs_hook, **kw)\n  File \"C:\\Python314\\Lib\\json\\__init__.py\", line 346, in loads\n    return _default_decoder.decode(s)\n           ~~~~~~~~~~~~~~~~~~~~~~~^^^\n  File \"C:\\Python314\\Lib\\json\\decoder.py\", line 345, in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Python314\\Lib\\json\\decoder.py\", line 363, in raw_decode\n    raise JSONDecodeError(\"Expecting value\", s, err.value) from None\njson.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)\n"
+      },
+      "error": "Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "paper_id": "paper3",
+      "status": "error",
+      "score": 0,
+      "details": {
+        "traceback": "Traceback (most recent call last):\n  File \"F:\\STUDY\\NJU\\COMPUTER_SCIENCE\\AutoCode_local\\ms-agent\\projects\\code_scratch\\evaluate_paperbench.py\", line 178, in _evaluate_paper\n    rubric = json.load(f)\n  File \"C:\\Python314\\Lib\\json\\__init__.py\", line 293, in load\n    return loads(fp.read(),\n        cls=cls, object_hook=object_hook,\n        parse_float=parse_float, parse_int=parse_int,\n        parse_constant=parse_constant, object_pairs_hook=object_pairs_hook, **kw)\n  File \"C:\\Python314\\Lib\\json\\__init__.py\", line 346, in loads\n    return _default_decoder.decode(s)\n           ~~~~~~~~~~~~~~~~~~~~~~~^^^\n  File \"C:\\Python314\\Lib\\json\\decoder.py\", line 345, in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Python314\\Lib\\json\\decoder.py\", line 363, in raw_decode\n    raise JSONDecodeError(\"Expecting value\", s, err.value) from None\njson.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)\n"
+      },
+      "error": "Expecting value: line 1 column 1 (char 0)"
+    }
+  ],
+  "summary": {
+    "total": 3,
+    "completed": 0,
+    "failed": 3,
+    "success_rate": 0.0,
+    "average_score": 0
+  }
+}
