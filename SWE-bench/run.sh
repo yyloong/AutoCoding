@@ -1,4 +1,14 @@
-# 测试 docker 是否能正常运行
+# 建议 conda python 3.10 环境
+pip install -e .
+
+# set up docker
+# 在电脑上装好 docker
+# 可能需要按照这个教程配置 nju docker mirror
+# https://sci.nju.edu.cn/9e/05/c30384a564741/page.htm 
+# docker 测试命令
+# docker run hello-world
+
+# 测试 docker 是否配置正确
 # 如果该问题能验证通过，则说明 docker 环境配置正确
 python -m swebench.harness.run_evaluation \
     --max_workers 1 \
