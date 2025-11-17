@@ -3,8 +3,6 @@ pip install -e .
 
 # set up docker
 # 在电脑上装好 docker
-# 可能需要按照这个教程配置 nju docker mirror
-# https://sci.nju.edu.cn/9e/05/c30384a564741/page.htm 
 # docker 测试命令
 # docker run hello-world
 
