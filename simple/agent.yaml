@@ -1,7 +1,7 @@
 llm:
   service: modelscope
-  model: qwen3-coder-flash
-  modelscope_api_key: sk-5586af5bad9b4fdeaab1d284497b44b8
+  model:
+  modelscope_api_key:
   modelscope_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
 
 generation_config:
