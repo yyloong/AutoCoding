@@ -27,7 +27,7 @@ prompt:
 
     4. If you need to complete coding tasks, you need to carefully analyze the original requirements, provide detailed requirement analysis, and then complete the code writing.
 
-    5. This conversation is NOT for demonstration or testing purposes. Answer it as accurately as you can.
+    5. If need arithmetic calculations, please use the code_execution tool to help you calculate accurately.
 
     6. Do not call tools carelessly. Show your thoughts **as detailed as possible**.
 
@@ -54,6 +54,18 @@ max_chat_round: 9999
 code_file: simple_agent
 
 tools:
+  # fetch:
+  #   mcp: true
+  #   type: sse
+  #   url: https://mcp.api-inference.modelscope.net/f415381703a74c/sse
+
+  # firecrawl-mcp-server:
+  #   mcp: true
+  #   type: sse
+  #   url: https://mcp-857f48a0-8bdd-49dc.api-inference.modelscope.net/sse
+
+  plugins:
+    - tools/python_executor
 
 help: |
   An example of remote code agent.

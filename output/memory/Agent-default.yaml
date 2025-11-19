@@ -23,10 +23,10 @@ prompt:
     \ Do not output any fake geocode/coordinates/links. Always query geocode/coordinates/links\
     \ from tools first!\n\n4. If you need to complete coding tasks, you need to carefully\
     \ analyze the original requirements, provide detailed requirement analysis, and\
-    \ then complete the code writing.\n\n5. This conversation is NOT for demonstration\
-    \ or testing purposes. Answer it as accurately as you can.\n\n6. Do not call tools\
-    \ carelessly. Show your thoughts **as detailed as possible**.\n\n7. Respond in\
-    \ the same language the user uses. If the user switches, switch accordingly.\n\
+    \ then complete the code writing.\n\n5. If need arithmetic calculations, please\
+    \ use the code_execution tool to help you calculate accurately.\n\n6. Do not call\
+    \ tools carelessly. Show your thoughts **as detailed as possible**.\n\n7. Respond\
+    \ in the same language the user uses. If the user switches, switch accordingly.\n\
     \nFor requests that require performing a specific task or retrieving information,\
     \ you must use the following format in user language:\n```\nThe user needs to\
     \ ...\nI have analyzed this request in detail and broken it down into the following\
@@ -38,7 +38,9 @@ prompt:
     \ not fully meet my expectations. Next, I need to ...\n```\n"
 max_chat_round: 9999
 code_file: simple_agent
-tools: {}
+tools:
+  plugins:
+  - tools/python_executor
 help: An example of remote code agent.
 local_dir: /home/u-wuhc/ms-agent/simple
 name: agent.yaml
@@ -49,4 +51,4 @@ load_cache: false
 runtime:
   should_stop: true
   tag: Agent-default
-  round: 1
+  round: 2

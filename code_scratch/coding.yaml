@@ -4,7 +4,6 @@ llm:
   modelscope_api_key:
   modelscope_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
 
-
 generation_config:
   temperature: 0.2
   top_k: 20
@@ -14,7 +13,6 @@ generation_config:
     dashscope_extend_params:
       provider: b
     enable_thinking: false
-
 
 prompt:
   system: |
@@ -69,7 +67,7 @@ memory:
     conversation_search_limit: 10
     procedural_search_limit: 3
     embedding_model: "text-embedding-v4"
-    summary_model: "qwen3-coder-plus"
+    summary_model: "qwen3-coder-flash"
     max_tokens: 4096
 
 max_chat_round: 100
