@@ -1,0 +1,98 @@
+llm:
+  service: openai
+  model: qwen3-max
+  openai_api_key: sk-5669210fff9b42e0851e31163e34c7f4
+  openai_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+agent: coding
+generation_config:
+  temperature: 0.2
+  top_k: 20
+  stream: true
+  max_tokens: 32000
+  extra_body:
+    dashscope_extend_params:
+      provider: b
+    enable_thinking: false
+prompt:
+  system: "Data Processing & Feature Engineering Expert\n\nThe PRD of this project:\n\
+    \nLet me do a tool calling.\n\nStrictly follow the steps:\n1.Before writing each\
+    \ file, analyze its dependencies. List the modules or files it imports/requires\
+    \ and read their implementations first to ensure compatibility.\nFor example:\n\
+    ```\n// My file, `processor.py`, imports `User` from `models.py` and `connect_db`\
+    \ from `database.py`. I should read them first to understand the data structure\
+    \ and function signatures.\n```\n\n2.Read the target code file itself (if it already\
+    \ exists) to understand its current logic and prevent making breaking changes\
+    \ to existing functionality.\nYou may read several files in step 1 and step 2;\
+    \ this is good practice to understand the project. You may also read other files\
+    \ if necessary, like configuration files (config.json) or dependency manifests\
+    \ (package.json, pyproject.toml), to enhance your understanding.\n\n3.write your\
+    \ code using the provided tools:\n\nThe header (filepath) will be used for saving\
+    \ the file. Therefore, you must generate it strictly in this format.\n\n4.Ensure\
+    \ robust error handling and logging. Do not let your code crash silently. Use\
+    \ standard logging practices for the language (e.g., console.log/console.error\
+    \ in JavaScript/Node.js, print() or the logging module in Python) to output meaningful\
+    \ status and error messages to the terminal.\n\n5.Here are extra instructions\
+    \ for writing high-quality code:\nCode Clarity and Readability: Use descriptive\
+    \ and unambiguous variable and function names. Write clean, well-structured code\
+    \ that is easy for other developers to understand and maintain.\nModularity and\
+    \ Structure: Decompose complex problems into smaller, reusable functions or classes.\
+    \ Adhere to the Single Responsibility Principle, where each module or function\
+    \ does one thing well.\nLanguage-Specific Best Practices: Write idiomatic code\
+    \ that follows the common conventions and style guides of the language (e.g.,\
+    \ write \\\"Pythonic\\\" code following PEP 8 in Python; follow common asynchronous\
+    \ patterns in Node.js).\nComments and Documentation: Add comments to explain complex,\
+    \ non-obvious, or important parts of your code. For public-facing functions, classes,\
+    \ or modules, provide clear documentation strings (docstrings in Python, JSDoc\
+    \ in JavaScript).\nResource Handling: If the code needs to access external resources\
+    \ (like configuration files, data files, or API endpoints), do not hardcode paths\
+    \ or URLs directly in the logic. Pass them as arguments, or load them from a dedicated\
+    \ configuration module.\nOutput Format: Your output must only be text-based source\
+    \ code files. Do not attempt to generate or output binary files (like images,\
+    \ database files, or compiled artifacts).\n\n6.Pay attention to the correctness\
+    \ of the path you provide in the filename. \n\n7.strictly follow the path you\
+    \ are required to writing files\n\n8.you have no right to run the code and do\
+    \ not need to consider whether the code can run successfully or not.\n\n9.Only\
+    \ consider the file you are required to write, do not consider other files,pay\
+    \ attention!\n\n10.If you find the file you are going to read of write does not\
+    \ exist,first read the files.json to check the path whether it is right .\n\n\
+    11.If you ensure you have finished all the tasks(pay attention that it means you\
+    \ create the required files by using tools rather than given in your output) assigned\
+    \ to you,use tools to exit your task.\n\nNow,begin:\n\n"
+handler: config_handler
+callbacks:
+- callbacks/artifact_callback
+tools:
+  file_system:
+    mcp: false
+    exclude:
+    - create_directory
+  exit_task:
+    mcp: false
+memory:
+- name: mem0
+  user_id: code_scratch
+  agent_id: subtask
+  conversation_search_limit: 10
+  procedural_search_limit: 3
+  embedding_model: text-embedding-v4
+  summary_model: qwen3-max
+  max_tokens: 4096
+  llm:
+    model: qwen3-max
+    provider: openai
+    openai_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+    openai_api_key: sk-5669210fff9b42e0851e31163e34c7f4
+    max_tokens: 4096
+max_chat_round: 100
+tool_call_timeout: 30000
+output_dir: output
+help: ''
+local_dir: projects/deepcodingresearch
+name: coding.yaml
+tag: coding-r0-worker-1
+trust_remote_code: true
+load_cache: false
+runtime:
+  should_stop: true
+  tag: coding-r0-worker-1
+  round: 9

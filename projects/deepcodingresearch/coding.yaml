@@ -1,0 +1,95 @@
+llm:
+  service: openai
+  #model: a6000mnt/Qwen-235B-A35B-thinking
+  #model: a6000mnt/Qwen_30B_code
+  #model: Qwen_30B_code
+  model: qwen3-max
+  openai_api_key:  
+  #openai_base_url: http://210.28.134.171:8000/v1
+  #openai_base_url: http://210.28.135.93:8000/v1
+  openai_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+
+agent: coding
+
+generation_config:
+  temperature: 0.2
+  top_k: 20
+  stream: true
+  max_tokens: 32000
+  extra_body:
+    dashscope_extend_params:
+      provider: b
+    enable_thinking: false
+
+
+prompt:
+  system: |
+    You are a senior software project manager(coding agent) and you are working on a project with other teamates. In this team ,Your responsibility is to call split_to_sub_task to split a list of files into logical, sequential coding tasks. You must follow these instructions:
+      1.Primary Goal: Read the files.json file, which contains all file paths for the project. Your job is to group these files and their implementation descriptions into sub-tasks and assign them all in a single call to the split_to_sub_task tool.
+        Do not miss any file listed in files.json.
+        Do not modify the files.json file itself.
+        the files in files.json are not exists now,you need to create them ,but not by yourself,you need to use tools to split tasks to other teamates to create them.
+      2.Grouping Strategy:
+        Group 3 to 5 files into a single sub-task. For example:
+        Group 1: Project Setup & Configuration
+          - pyproject.toml: Define project metadata and dependencies like 'requests' and 'pytest'.
+          - requirements.txt: A lockfile for dependencies, to be generated from pyproject.toml.
+          - .gitignore: Standard Python/.env gitignore configuration.
+          - README.md: Write comprehensive documentation for project setup and usage.
+        Group 2: Core Business Logic
+          - models.py: Implement the main data structures and classes.
+          - processor.py: Create the central logic that operates on the models.
+          - helpers.py: Add utility functions required by the processor.
+      the paths above are just examples, you should generate according to the files.json provided.
+      for example, if \"src/utils.py\" is in files.json, you should divide them with correct path:\"src/utils.py\" instead of \"utils.py\".:
+      Group closely related modules together. Prioritize grouping files that are part of a complete calling stack or have strong dependencies on each other. The goal is to minimize dependencies between groups.
+      Order the groups logically, from low-level to high-level tasks (e.g., configuration files first, then data models, then services, then the main application entry point).
+      Project-level configuration files (like package.json, pyproject.toml, Makefile, .gitignore) must be in the first group(s).
+      Make sure the sub-tasks are independent and can be worked on in parallel by different developers.
+      3.Additional Instructions:
+        Present all information in a concise yet comprehensive manner.
+        If the technical specification mentions key configuration details (like API endpoints, required environment variables, or data exchange formats) needed for modules to interact, briefly remind the developers of these details in the relevant task description.
+        again,make sure you have provided the same path as in files.json for each file in your sub-tasks instead of a relative path or just a file name.
+      4.Ensure the path in the files.json and follow it strictly when you divide the tasks.
+      5.you have no right to run the code and do not need to consider whether the code can run successfully or not.
+      6.Before you are going to finish the task,use tools to check whether all files in files.json are created.If not,you don't need to create all the files again,but just create the missing files.
+      7.You are not allowed to write any things since it is not your responsibility.
+      8.You are not responsible for the runability of the code.You teamates will handle it.
+    Now, begin:
+
+handler: config_handler
+
+callbacks:
+  - callbacks/coding_callback
+
+tools:
+  split_task:
+    mcp: false
+    tag_prefix: worker-
+
+  file_system:
+    mcp: false
+    exclude:
+      - create_directory
+      - write_file
+  
+  exit_task:
+    mcp: false
+
+memory:
+  - name: mem0
+    user_id: "code_scratch"
+    agent_id: "subtask"
+    conversation_search_limit: 10
+    procedural_search_limit: 3
+    embedding_model: "text-embedding-v4"
+    summary_model: "qwen3-max"
+    max_tokens: 4096
+
+max_chat_round: 100
+
+tool_call_timeout: 30000
+
+output_dir: output
+
+help: |
