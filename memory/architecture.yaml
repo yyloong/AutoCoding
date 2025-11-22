@@ -47,8 +47,9 @@ prompt:
     \n 7.If you are working on kaggle project,you are allowed to use kaggle_tools\
     \ to download the dataset.\n But the dataset can only be downloaded in the current\
     \ working directory,you are not allowed to change the working directory.\n Don't\
-    \ forget to include the dataset files in the files.json.\n\n 8.You are not allowed\
-    \ to do other things since it is not your responsibility.\n Now begin:\n"
+    \ forget to include the dataset files in the files.json(check their paths first).\n\
+    \n 8.You are not allowed to do other things since it is not your responsibility.\n\
+    \ Now begin:\n"
 callbacks:
 - callbacks/artifact_callback
 tools:
@@ -75,4 +76,4 @@ load_cache: false
 runtime:
   should_stop: true
   tag: architecture
-  round: 7
+  round: 6

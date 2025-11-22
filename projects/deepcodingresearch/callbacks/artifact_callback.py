@@ -41,6 +41,11 @@ class ArtifactCallback(Callback):
         results = []
         tool_calls = deepcopy(messages[-1].tool_calls)
         for tc in tool_calls:
+            if tc['tool_name'] == 'web_research---search' or tc['tool_name'] == 'web_research---visit_page':
+                if self.agent_type == "research":
+                    os.environ["http_proxy"] = os.environ.get("shorttime_http_proxy","")
+                    os.environ["https_proxy"] = os.environ.get("shorttime_https_proxy","")
+                
             if tc['tool_name'] == 'file_system---write_file':
                 await self.file_system.create_directory()
                 path = json.loads(tc['arguments']).get('path', '')
@@ -87,3 +92,12 @@ class ArtifactCallback(Callback):
             if f == filename:
                 return True
         return False
+    
+    async def after_tool_call(self, runtime, messages):
+        # reset proxy after web research tool call
+        if self.agent_type == "research":
+            if messages[-1].tool_calls:
+                for tc in messages[-1].tool_calls:
+                    if tc['tool_name'] == 'web_research---search' or tc['tool_name'] == 'web_research---visit_page':
+                        del os.environ["http_proxy"] 
+                        del os.environ["https_proxy"] 
