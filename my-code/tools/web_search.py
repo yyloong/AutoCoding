@@ -1,8 +1,4 @@
-# Copyright (c) Alibaba, Inc. and its affiliates.
-import re
-import subprocess
 import os
-import shutil
 from typing import Optional
 from typing import List, Union
 
@@ -87,11 +83,6 @@ class Web_research(ToolBase):
             ]
         }
 
-    async def call_tool(
-        self, server_name: str, *, tool_name: str, tool_args: dict
-    ) -> str:
-        return await getattr(self, tool_name)(**tool_args)
-
     async def search(self, query: str) -> str:
         params = {"query": query}
         return Search.call_tool(params)
@@ -105,4 +96,15 @@ class Web_research(ToolBase):
         Visit_page.api_key = os.environ.get("OPENAI_API_KEY")
         Visit_page.model = getattr(self.config["llm"], "model", None)
         return await Visit_page.call_tool(params)
+    
+    async def call_tool(self, server_name: str, tool_name: str, tool_args: dict) -> str:
+        if tool_name == 'search':
+            query = tool_args.get('query', '')
+            return await self.search(query)
+        elif tool_name == 'visit_page':
+            url = tool_args.get('url', '')
+            goal = tool_args.get('goal', '')
+            return await self.visit_page(url, goal)
+        else:
+            return f'Unknown tool: {tool_name}'
    

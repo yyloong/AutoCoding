@@ -88,15 +88,15 @@ tools:
     # - tools/shell
     - tools/web_search
 
-memory:
-  - name: mem0
-    user_id: "code_scratch"
-    agent_id: "subtask"
-    conversation_search_limit: 10
-    procedural_search_limit: 3
-    embedding_model: "text-embedding-v4"
-    summary_model: "qwen3-coder-flash"
-    max_tokens: 4096
+# memory:
+#   - name: mem0
+#     user_id: "code_scratch"
+#     agent_id: "subtask"
+#     conversation_search_limit: 10
+#     procedural_search_limit: 3
+#     embedding_model: "text-embedding-v4"
+#     summary_model: "qwen3-coder-flash"
+#     max_tokens: 4096
 
 max_chat_round: 100
 
