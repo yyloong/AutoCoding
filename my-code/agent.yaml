@@ -75,9 +75,6 @@ prompt:
 
     You must strictly follow these instructions throughout the conversation.
     
-
-max_chat_round: 9999
-
 code_file: simple_agent
 
 tools:
@@ -86,6 +83,7 @@ tools:
 
   plugins:
     - tools/python_executor
+    - tools/environment_set_up
 
 memory:
   - name: mem0
