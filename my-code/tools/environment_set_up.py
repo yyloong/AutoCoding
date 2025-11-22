@@ -2,8 +2,6 @@
 import re
 import subprocess
 import os
-import shutil
-from typing import Optional
 
 from ms_agent.llm.utils import Tool
 from ms_agent.tools.base import ToolBase

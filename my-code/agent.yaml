@@ -84,6 +84,8 @@ tools:
   plugins:
     - tools/python_executor
     - tools/environment_set_up
+    # - tools/code_executor   # 需要 docker 支持，当前环境无法使用
+    - tools/shell
 
 memory:
   - name: mem0
