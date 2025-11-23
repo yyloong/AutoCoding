@@ -492,7 +492,7 @@ class LLMAgent(Agent):
         if _response_message.tool_calls:
             messages = await self.parallel_tool_call(messages)
 
-        if _response_message.tool_calls[-1]["tool_name"] == "exit_task---exit_task":
+        if _response_message.tool_calls and _response_message.tool_calls[-1]["tool_name"] == "exit_task---exit_task":
             self.runtime.should_stop = True
 
         await self.after_tool_call(messages)

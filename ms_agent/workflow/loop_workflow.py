@@ -110,9 +110,10 @@ class LoopWorkflow(Workflow):
                     print('='*50)
                     
                     inputs = outputs
-                    if self._should_break_loop(agent.last_message):
-                        logger.info('Exiting loop as break condition met.')
-                        break
+                    if task_info['breaker']:
+                        if self._should_break_loop(outputs[-2]):
+                            logger.info('Exiting loop as break condition met.')
+                            break
         return inputs
 
     def _should_break_loop(self, message):
@@ -125,6 +126,22 @@ class LoopWorkflow(Workflow):
         Returns:
             bool: True if should continue refining, False if exit_task was called
         """
-        # 优先检查是否调用了 exit_task 工具
-        if message.tool_calls and message.tool_calls[-1]["tool_name"] == "break_loop---break_loop":
-            return True
+        # ```json
+        # {
+        # "accepted": true/false,
+        # "issues": [ "错误描述1 (步骤编号)", "错误描述2 (步骤编号)" ],
+        # "suggestions": "改进建议"
+        # }
+        # ```
+        
+        # 匹配是否有以上格式的 JSON 输出，并检查 accepted 字段
+        if "```json" in message.content and "```" in message.content:
+            try:
+                json_str = message.content.split("```json")[1].split("```")[0].strip()
+                import json
+                output_json = json.loads(json_str)
+                if 'accepted' in output_json and output_json['accepted'] is True:
+                    return True
+            except Exception as e:
+                logger.warning(f"Failed to parse JSON from refine agent output: {e}")
+        return False

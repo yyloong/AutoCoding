@@ -1,12 +1,12 @@
 import sys
 from copy import deepcopy
-from typing import List, AsyncGenerator, Any
+from typing import List, AsyncGenerator, Any, Union
 
 from ms_agent import LLMAgent
 from ms_agent.llm import Message
+from ms_agent.utils.logger import logger
 
-
-class SimpleAgent(LLMAgent):
+class RefineAgent(LLMAgent):
 
     async def step(
         self, messages: List[Message]
@@ -80,7 +80,7 @@ class SimpleAgent(LLMAgent):
         # else:
         #     self.runtime.should_stop = True
 
-        if _response_message.tool_calls and _response_message.tool_calls[-1]["tool_name"] == "exit_task---exit_task":
+        if _response_message and _response_message.tool_calls[-1]["tool_name"] == "exit_task---exit_task":
             self.runtime.should_stop = True
 
         await self.after_tool_call(messages)
@@ -88,3 +88,74 @@ class SimpleAgent(LLMAgent):
             f'[usage] prompt_tokens: {_response_message.prompt_tokens}, '
             f'completion_tokens: {_response_message.completion_tokens}')
         yield messages
+
+    async def run_loop(self, messages: Union[List[Message], str],
+                       **kwargs) -> AsyncGenerator[Any, Any]:
+        """Run the agent, mainly contains a llm calling and tool calling loop.
+
+        Args:
+            messages (Union[List[Message], str]): Input data for the agent. Can be a raw string prompt,
+                                               or a list of previous interaction messages.
+        Returns:
+            List[Message]: A list of message objects representing the agent's response or interaction history.
+        """
+        try:
+            self.max_chat_round = getattr(self.config, 'max_chat_round',
+                                          LLMAgent.DEFAULT_MAX_CHAT_ROUND)
+            self.register_callback_from_config()
+            self.prepare_llm()
+            self.prepare_runtime()
+            await self.prepare_tools()
+            await self.load_memory()
+            await self.prepare_rag()
+            self.runtime.tag = self.tag
+
+            if messages is None:
+                messages = self.query
+
+            self.config, self.runtime, messages = self.read_history(messages)
+
+            if self.runtime.round == 0:
+                # 0 means no history
+                messages = await self.create_messages(messages)
+                await self.do_rag(messages)
+                await self.on_task_begin(messages)
+
+            for message in messages:
+                if message.role != 'system':
+                    self.log_output('[' + message.role + ']:')
+                    self.log_output(message.content)
+            while not self.runtime.should_stop:
+                async for messages in self.step(messages):
+                    yield messages
+                self.runtime.round += 1
+                # save memory and history
+                self.save_memory(messages)
+                self.save_history(messages)
+
+                # +1 means the next round the assistant may give a conclusion
+                if self.runtime.round >= self.max_chat_round + 1:
+                    if not self.runtime.should_stop:
+                        messages.append(
+                            Message(
+                                role='assistant',
+                                content=
+                                f'Task {messages[1].content} was cutted off, because '
+                                f'max round({self.max_chat_round}) exceeded.'))
+                    self.runtime.should_stop = True
+                    yield messages
+
+            # save memory
+            self.save_memory(messages)
+
+            await self.on_task_end(messages)
+            await self.cleanup_tools()
+            yield messages
+        except Exception as e:
+            import traceback
+            logger.warning(traceback.format_exc())
+            if hasattr(self.config, 'help'):
+                logger.error(
+                    f'[{self.tag}] Runtime error, please follow the instructions:\n\n {self.config.help}'
+                )
+            raise e

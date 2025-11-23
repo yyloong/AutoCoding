@@ -98,8 +98,14 @@ class ChainWorkflow(Workflow):
                 init_args['tag'] = task
             engine = AgentLoader.build(**init_args)
             step_inputs[idx] = (inputs, config)
+            print("="*100)
+            print(inputs)
+            print("="*100)
             outputs = await engine.run(inputs)
             ############################################
+            print('='*100)
+            print(outputs)
+            print('='*100)
             outputs = inputs
             ###########################################
             next_idx = engine.next_flow(idx)

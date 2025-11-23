@@ -3,6 +3,8 @@ type: LoopWorkflow
 loop:
   coding:
     agent_config: coder.yaml
+    breaker: false
 
   refine:
     agent_config: refine.yaml
+    breaker: true
