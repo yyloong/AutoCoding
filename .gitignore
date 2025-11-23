@@ -2,3 +2,4 @@ memory/
 log/
 run.sh
 ouput/
+__pycache__/

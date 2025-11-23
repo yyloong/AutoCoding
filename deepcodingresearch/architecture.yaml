@@ -1,18 +1,13 @@
 llm:
   service: openai
-  #model: a6000mnt/Qwen-235B-A35B-thinking
-  #model: a6000mnt/Qwen_30B_code
-  #model: Qwen_30B_code
   model: qwen3-coder-plus
   openai_api_key:  
-  #openai_base_url: http://210.28.134.171:8000/v1
-  #openai_base_url: http://210.28.135.93:8000/v1
   openai_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
 
 agent : architecture
 
 generation_config:
-  temperature: 0.3
+  temperature: 0.8
   top_k: 50
   stream: true
   max_tokens: 32000
@@ -20,7 +15,6 @@ generation_config:
     dashscope_extend_params:
       provider: b
     enable_thinking: false
-
 
 prompt:
   system: |
@@ -81,8 +75,6 @@ tools:
     exclude:
       - submit_csv
       
-
-
 max_chat_round: 10
 tool_call_timeout: 30000
 
