@@ -42,16 +42,8 @@ prompt:
         Pay attention to all arguments and import/require statements related to the error line, and whether there are related issues in the files; fix them also.
         Do a minimum change in case that the normal code is damaged. If you are doing a breaking change, change related files also.
         Fix other issues you discover while reading the code files, but only if you have clearly identified their root cause.
-        Step 5: Express Your Thinking and Fixes. Express your thinking in concise and clear language. When you fix files, you should use the following format and do not add any other text outside the format:
-
-        ```Type: filename
-        text
-        ```
-
-        For example,you can output like this:
-        ```Python: src/main.py
-        your code here
-        ```
+        Step 5: Express Your Thinking and Fixes. Express your thinking in concise and clear language. And then use the provided tools to make the necessary code changes to fix the identified issues.
+        Step 6: When you try to use python to operate the file,please check their path first since yourt working directory may not be the project root directory.
         Once you ensure you have finished all the fixes, use tools to exit you task.
     Let's begin:
 
@@ -66,6 +58,9 @@ tools:
     mcp: false
     exclude:
       - create_directory
+    limit_len_files_end_with:
+      - .csv
+    limit_len: 1000
   environment_set_up: 
     mcp: false
 

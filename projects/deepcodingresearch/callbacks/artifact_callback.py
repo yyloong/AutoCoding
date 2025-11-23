@@ -45,7 +45,9 @@ class ArtifactCallback(Callback):
                 if self.agent_type == "research":
                     os.environ["http_proxy"] = os.environ.get("shorttime_http_proxy","")
                     os.environ["https_proxy"] = os.environ.get("shorttime_https_proxy","")
-                
+            if tc['tool_name'] == 'kaggle_tools---download_dataset' or tc['tool_name'] == 'kaggle_tools---submit_csv':
+                os.environ["http_proxy"] = os.environ.get("shorttime_http_proxy","")
+                os.environ["https_proxy"] = os.environ.get("shorttime_https_proxy","")
             if tc['tool_name'] == 'file_system---write_file':
                 await self.file_system.create_directory()
                 path = json.loads(tc['arguments']).get('path', '')

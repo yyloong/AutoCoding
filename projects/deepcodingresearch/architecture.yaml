@@ -56,9 +56,7 @@ prompt:
 
     6.Once you have given the files.json(pay attention that it means you use tools to create a files.json file rather than given in your output), you should use tools to exit the task.
 
-    7.If you are working on kaggle project,you are allowed to use kaggle_tools to download the dataset.
-    But the dataset can only be downloaded in the current working directory,you are not allowed to change the working directory.
-    Don't forget to include the dataset files in the files.json(check their paths first).
+    7.If you are working on kaggle project,don't forget to give the path of data in the json file.
 
     8.You are not allowed to do other things since it is not your responsibility.
     Now begin:
@@ -74,13 +72,10 @@ tools:
     mcp: false
     exclude:
       - create_directory
-      - delete_file_or_dir
-
-  kaggle_tools:
-    mcp: false
-    exclude:
-      - submit_csv
-      
+      - delete_file_or_dir  
+    limit_len_files_end_with:
+      - .csv
+    limit_len: 1000
 
 
 max_chat_round: 10

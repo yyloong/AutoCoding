@@ -26,16 +26,20 @@ class kaggle_tools(ToolBase):
                 Tool(
                     tool_name="download_dataset",
                     server_name="kaggle_tools",
-                    description="Download the dataset for the competition from Kaggle.",
+                    description="Download the dataset for the competition from Kaggle in the provided path.",
                     parameters={
                         "type": "object",
                         "properties": {
                             "competition": {
                                 "type": "string",
                                 "description": "The name of the Kaggle competition to download the dataset from.The files can only be downloaded in the current working directory.",
+                            },
+                            "path": {
+                                "type": "string",
+                                "description": "The path where the dataset should be downloaded.",
                             }
                         },
-                        "required": ["competition"],
+                        "required": ["competition", "path"],
                         "additionalProperties": False,
                     },
                 ),
@@ -86,11 +90,12 @@ class kaggle_tools(ToolBase):
     async def call_tool(self, server_name, *, tool_name, tool_args):
         return await getattr(self, tool_name)(**tool_args)
         
-    async def download_dataset(self, competition: str) -> str:
+    async def download_dataset(self, competition: str, path: str) -> str:
+        path = os.path.join(self.output_dir, path)
         cmd_set = [
-            f'kaggle competitions download -c {competition} -p {self.output_dir}/{competition}',
-            f'unzip {self.output_dir}/{competition}/*.zip -d {self.output_dir}/{competition}',
-            f'rm {self.output_dir}/{competition}/*.zip'
+            f'kaggle competitions download -c {competition} -p {path}',
+            f'unzip {path}/*.zip -d {path}',
+            f'rm {path}/*.zip'
         ]
         results = []
         for cmd in cmd_set:
@@ -109,6 +114,7 @@ class kaggle_tools(ToolBase):
 
     
     async def submit_csv(self, competition: str, file_path: str, submit_message: str) -> str:
+        file_path = os.path.join(self.output_dir, file_path)
         cmd = f'kaggle competitions submit -c {competition} -f {file_path} -m "{submit_message}"'
         process = await asyncio.create_subprocess_shell(
             cmd,

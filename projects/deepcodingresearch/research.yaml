@@ -59,6 +59,9 @@ tools:
     exclude:
       - create_directory
       - delete_file_or_dir
+    limit_len_files_end_with:
+      - .csv
+    limit_len: 1000
   web_research:
     mcp: false
 

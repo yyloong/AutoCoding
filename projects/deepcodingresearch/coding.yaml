@@ -29,7 +29,8 @@ prompt:
         Do not miss any file listed in files.json.
         Do not modify the files.json file itself.
         the files in files.json are not exists now,you need to create them ,but not by yourself,you need to use tools to split tasks to other teamates to create them.
-      2.Grouping Strategy:
+      2.If you are working on a kaggle project, use tools to download the dataset in the path according to files.json.
+      3.Grouping Strategy:
         Group 3 to 5 files into a single sub-task. For example:
         Group 1: Project Setup & Configuration
           - pyproject.toml: Define project metadata and dependencies like 'requests' and 'pytest'.
@@ -46,15 +47,15 @@ prompt:
       Order the groups logically, from low-level to high-level tasks (e.g., configuration files first, then data models, then services, then the main application entry point).
       Project-level configuration files (like package.json, pyproject.toml, Makefile, .gitignore) must be in the first group(s).
       Make sure the sub-tasks are independent and can be worked on in parallel by different developers.
-      3.Additional Instructions:
+      4.Additional Instructions:
         Present all information in a concise yet comprehensive manner.
         If the technical specification mentions key configuration details (like API endpoints, required environment variables, or data exchange formats) needed for modules to interact, briefly remind the developers of these details in the relevant task description.
         again,make sure you have provided the same path as in files.json for each file in your sub-tasks instead of a relative path or just a file name.
-      4.Ensure the path in the files.json and follow it strictly when you divide the tasks.
-      5.you have no right to run the code and do not need to consider whether the code can run successfully or not.
-      6.Before you are going to finish the task,use tools to check whether all files in files.json are created.If not,you don't need to create all the files again,but just create the missing files.
-      7.You are not allowed to write any things since it is not your responsibility.
-      8.You are not responsible for the runability of the code.You teamates will handle it.
+      5.Ensure the path in the files.json and follow it strictly when you divide the tasks.
+      6.you have no right to run the code and do not need to consider whether the code can run successfully or not.
+      7.Before you are going to finish the task,use tools to check whether all files in files.json are created.If not,you don't need to create all the files again,but just create the missing files.
+      8.You are not allowed to write any things since it is not your responsibility.
+      9.You are not responsible for the runability of the code.You teamates will handle it.
     Now, begin:
 
 handler: config_handler
@@ -70,21 +71,28 @@ tools:
   file_system:
     mcp: false
     exclude:
-      - create_directory
       - write_file
+    limit_len_files_end_with:
+      - .csv
+    limit_len: 1000
   
   exit_task:
     mcp: false
 
-memory:
-  - name: mem0
-    user_id: "code_scratch"
-    agent_id: "subtask"
-    conversation_search_limit: 10
-    procedural_search_limit: 3
-    embedding_model: "text-embedding-v4"
-    summary_model: "qwen3-max"
-    max_tokens: 4096
+  kaggle_tools:
+    mcp: false
+    exclude:
+      - submit_csv
+
+#memory:
+#  - name: mem0
+#    user_id: "code_scratch"
+#    agent_id: "subtask"
+#    conversation_search_limit: 10
+#    procedural_search_limit: 3
+#    embedding_model: "text-embedding-v4"
+#    summary_model: "qwen3-max"
+#    max_tokens: 4096
 
 max_chat_round: 100
 
