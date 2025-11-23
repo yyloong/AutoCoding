@@ -1,0 +1,10 @@
+type: DeepcodeWorkflow
+
+coding:
+  next:
+    - refine
+  agent_config: coder.yaml
+
+refine:
+  # refine 的 next 可以不设置，由 DeepcodeWorkflow 控制循环
+  agent_config: refine.yaml

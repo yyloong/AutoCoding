@@ -19,11 +19,15 @@ class DeepcodeWorkflow(Workflow):
         if not self.config:
             return
 
+        # 过滤掉配置字段，只保留任务定义
+        reserved_keys = {'type', 'local_dir'}  # 这些是配置字段，不是任务
+        task_configs = {k: v for k, v in self.config.items() if k not in reserved_keys}
+
         has_next = set()
         start_task = None
         
         # Find all tasks that are referenced as 'next'
-        for task_name, task_config in self.config.items():
+        for task_name, task_config in task_configs.items():
             if 'next' in task_config:
                 next_tasks = task_config['next']
                 if isinstance(next_tasks, str):
@@ -32,7 +36,7 @@ class DeepcodeWorkflow(Workflow):
                     has_next.update(next_tasks)
 
         # Find start task (not referenced by any other task)
-        for task_name in self.config.keys():
+        for task_name in task_configs.keys():
             if task_name not in has_next:
                 start_task = task_name
                 break
@@ -47,7 +51,7 @@ class DeepcodeWorkflow(Workflow):
         while current_task:
             result.append(current_task)
             next_task = None
-            task_config = self.config[current_task]
+            task_config = task_configs[current_task]
             if 'next' in task_config:
                 next_tasks = task_config['next']
                 if isinstance(next_tasks, str):

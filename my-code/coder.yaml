@@ -82,10 +82,10 @@ tools:
     mcp: false
 
   plugins:
-    # - tools/python_executor
-    # - tools/environment_set_up
+    - tools/python_executor
+    - tools/environment_set_up
     # - tools/code_executor   # 需要 docker 支持，当前环境无法使用
-    # - tools/shell
+    - tools/shell
     - tools/web_search
 
 # memory:
