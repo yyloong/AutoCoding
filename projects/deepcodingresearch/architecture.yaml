@@ -29,6 +29,7 @@ prompt:
 
     2.Generate Directory Structure:
       you should first analyze the analysis.md file,check the project can be done in single file or multi files.
+      Then you should use tools to list files in the current directory to see the existing files.
       Based on your analysis, create a comprehensive directory structure that includes:
       Completeness: Create the entire file and folder hierarchy from the project root. This must include source code directories, test suites, documentation placeholders, and resource folders.
       Configuration Files: Ensure the inclusion of standard project and environment configuration files essential for the chosen tech stack. For instance:
@@ -75,6 +76,7 @@ tools:
       - delete_file_or_dir  
     limit_len_files_end_with:
       - .csv
+      - .npz
     limit_len: 1000
 
 

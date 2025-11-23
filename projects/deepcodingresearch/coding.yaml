@@ -74,6 +74,7 @@ tools:
       - write_file
     limit_len_files_end_with:
       - .csv
+      - .npz
     limit_len: 1000
   
   exit_task:

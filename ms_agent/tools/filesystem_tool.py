@@ -279,6 +279,9 @@ class FileSystemTool(ToolBase):
                     absolute_path = os.path.join(root, file)
                     relative_path = os.path.relpath(absolute_path, path)
                     file_paths.append(relative_path)
-            return "\n".join(file_paths)
+            result = "\n".join(file_paths)
+            if len(result) > 1000:
+                result = result[:1000] + "\n...[truncated](too many files)"
+            return result
         except Exception as e:
             return f'List files of <{path or "root path"}> failed, error: ' + str(e)

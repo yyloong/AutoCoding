@@ -68,6 +68,7 @@ class LLMAgent(Agent):
         self.callbacks: List[Callback] = []
         self.tool_manager: Optional[ToolManager] = None
         self.memory_tools: List[Memory] = []
+        self.limit_memory_size: int = kwargs.get('limit_memory_size', 20000)
         self.rag: Optional[RAG] = None
         self.llm: Optional[LLM] = None
         self.runtime: Optional[Runtime] = None
@@ -615,6 +616,11 @@ class LLMAgent(Agent):
                     if isinstance(memory_tool, Mem0Memory):
                         memory_tool.add_memories_from_conversation(
                             messages, self.get_user_id())
+    
+    def summary_memory(self, messages: List[Message]) -> List[Message]:
+        """
+        Summary memories from the current messages if the memory is too long.
+        """
 
     async def run_loop(self, messages: Union[List[Message], str],
                        **kwargs) -> AsyncGenerator[Any, Any]:
