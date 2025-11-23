@@ -51,11 +51,11 @@ generation_config:
 prompt:
   user: |
     你的任务是验证之前的 agent 的数学题目解答过程是否正确，如果错误，请指出问题所在，然后 agent 会修改并再次提交新的解答过程，直到你验证通过为止。
-    如果没有问题，请调用 tool "exit_task" 结束任务。
-
-agent: refine
+    如果没有问题，请调用 tool 结束任务。
 
 tools:
+  exit_task:
+    mcp: false
 #   file_system:
 #     mcp: false
 #     exclude:
@@ -66,8 +66,8 @@ tools:
 
 #   run_code:
 #     mcp: false
-  exit_task:
-    mcp: false
+
+code_file: simple_agent
 
 max_chat_round: 100
 

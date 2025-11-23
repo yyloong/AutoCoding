@@ -25,7 +25,7 @@ class WorkflowLoader:
 
         from ms_agent.workflow.chain_workflow import ChainWorkflow
         from ms_agent.workflow.dag_workflow import DagWorkflow
-        from ms_agent.workflow.code_refine_workflow import DeepcodeWorkflow
+        from ms_agent.workflow.loop_workflow import LoopWorkflow
         wf_type = ChainWorkflow.WORKFLOW_NAME.lower()
         wf_type = getattr(wf_config, 'type', '').lower() or wf_type
 
@@ -47,8 +47,8 @@ class WorkflowLoader:
                 load_cache=kwargs.get('load_cache', False),
                 trust_remote_code=trust_remote_code
             )
-        elif wf_type == DeepcodeWorkflow.WORKFLOW_NAME.lower():
-            wf_instance = DeepcodeWorkflow(
+        elif wf_type == LoopWorkflow.WORKFLOW_NAME.lower():
+            wf_instance = LoopWorkflow(
                 config_dir_or_id=config_dir_or_id,
                 config=wf_config,
                 env=env,

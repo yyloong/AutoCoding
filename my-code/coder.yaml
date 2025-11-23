@@ -81,6 +81,9 @@ prompt:
     
 code_file: simple_agent
 
+tools:
+  exit_task:
+    mcp: false
 # tools:
 #   file_system:
 #     mcp: false

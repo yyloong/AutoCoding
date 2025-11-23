@@ -10,7 +10,7 @@ class SimpleAgent(LLMAgent):
 
     async def step(
         self, messages: List[Message]
-    ) -> AsyncGenerator[List[Message], Any]:
+    ) -> AsyncGenerator[List[Message], Any]:  # type: ignore
         """
         Execute a single step in the agent's interaction loop.
 
@@ -38,7 +38,7 @@ class SimpleAgent(LLMAgent):
             messages = await self.condense_memory(messages)
             await self.on_generate_response(messages)
             tools = await self.tool_manager.get_tools()
-            # print(tools)
+            print(tools)
 
             if self.stream:
                 self.log_output('[assistant]:')
@@ -77,10 +77,7 @@ class SimpleAgent(LLMAgent):
         # print(f"Tool calls: {_response_message.tool_calls}")
         if _response_message.tool_calls:
             messages = await self.parallel_tool_call(messages)
-        # else:
-        #     self.runtime.should_stop = True
-
-        if _response_message and _response_message.tool_calls[-1]["tool_name"] == "exit_task---exit_task":
+        else:
             self.runtime.should_stop = True
 
         await self.after_tool_call(messages)
