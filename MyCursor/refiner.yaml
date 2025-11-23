@@ -203,13 +203,14 @@ tools:
   file_system:
     mcp: false
   
-  environment_setup:
+  environment_set_up:
     mcp: false
-    # 功能：安装项目依赖，支持 pip、npm、uv 等包管理器
   
-  shell_executor:
+  run_code:
     mcp: false
-    # 功能：执行 shell 命令，用于运行测试、检查环境等
+
+  plugins:
+    - tools/shell
 
 max_chat_round: 50
 
