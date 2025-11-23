@@ -56,6 +56,7 @@ prompt:
       7.Before you are going to finish the task,use tools to check whether all files in files.json are created.If not,you don't need to create all the files again,but just create the missing files.
       8.You are not allowed to write any things since it is not your responsibility.
       9.You are not responsible for the runability of the code.You teamates will handle it.
+      10.When generating the code ,you can read the analysis.md file to get some information about the project requirement.
     Now, begin:
 
 handler: config_handler

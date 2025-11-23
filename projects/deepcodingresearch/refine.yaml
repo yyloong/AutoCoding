@@ -44,6 +44,7 @@ prompt:
         Fix other issues you discover while reading the code files, but only if you have clearly identified their root cause.
         Step 5: Express Your Thinking and Fixes. Express your thinking in concise and clear language. And then use the provided tools to make the necessary code changes to fix the identified issues.
         Step 6: When you try to use python to operate the file,please check their path first since yourt working directory may not be the project root directory.
+        When fixing the bug,you can read the analysis.md file to get some information about the project requirement.
         Once you ensure you have finished all the fixes, use tools to exit you task.
     Let's begin:
 
