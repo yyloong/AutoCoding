@@ -84,7 +84,14 @@ class Environment_set_up(ToolBase):
     async def call_tool(
         self, server_name: str, *, tool_name: str, tool_args: dict
     ) -> str:
-        return await getattr(self, tool_name)(**tool_args)
+        os.chdir(self.output_dir)
+        logger.info(f"Changed working directory to {self.output_dir} for environment setup.")
+        result = await getattr(self, tool_name)(**tool_args)
+        import pdb
+        pdb.set_trace()
+        os.chdir(os.path.dirname(os.getcwd()))
+        logger.info(f"Changed working directory back to {os.getcwd()} after environment setup.")
+        return result
 
     async def npm_install(self) -> str:
         """Install Node.js project dependencies using npm.

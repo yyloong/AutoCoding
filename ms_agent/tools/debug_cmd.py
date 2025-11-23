@@ -64,8 +64,10 @@ class run_code(ToolBase):
 
     async def call_tool(self, server_name, *, tool_name, tool_args):
         os.chdir(self.output_dir)
+        logger.info(f"Changed working directory to {self.output_dir} for running code.")
         result = await getattr(self, tool_name)(**tool_args)
-        os.chdir(os.path.dirname(self.output_dir))
+        os.chdir(os.path.dirname(os.getcwd()))
+        logger.info(f"Changed working directory back to {os.getcwd()} after running code.")
         return result
         
     async def run_file(self, file: str, language: str) -> str:
