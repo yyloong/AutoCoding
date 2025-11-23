@@ -14,55 +14,58 @@ generation_config:
       provider: b
     enable_thinking: false
 
+# prompt:
+#   system: |
+#     You are a senior software bug fixer(refine agent) and you are working on a project with other teamates. In this team ,Your responsibility is to fix compilation, dependency, or runtime errors based on the project's requirements,then you
+#       you should debug the code step by step by using the provided running tools until the code can run suceessfully and satisfy the user's requirements.
+#       pay attention that you are not required to write your own project but try to run the code that your teamate has written and fix the bug.
+#       each time you try to write the code , you should think if there is a clearly root cause for the bug and fix it rather than write your own project.
+#       Your workflow is the process below:
+#         Step 1: Environment Setup. First,you should use the provided tools to set up the project environment. This involves installing all dependencies specified in the project's configuration files (package.json for Node.js projects, requirements.txt or pyproject.toml for Python projects) using the appropriate package manager command (npm install or uv install). You will be given the complete output from this step, including any error messages encountered during setup.
+#         Step 2: Code Execution and Observation. After step1,you should run the project using the provided tools. You will be provided with the full output from this execution, including any runtime errors or exceptions that occur.
+#         Step 3: Analyze Errors and Read Files. Based on the error messages from the previous steps, you need to use tools to read the relevant files to analyze the problem:
+#         The error-reporting file.
+#         The upstream files that reference the error-reporting file.
+#         The project's configuration files, specifically package.json or requirements.txt / pyproject.toml.
+#         Remember: You need to analyze the problem end-to-end and consider all possibilities completely. If the current information is insufficient to locate the root cause, you should read more distant related files.
+#         Step 4: Find the Root Cause and Fix It.
+#         If the problem is related to interfaces between different modules or functions, you should suspect whether function signatures, data formats, and return values are correctly aligned.
+#         If the problem is related to dependencies or modules not being found (often an error from Step 1 or Step 2), you must inspect the configuration files. For Node.js, check package.json for missing or incorrect dependencies. For Python, check requirements.txt to ensure all packages are listed for uv to install.
+#         If the problem is a runtime exception, carefully examine the error message and traceback to identify the exact line of code causing the issue.
+#         Pay attention to all arguments and import/require statements related to the error line, and whether there are related issues in the files; fix them also.
+#         Do a minimum change in case that the normal code is damaged. If you are doing a breaking change, change related files also.
+#         Fix other issues you discover while reading the code files, but only if you have clearly identified their root cause.
+#         Step 5: Express Your Thinking and Fixes. Express your thinking in concise and clear language. When you fix files, you should use the following format and do not add any other text outside the format:
+
+#         ```Type: filename
+#         text
+#         ```
+
+#         For example,you can output like this:
+#         ```Python: src/main.py
+#         your code here
+#         ```
+#         Once you ensure you have finished all the fixes, use tools to exit you task.
+#     Let's begin:
+
 prompt:
-  system: |
-    You are a senior software bug fixer(refine agent) and you are working on a project with other teamates. In this team ,Your responsibility is to fix compilation, dependency, or runtime errors based on the project's requirements,then you
-      you should debug the code step by step by using the provided running tools until the code can run suceessfully and satisfy the user's requirements.
-      pay attention that you are not required to write your own project but try to run the code that your teamate has written and fix the bug.
-      each time you try to write the code , you should think if there is a clearly root cause for the bug and fix it rather than write your own project.
-      Your workflow is the process below:
-        Step 1: Environment Setup. First,you should use the provided tools to set up the project environment. This involves installing all dependencies specified in the project's configuration files (package.json for Node.js projects, requirements.txt or pyproject.toml for Python projects) using the appropriate package manager command (npm install or uv install). You will be given the complete output from this step, including any error messages encountered during setup.
-        Step 2: Code Execution and Observation. After step1,you should run the project using the provided tools. You will be provided with the full output from this execution, including any runtime errors or exceptions that occur.
-        Step 3: Analyze Errors and Read Files. Based on the error messages from the previous steps, you need to use tools to read the relevant files to analyze the problem:
-        The error-reporting file.
-        The upstream files that reference the error-reporting file.
-        The project's configuration files, specifically package.json or requirements.txt / pyproject.toml.
-        Remember: You need to analyze the problem end-to-end and consider all possibilities completely. If the current information is insufficient to locate the root cause, you should read more distant related files.
-        Step 4: Find the Root Cause and Fix It.
-        If the problem is related to interfaces between different modules or functions, you should suspect whether function signatures, data formats, and return values are correctly aligned.
-        If the problem is related to dependencies or modules not being found (often an error from Step 1 or Step 2), you must inspect the configuration files. For Node.js, check package.json for missing or incorrect dependencies. For Python, check requirements.txt to ensure all packages are listed for uv to install.
-        If the problem is a runtime exception, carefully examine the error message and traceback to identify the exact line of code causing the issue.
-        Pay attention to all arguments and import/require statements related to the error line, and whether there are related issues in the files; fix them also.
-        Do a minimum change in case that the normal code is damaged. If you are doing a breaking change, change related files also.
-        Fix other issues you discover while reading the code files, but only if you have clearly identified their root cause.
-        Step 5: Express Your Thinking and Fixes. Express your thinking in concise and clear language. When you fix files, you should use the following format and do not add any other text outside the format:
-
-        ```Type: filename
-        text
-        ```
-
-        For example,you can output like this:
-        ```Python: src/main.py
-        your code here
-        ```
-        Once you ensure you have finished all the fixes, use tools to exit you task.
-    Let's begin:
+  user: |
+    你的任务是验证之前的 agent 的数学题目解答过程是否正确，如果错误，请指出问题所在，然后 agent 会修改并再次提交新的解答过程，直到你验证通过为止。
+    如果没有问题，请调用 tool "exit_task" 结束任务。
 
 agent: refine
 
 tools:
+#   file_system:
+#     mcp: false
+#     exclude:
+#       - create_directory
 
-  file_system:
-    mcp: false
-    exclude:
-      - create_directory
+#   environment_set_up: 
+#     mcp: false
 
-  environment_set_up: 
-    mcp: false
-
-  run_code:
-    mcp: false
-  
+#   run_code:
+#     mcp: false
   exit_task:
     mcp: false
 

@@ -4,7 +4,7 @@ import os
 from ms_agent.agent.loader import AgentLoader
 from ms_agent.utils import get_logger
 from ms_agent.workflow.base import Workflow
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 
 logger = get_logger()
 
@@ -20,20 +20,47 @@ class DeepcodeWorkflow(Workflow):
             return
 
         # 过滤掉配置字段，只保留任务定义
-        reserved_keys = {'type', 'local_dir'}  # 这些是配置字段，不是任务
-        task_configs = {k: v for k, v in self.config.items() if k not in reserved_keys}
+        reserved_keys = {'type', 'local_dir', 'name', 'tools', 'callbacks', 
+                        'llm', 'generation_config', 'prompt', 'agent', 
+                        'max_chat_round', 'tool_call_timeout', 'output_dir', 'help'}
+        
+        task_configs = {k: v for k, v in self.config.items() 
+                       if k not in reserved_keys and isinstance(v, (dict, DictConfig))}
+
+        logger.info(f'Task configs: {list(task_configs.keys())}')
 
         has_next = set()
         start_task = None
         
         # Find all tasks that are referenced as 'next'
         for task_name, task_config in task_configs.items():
-            if 'next' in task_config:
-                next_tasks = task_config['next']
-                if isinstance(next_tasks, str):
-                    has_next.add(next_tasks)
-                elif isinstance(next_tasks, list):
-                    has_next.update(next_tasks)
+            # 确保 task_config 是 DictConfig
+            if not isinstance(task_config, (dict, DictConfig)):
+                logger.warning(f'Task {task_name} config is not a dict: {type(task_config)}')
+                continue
+            
+            logger.info(f'Processing task: {task_name}, config type: {type(task_config)}')
+            
+            # 使用 OmegaConf 的方式访问字段
+            if 'next' in task_config or hasattr(task_config, 'next'):
+                next_tasks = task_config.get('next') if isinstance(task_config, dict) else getattr(task_config, 'next', None)
+                
+                if next_tasks is not None:
+                    logger.info(f'  next tasks: {next_tasks} (type: {type(next_tasks)})')
+                    
+                    # 处理不同类型的 next
+                    if isinstance(next_tasks, str):
+                        has_next.add(next_tasks)
+                    elif isinstance(next_tasks, (list, tuple)):
+                        has_next.update(next_tasks)
+                    else:
+                        # 可能是 ListConfig
+                        try:
+                            has_next.update(list(next_tasks))
+                        except:
+                            logger.warning(f'Cannot process next_tasks: {next_tasks}')
+
+        logger.info(f'Tasks referenced as next: {has_next}')
 
         # Find start task (not referenced by any other task)
         for task_name in task_configs.keys():
@@ -44,21 +71,40 @@ class DeepcodeWorkflow(Workflow):
         if start_task is None:
             raise ValueError('No start task found')
 
+        logger.info(f'Start task: {start_task}')
+
         # Build the workflow chain
         result = []
         current_task = start_task
+        visited = set()
 
-        while current_task:
+        while current_task and current_task not in visited:
             result.append(current_task)
+            visited.add(current_task)
+            
             next_task = None
-            task_config = task_configs[current_task]
-            if 'next' in task_config:
-                next_tasks = task_config['next']
-                if isinstance(next_tasks, str):
-                    next_task = next_tasks
-                elif isinstance(next_tasks, list):
-                    next_task = next_tasks[0]
-
+            if current_task in task_configs:
+                task_config = task_configs[current_task]
+                
+                # 使用统一的方式获取 next
+                if 'next' in task_config or hasattr(task_config, 'next'):
+                    next_tasks = task_config.get('next') if isinstance(task_config, dict) else getattr(task_config, 'next', None)
+                    
+                    if next_tasks is not None:
+                        if isinstance(next_tasks, str):
+                            next_task = next_tasks
+                        elif isinstance(next_tasks, (list, tuple)) and len(next_tasks) > 0:
+                            next_task = next_tasks[0]
+                        else:
+                            try:
+                                next_list = list(next_tasks)
+                                if len(next_list) > 0:
+                                    next_task = next_list[0]
+                            except:
+                                pass
+                        
+                        logger.info(f'Task {current_task} -> next: {next_task}')
+            
             current_task = next_task
             
         self.workflow_chains = result
@@ -67,29 +113,18 @@ class DeepcodeWorkflow(Workflow):
     async def run(self, inputs, **kwargs):
         """
         Execute the workflow with loop support between refine and coding.
-
-        Args:
-            inputs (Any): Initial input data for the first task.
-            **kwargs: Additional keyword arguments.
-
-        Returns:
-            Any: The final output after workflow completion.
         """
         agent_config = None
         idx = 0
         step_inputs = {}
-        max_iterations = kwargs.get('max_iterations', 10)  # 防止无限循环
+        max_iterations = kwargs.get('max_iterations', 10)
         iteration_count = 0
 
-        while True:
-            if idx >= len(self.workflow_chains):
-                break
-
+        while idx < len(self.workflow_chains):
             task = self.workflow_chains[idx]
             task_info = getattr(self.config, task)
             config = getattr(task_info, 'agent_config', agent_config)
             
-            # Prepare agent initialization arguments
             if not hasattr(task_info, 'agent'):
                 task_info.agent = DictConfig({})
             
@@ -110,22 +145,18 @@ class DeepcodeWorkflow(Workflow):
             if 'tag' not in init_args:
                 init_args['tag'] = task
             
-            # Build and run agent
+            logger.info(f'Running task: {task} (iteration: {iteration_count}/{max_iterations})')
             engine = AgentLoader.build(**init_args)
             step_inputs[idx] = (inputs, config)
             
-            logger.info(f'Running task: {task} (iteration: {iteration_count})')
             outputs = await engine.run(inputs)
+            logger.info(f'Task {task} completed')
             
-            # Handle refine task - check if code is acceptable
             if task == 'refine':
                 iteration_count += 1
-                
-                # 检查 refine 的输出，判断是否需要继续循环
                 should_continue = self._should_continue_refining(outputs)
                 
                 if should_continue and iteration_count < max_iterations:
-                    # 循环回 coding 阶段
                     logger.info(f'Refine suggests improvements, returning to coding (iteration {iteration_count})')
                     coding_idx = self.workflow_chains.index('coding')
                     idx = coding_idx
@@ -134,66 +165,32 @@ class DeepcodeWorkflow(Workflow):
                     continue
                 else:
                     if iteration_count >= max_iterations:
-                        logger.warning(f'Max iterations ({max_iterations}) reached, stopping refinement loop')
+                        logger.warning(f'Max iterations ({max_iterations}) reached')
                     else:
                         logger.info('Refine approved, workflow completed')
-                    # 退出循环
                     return outputs
             
-            # Normal flow progression
-            next_idx = engine.next_flow(idx)
-            
-            if next_idx == idx + 1:
-                inputs = outputs
-                agent_config = engine.config
-            else:
-                inputs, agent_config = step_inputs[next_idx]
-                
-            idx = next_idx
+            inputs = outputs
+            agent_config = config
+            idx += 1
 
         return inputs
 
     def _should_continue_refining(self, refine_output):
         """
-        Determine if the refine agent wants to continue refining.
-        
-        This method checks the refine output to see if it indicates
-        the code needs further improvement.
+        Determine if refining should continue by checking if exit_task was called.
         
         Args:
             refine_output: Output from the refine agent
             
         Returns:
-            bool: True if should continue refining, False if code is acceptable
+            bool: True if should continue refining, False if exit_task was called
         """
-        # 你需要根据 refine agent 的实际输出格式来实现这个逻辑
-        # 以下是几种可能的实现方式：
-        
-        # 方式1: 检查输出中是否包含特定关键词
-        if isinstance(refine_output, str):
-            # 如果包含这些词，说明需要继续改进
-            continue_keywords = ['需要改进', 'need improvement', 'issues found', 
-                               'bugs', 'errors', '问题', '建议修改']
-            # 如果包含这些词，说明代码没问题
-            approve_keywords = ['approved', 'looks good', 'no issues', 
-                              '没有问题', '通过', 'LGTM']
-            
-            output_lower = refine_output.lower()
-            
-            if any(keyword.lower() in output_lower for keyword in approve_keywords):
-                return False
-            if any(keyword.lower() in output_lower for keyword in continue_keywords):
-                return True
-        
-        # 方式2: 检查是否是字典格式，包含状态字段
-        if isinstance(refine_output, dict):
-            if 'status' in refine_output:
-                return refine_output['status'] != 'approved'
-            if 'needs_refinement' in refine_output:
-                return refine_output['needs_refinement']
-            if 'issues' in refine_output:
-                return len(refine_output['issues']) > 0
-        
-        # 默认：如果不确定，继续循环（保守策略）
-        logger.warning('Unable to determine refine status, continuing refinement')
-        return True
+        # 优先检查是否调用了 exit_task 工具
+        tool_calls = refine_output.get('tool_calls', [])
+        if tool_calls:
+            for call in tool_calls:
+                tool_name = call.get('tool_name', '')
+                if 'exit_task' in tool_name:
+                    logger.info('Refine agent called exit_task, stopping refinement loop')
+                    return False
