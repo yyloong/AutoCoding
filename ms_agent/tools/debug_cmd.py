@@ -65,15 +65,15 @@ class run_code(ToolBase):
     async def call_tool(self, server_name, *, tool_name, tool_args):
         return await getattr(self, tool_name)(**tool_args)
         
-    async def run_file(self, code: str, language: str) -> str:
+    async def run_file(self, file: str, language: str) -> str:
         try:
-            code_path = os.path.join(self.output_dir, code)
+            code_file_path = os.path.join(self.output_dir, file)
             
             cmd = []
             if language == "python":
-                cmd = ["uv", "run", "--python=.venv/bin/python", code_path]
+                cmd = ["uv", "run", "--python=.venv/bin/python", code_file_path]
             elif language == "javascript":
-                cmd = ["node", code_path]
+                cmd = ["node", code_file_path]
             else:
                 return f"Unsupported language: {language}"
 

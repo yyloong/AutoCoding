@@ -47,7 +47,7 @@ prompt:
     - 项目的复杂度评估
     
     **步骤 4：生成调研报告**
-    使用 file_system 工具创建 `analysis.md` 文件，严格按照以下格式：
+    使用 file_system 工具创建 `analysis.md` 文件到 output 目录下（不要创建子目录），严格按照以下格式：
     
     ```markdown
     # 需求分析与技术方案
@@ -109,6 +109,8 @@ tools:
   
   web_research:
     mcp: false
+    exclude:
+      - visit_page
 
 max_chat_round: 20
 
