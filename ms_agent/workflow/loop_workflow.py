@@ -26,7 +26,6 @@ class LoopWorkflow(Workflow):
         """
         Execute the workflow with loop support between refine and coding.
         """
-        step_inputs = {}
         max_iterations = kwargs.get('max_iterations', 10)
         iteration_count = 0
         idx = 0
@@ -55,7 +54,6 @@ class LoopWorkflow(Workflow):
                 
                 logger.info(f'Running task: {task} (iteration: {iteration_count}/{max_iterations})')
                 agent = AgentLoader.build(**init_args)
-                step_inputs[idx] = (inputs, config)
                 
                 print('='*100)
                 print(agent.config)
@@ -67,7 +65,6 @@ class LoopWorkflow(Workflow):
                 print('='*20 + ' OUTPUT ' + '='*20)
                 print(outputs)
                 print('='*50)
-                inputs = outputs
                 idx += 1
 
             else:
@@ -96,7 +93,6 @@ class LoopWorkflow(Workflow):
                     
                     logger.info(f'Running task: {task} (iteration: {iteration_count}/{max_iterations})')
                     agent = AgentLoader.build(**init_args)
-                    step_inputs[idx] = (inputs, config)
                     
                     print('='*100)
                     print(agent.config)
@@ -109,7 +105,6 @@ class LoopWorkflow(Workflow):
                     print(outputs)
                     print('='*50)
                     
-                    inputs = outputs
                     if task_info['breaker']:
                         if self._should_break_loop(outputs[-2]):
                             logger.info('Exiting loop as break condition met.')

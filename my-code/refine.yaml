@@ -49,13 +49,13 @@ generation_config:
 #     Let's begin:
 
 prompt:
-  user: |
+  system: |
     你的任务是验证之前的 agent 的数学题目解答过程是否正确。
     最终需要输出一个报告，用 json 格式给出，包含以下字段：
     - accepted: 布尔值，表示解答过程是否正确
     - issues: 如果解答过程有错误，列出所有错误的简要描述和所在步骤编号的列表；如果没有错误，则为空列表
     - suggestions: 如果解答过程有错误，给出改进建议的简要描述；如果没有错误，则为空字符串
-    重要：**不要在纂写报告前调用 exit_task 工具结束任务。**
+    重要：**不要在纂写报告前调用 exit_task---exit_task 工具结束任务。**
     格式为：
     ```json
     {
