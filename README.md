@@ -1,14 +1,22 @@
 #### 基本实现pipeline 的一个workflow
 ##### 关于一些细节问题的临时补丁
 - 工作路径，目前在kaggle,run_code,environment_set_up这些工具调用前会先临时修改环境变量
+(新添加了try处理逻辑(确保调用工具出错时能正确更新工作目录))
 ``` python
-async def call_tool(self, server_name, *, tool_name, tool_args):
-  os.chdir(self.output_dir)
-  logger.info(f"Changed working directory to {self.output_dir} for running code.")
-  result = await getattr(self, tool_name)(**tool_args)
-  os.chdir(os.path.dirname(os.getcwd()))
-  logger.info(f"Changed working directory back to {os.getcwd()} after running code.")
-  return result
+  async def call_tool(
+        self, server_name: str, *, tool_name: str, tool_args: dict
+    ) -> str:
+      now_dir = os.getcwd()
+      os.chdir(self.output_dir)
+      logger.info(f"Changed working directory to {self.output_dir} for environment setup.")
+      try:
+          result = await getattr(self, tool_name)(**tool_args)
+      except Exception as e:
+          result = f"System error: {str(e)}"
+      finally:
+          os.chdir(now_dir)
+          logger.info(f"Changed working directory back to {os.getcwd()} after environment setup.")
+      return result
 ```
 
 - file_system 添加了limit 逻辑，可以在配置文件中配置，设置某些后缀的文件只能读前n个字符
