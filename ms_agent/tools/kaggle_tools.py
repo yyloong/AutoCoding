@@ -21,65 +21,81 @@ class kaggle_tools(ToolBase):
         self.output_dir = getattr(config, 'output_dir', DEFAULT_OUTPUT_DIR)
     
     async def get_tools(self):
+        # 获取 exclude 配置
+        exclude_tools = getattr(self.config, 'exclude', [])
+        
+        # 定义所有可用的工具
+        all_tools = [
+            Tool(
+                tool_name="download_dataset",
+                server_name="kaggle_tools",
+                description="Download the dataset for the competition from Kaggle.",
+                parameters={
+                    "type": "object",
+                    "properties": {
+                        "competition": {
+                            "type": "string",
+                            "description": "The name of the Kaggle competition to download the dataset from.The files can only be downloaded in the current working directory.",
+                        }
+                    },
+                    "required": ["competition"],
+                    "additionalProperties": False,
+                },
+            ),
+            Tool(
+                tool_name="submit_csv",
+                server_name="kaggle_tools",
+                description="Submit the solution file (csv file) to the Kaggle competition.",
+                parameters={
+                    "type": "object",
+                    "properties": {
+                        "competition": {
+                            "type": "string",
+                            "description": "The name of the Kaggle competition to submit the solution to.",
+                        },
+                        "file_path": {
+                            "type": "string",
+                            "description": "The path to the csv file to be submitted.",
+                        },
+                        "submit_message": {
+                            "type": "string",
+                            "description": "The message for the submission.",
+                        }
+                    },
+                    "required": ["competition", "file_path","submit_message"],
+                    "additionalProperties": False,
+                },
+            ),
+            Tool(
+                tool_name="get_scores",
+                server_name="kaggle_tools",
+                description="Get the scores of the submissions for the Kaggle competition.",
+                parameters={
+                    "type": "object",
+                    "properties": {
+                        "competition": {
+                            "type": "string",
+                            "description": "The name of the Kaggle competition to get the scores from.",
+                        }
+                    },
+                    "required": ["competition"],
+                    "additionalProperties": False,
+                },
+            )
+        ]
+        
+        # 过滤掉被排除的工具
+        filtered_tools = [
+            tool for tool in all_tools 
+            if tool.tool_name not in exclude_tools
+        ]
+        
+        logger.info(f"Kaggle tools loaded: {[t.tool_name for t in filtered_tools]}")
+        if exclude_tools:
+            logger.info(f"Excluded tools: {exclude_tools}")
+        
         tools = {
-            "kaggle_tools": [
-                Tool(
-                    tool_name="download_dataset",
-                    server_name="kaggle_tools",
-                    description="Download the dataset for the competition from Kaggle.",
-                    parameters={
-                        "type": "object",
-                        "properties": {
-                            "competition": {
-                                "type": "string",
-                                "description": "The name of the Kaggle competition to download the dataset from.The files can only be downloaded in the current working directory.",
-                            }
-                        },
-                        "required": ["competition"],
-                        "additionalProperties": False,
-                    },
-                ),
-                Tool(
-                    tool_name="submit_csv",
-                    server_name="kaggle_tools",
-                    description="Submit the solution file (csv file) to the Kaggle competition.",
-                    parameters={
-                        "type": "object",
-                        "properties": {
-                            "competition": {
-                                "type": "string",
-                                "description": "The name of the Kaggle competition to submit the solution to.",
-                            },
-                            "file_path": {
-                                "type": "string",
-                                "description": "The path to the csv file to be submitted.",
-                            },
-                            "submit_message": {
-                                "type": "string",
-                                "description": "The message for the submission.",
-                            }
-                        },
-                        "required": ["competition", "file_path","submit_message"],
-                        "additionalProperties": False,
-                    },
-                ),
-                Tool(
-                    tool_name="get_scores",
-                    server_name="kaggle_tools",
-                    description="Get the scores of the submissions for the Kaggle competition.",
-                    parameters={
-                        "type": "object",
-                        "properties": {
-                            "competition": {
-                                "type": "string",
-                                "description": "The name of the Kaggle competition to get the scores from.",
-                            }
-                        },
-                        "required": ["competition"],
-                        "additionalProperties": False,
-                    },
-                )
-            ]
+            "kaggle_tools": filtered_tools
         }
         return tools
 
