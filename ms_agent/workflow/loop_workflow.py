@@ -136,10 +136,6 @@ class LoopWorkflow(Workflow):
                             logger.info('Code not accepted, continuing to next iteration.')
                             # 清理 report.md 以便下次循环使用新的反馈
                             # （实际上 refiner 会重新生成 report.md）
-                
-                # 退出 itertools.cycle
-                break
-        
         return inputs
 
     def _inject_plan_and_feedback(self, inputs):
