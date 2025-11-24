@@ -1,10 +1,8 @@
-# Copyright (c) Alibaba, Inc. and its affiliates.
 import subprocess
 import asyncio
 import os
 import shutil
 from typing import Optional
-import subprocess
 
 from ms_agent.llm.utils import Tool
 from ms_agent.tools.base import ToolBase
@@ -16,14 +14,12 @@ logger = get_logger()
 class kaggle_tools(ToolBase):
     """Kaggle related tools.
     """
-    def __init__(self, config,**kwargs):
+    def __init__(self, config, **kwargs):
         super().__init__(config)
+        self.exclude_func(getattr(config.tools, 'kaggle_tools', None))
         self.output_dir = getattr(config, 'output_dir', DEFAULT_OUTPUT_DIR)
     
     async def get_tools(self):
-        # 获取 exclude 配置
-        exclude_tools = getattr(self.config, 'exclude', [])
-        
         # 定义所有可用的工具
         all_tools = [
             Tool(
@@ -62,7 +58,7 @@ class kaggle_tools(ToolBase):
                             "description": "The message for the submission.",
                         }
                     },
-                    "required": ["competition", "file_path","submit_message"],
+                    "required": ["competition", "file_path", "submit_message"],
                     "additionalProperties": False,
                 },
             ),
@@ -84,20 +80,13 @@ class kaggle_tools(ToolBase):
             )
         ]
         
-        # 过滤掉被排除的工具
-        filtered_tools = [
-            tool for tool in all_tools 
-            if tool['tool_name'] not in exclude_tools
-        ]
-        
-        logger.info(f"Kaggle tools loaded: {[t['tool_name'] for t in filtered_tools]}")
-        if exclude_tools:
-            logger.info(f"Excluded tools: {exclude_tools}")
-        
-        tools = {
-            "kaggle_tools": filtered_tools
+        # 使用基类的 exclude_functions 属性过滤工具
+        return {
+            "kaggle_tools": [
+                tool for tool in all_tools 
+                if tool['tool_name'] not in self.exclude_functions
+            ]
         }
-        return tools
 
     async def call_tool(self, server_name, *, tool_name, tool_args):
         return await getattr(self, tool_name)(**tool_args)

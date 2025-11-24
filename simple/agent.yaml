@@ -60,8 +60,14 @@ tools:
   exit_task:
     mcp: false
 
-  run_code:
+  code_executor:
     mcp: false
+    sandbox:
+      mode: local
+      image: jupyter-kernel-gateway:latest
+
+  # run_code:
+  #   mcp: false
 
   # fetch:
   #   mcp: true
