@@ -87,10 +87,10 @@ class kaggle_tools(ToolBase):
         # 过滤掉被排除的工具
         filtered_tools = [
             tool for tool in all_tools 
-            if tool.tool_name not in exclude_tools
+            if tool['tool_name'] not in exclude_tools
         ]
         
-        logger.info(f"Kaggle tools loaded: {[t.tool_name for t in filtered_tools]}")
+        logger.info(f"Kaggle tools loaded: {[t['tool_name'] for t in filtered_tools]}")
         if exclude_tools:
             logger.info(f"Excluded tools: {exclude_tools}")
         
