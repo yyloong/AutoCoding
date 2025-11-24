@@ -64,7 +64,7 @@ class Environment_set_up(ToolBase):
                         "properties": {
                             "command_content": {
                                 "type": "string",
-                                "description": "uv command to run, e.g., if you want to run 'uv venv', just pass 'venv' here,Now only support 'venv' , 'pip uninstall xxx' and 'pip install xxx' commands.",
+                                "description": "uv command to run, e.g., if you want to run 'uv venv', just pass 'venv' here, Now only support 'venv' , 'pip uninstall xxx' and 'pip install xxx' commands.",
                             },
                         },
                         "required": ["command_content"],

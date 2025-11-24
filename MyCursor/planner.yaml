@@ -1,6 +1,6 @@
 llm:
   service: openai
-  model: deepseek-v3.2-exp
+  model: qwen3-max
   openai_api_key:  
   openai_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
 
