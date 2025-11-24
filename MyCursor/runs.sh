@@ -1,1 +1,1 @@
-python -m ms_agent.cli.cli run --config MyCursor --trust_remote_code true --openai_api_key ${OPENAI_API_KEY} --query "用 python 写一个经典的数字华容道游戏"
+python -m ms_agent.cli.cli run --config MyCursor --trust_remote_code true --openai_api_key ${OPENAI_API_KEY} --query "请你参加 kaggle 竞赛 Spaceship Titanic: https://www.kaggle.com/competitions/spaceship-titanic/leaderboard。尽可能获得更高的排名。最终你需要生成一个用于提交的 csv 文件，包含你的预测结果。"

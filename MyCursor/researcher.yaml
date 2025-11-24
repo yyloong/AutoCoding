@@ -106,6 +106,7 @@ tools:
     mcp: false
     exclude:
       - delete_file_or_dir
+      - create_directory
   
   web_research:
     mcp: false

@@ -32,7 +32,7 @@ prompt:
     - exit_task: 完成任务后退出
     
     重要原则：
-    1. 所有文件创建到 output 目录下，不要创建子目录
+    1. 根目录为当前目录，不用再新建一个目录进行代码编写
     2. 每次编写或修改代码后，立即使用 run_code 工具验证
     3. 代码要实用、可运行，不要写伪代码或框架代码
     4. 完成所有任务后使用 exit_task 工具退出
@@ -54,6 +54,12 @@ tools:
   
   web_search:
     mcp: false
+
+  kaggle_tools:
+    mcp: false
+    exclude:
+      - submit_csv
+      - get_scores
 
 max_chat_round: 100
 
