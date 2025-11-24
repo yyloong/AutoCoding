@@ -67,21 +67,32 @@ class run_code(ToolBase):
         
     async def run_file(self, file: str, language: str) -> str:
         try:
-            code_file_path = os.path.join(self.output_dir, file)
+            # 获取绝对路径
+            output_dir_abs = os.path.abspath(self.output_dir)
+            
+            # file 是相对于 output_dir 的文件路径
             
             cmd = []
             if language == "python":
-                cmd = ["uv", "run", "--python=.venv/bin/python", code_file_path]
+                # 关键：使用上层目录的 .venv（绝对路径）
+                venv_python = os.path.abspath(".venv/bin/python")
+                cmd = ["uv", "run", f"--python={venv_python}", file]
             elif language == "javascript":
-                cmd = ["node", code_file_path]
+                cmd = ["node", file]
             else:
                 return f"Unsupported language: {language}"
 
+            print(f"Command: {' '.join(cmd)}")
+            print('='*120)
+
             # 创建异步子进程
+            # 关键：cwd=output_dir_abs 让代码在 output 目录中执行
+            # 虚拟环境使用绝对路径，所以不受 cwd 影响
             process = await asyncio.create_subprocess_exec(
                 cmd[0], *cmd[1:],
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.STDOUT # 合并错误流
+                stderr=asyncio.subprocess.STDOUT,
+                cwd=output_dir_abs  # 在 output 目录中执行
             )
 
             captured_output = []
@@ -91,8 +102,8 @@ class run_code(ToolBase):
                 line = await process.stdout.readline()
                 if not line:
                     break
-                decoded_line = line.decode().strip() # 解码字节
-                print(decoded_line)           # 实时打印
+                decoded_line = line.decode().strip()
+                print(decoded_line)
                 captured_output.append(decoded_line + "\n")
 
             # 等待进程结束

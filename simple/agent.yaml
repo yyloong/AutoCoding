@@ -54,8 +54,15 @@ max_chat_round: 9999
 code_file: simple_agent
 
 tools:
+  file_system:
+    mcp: false
+
   exit_task:
     mcp: false
+
+  run_code:
+    mcp: false
+
   # fetch:
   #   mcp: true
   #   type: sse
