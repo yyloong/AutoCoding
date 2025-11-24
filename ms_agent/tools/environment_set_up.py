@@ -84,11 +84,16 @@ class Environment_set_up(ToolBase):
     async def call_tool(
         self, server_name: str, *, tool_name: str, tool_args: dict
     ) -> str:
+        now_dir = os.getcwd()
         os.chdir(self.output_dir)
         logger.info(f"Changed working directory to {self.output_dir} for environment setup.")
-        result = await getattr(self, tool_name)(**tool_args)
-        os.chdir(os.path.dirname(os.getcwd()))
-        logger.info(f"Changed working directory back to {os.getcwd()} after environment setup.")
+        try:
+            result = await getattr(self, tool_name)(**tool_args)
+        except Exception as e:
+            result = f"System error: {str(e)}"
+        finally:
+            os.chdir(now_dir)
+            logger.info(f"Changed working directory back to {os.getcwd()} after environment setup.")
         return result
 
     async def npm_install(self) -> str:
