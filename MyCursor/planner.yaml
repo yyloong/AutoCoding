@@ -5,8 +5,8 @@ llm:
   openai_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
 
 generation_config:
-  temperature: 0.2
-  top_k: 30
+  temperature: 0.4
+  top_k: 50
   stream: true
   max_tokens: 32000
   extra_body:
