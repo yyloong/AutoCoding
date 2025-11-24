@@ -143,6 +143,10 @@ tools:
   
   file_system:
     mcp: false
+    limit_len_files_end_with:
+      - .csv
+      - .npz
+    limit_len: 1000
   
   environment_set_up:
     mcp: false
