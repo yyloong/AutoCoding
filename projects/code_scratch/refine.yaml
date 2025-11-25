@@ -3,7 +3,7 @@ llm:
   #model: a6000mnt/Qwen-235B-A35B-thinking
   model: a6000mnt/Qwen_30B_code
   #model: Qwen_30B_code
-  openai_api_key:  
+  openai_api_key:  1
   #openai_base_url: http://210.28.134.171:8000/v1
   openai_base_url: http://210.28.135.93:8000/v1
 

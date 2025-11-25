@@ -220,7 +220,7 @@ class FileSystemTool(ToolBase):
                     )
                     continue
 
-                with open(target_path_real, "r") as f:
+                with open(target_path_real, "r", encoding='utf-8') as f:
                     ######################
                     if target_path_real.endswith(tuple(self.limit_len_files_end_with)):
                         content = f.read(self.limit_len + 1)

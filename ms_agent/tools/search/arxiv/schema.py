@@ -40,11 +40,34 @@ class ArxivSearchRequest(SearchRequest):
         Returns:
             Dict[str, Any]: The parameters as a dictionary
         """
+        # 将字符串形式的sort_by和sort_order转换为对应的枚举值
+        sort_by_map = {
+            'relevance': SortCriterion.Relevance,
+            'submittedDate': SortCriterion.SubmittedDate,
+            'lastUpdatedDate': SortCriterion.LastUpdatedDate
+        }
+        
+        sort_order_map = {
+            'ascending': SortOrder.Ascending,
+            'descending': SortOrder.Descending
+        }
+        
+        sort_by = self.sort_strategy
+        sort_order = self.sort_order
+        
+        # 如果sort_strategy是字符串，则尝试转换为枚举
+        if isinstance(self.sort_strategy, str):
+            sort_by = sort_by_map.get(self.sort_strategy, SortCriterion.Relevance)
+            
+        # 如果sort_order是字符串，则尝试转换为枚举
+        if isinstance(self.sort_order, str):
+            sort_order = sort_order_map.get(self.sort_order, SortOrder.Descending)
+
         return {
             'query': self.query,
             'max_results': self.num_results,
-            'sort_by': self.sort_strategy,
-            'sort_order': self.sort_order
+            'sort_by': sort_by,
+            'sort_order': sort_order
         }
 
     def to_json(self) -> Dict[str, Any]:
@@ -129,13 +152,32 @@ class ArxivSearchResult(SearchResult):
 
     def _process_arguments(self) -> Dict[str, Any]:
         """Process the search arguments to be JSON serializable."""
+        sort_strategy = self.arguments.get('sort_strategy', SortCriterion.Relevance)
+        sort_order = self.arguments.get('sort_order', SortOrder.Descending)
+        
+        # 处理sort_strategy和sort_order，确保它们是枚举值
+        if isinstance(sort_strategy, str):
+            sort_by_map = {
+                'relevance': SortCriterion.Relevance,
+                'submittedDate': SortCriterion.SubmittedDate,
+                'lastUpdatedDate': SortCriterion.LastUpdatedDate
+            }
+            sort_strategy = sort_by_map.get(sort_strategy, SortCriterion.Relevance)
+            
+        if isinstance(sort_order, str):
+            sort_order_map = {
+                'ascending': SortOrder.Ascending,
+                'descending': SortOrder.Descending
+            }
+            sort_order = sort_order_map.get(sort_order, SortOrder.Descending)
+
         return {
             'query':
             self.query,
             'max_results':
             self.arguments.get('max_results', None),
             'sort_strategy':
-            self.arguments.get('sort_strategy', SortCriterion.Relevance).value,
+            sort_strategy.value if hasattr(sort_strategy, 'value') else sort_strategy,
             'sort_order':
-            self.arguments.get('sort_order', SortOrder.Descending).value
+            sort_order.value if hasattr(sort_order, 'value') else sort_order
         }

@@ -106,8 +106,13 @@ class kaggle_tools(ToolBase):
             )
             stdout, stderr = await process.communicate()
             if process.returncode != 0:
-                logger.error(f'Error executing command "{cmd}": {stderr.decode().strip()}')
-                return f'Error executing command "{cmd}": {stderr.decode().strip()}'
+                # 修复编码问题：先尝试UTF-8，失败则使用系统默认编码
+                try:
+                    error_msg = stderr.decode('utf-8').strip()
+                except UnicodeDecodeError:
+                    error_msg = stderr.decode('gbk', errors='ignore').strip()  # Windows常用编码
+                logger.error(f'Error executing command "{cmd}": {error_msg}')
+                return f'Error executing command "{cmd}": {error_msg}'
             results.append(stdout.decode().strip())
 
         return f'Dataset for competition {competition} downloaded successfully to {self.output_dir}/{competition}.'

@@ -199,9 +199,9 @@ def save_history(output_dir: str, task: str, config: DictConfig,
     os.makedirs(cache_dir, exist_ok=True)
     config_file = os.path.join(cache_dir, f'{task}.yaml')
     message_file = os.path.join(cache_dir, f'{task}.json')
-    with open(config_file, 'w') as f:
+    with open(config_file, 'w', encoding='utf-8') as f:
         OmegaConf.save(config, f)
-    with open(message_file, 'w') as f:
+    with open(message_file, 'w', encoding='utf-8') as f:
         json.dump([message.to_dict() for message in messages],
                   f,
                   indent=4,

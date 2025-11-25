@@ -1,5 +1,6 @@
 # flake8: noqa
 import os
+import sys
 
 import arxiv
 from ms_agent.tools.search.arxiv.schema import (ArxivSearchRequest,
@@ -20,7 +21,7 @@ class ArxivSearch(SearchEngine):
     def search(self, search_request: ArxivSearchRequest) -> ArxivSearchResult:
         """Perform a search using arxiv and return the results."""
         search_args: dict = search_request.to_dict()
-
+        
         try:
             response = list(
                 self.client.results(search=arxiv.Search(**search_args)))

@@ -4,7 +4,7 @@ import os
 from ms_agent.tools.search.search_base import SearchEngine, SearchEngineType
 from ms_agent.tools.search.serpapi.schema import (SerpApiSearchRequest,
                                                   SerpApiSearchResult)
-from serpapi import BaiduSearch, BingSearch, GoogleSearch
+from serpapi import Client
 
 
 class SerpApiSearch(SearchEngine):
