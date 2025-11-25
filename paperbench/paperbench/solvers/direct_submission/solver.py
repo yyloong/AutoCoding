@@ -134,10 +134,9 @@ class PBDirectSubmissionSolver(BasePBSolver):
         current_paper_id = task.paper_id
         if current_paper_id not in self.paper_to_submissions:
             ctx_logger.warning(
-                f"No submissions found for {task.paper_id!r},",
-                " a score of 0 will be returned for this paper.",
-                destinations=["group", "run"],
-            )
+            f"No submissions found for {task.paper_id!r}, a score of 0 will be returned for this paper.",
+            destinations=["group", "run"],
+        )
         async with self._pop_lock:
             submission_dir = (
                 # pop a submission if the paper still has submissions to grade

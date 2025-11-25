@@ -5,3 +5,5 @@ output/
 __pycache__/
 tmp.sh
 .venv/
+paperbench/data/
+data/

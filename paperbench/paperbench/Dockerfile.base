@@ -49,9 +49,9 @@ RUN apt-get update && apt-get install -y \
 RUN apt update && apt install -y jupyter
 
 # Install Docker
-RUN curl -fsSL https://get.docker.com -o /tmp/get-docker.sh && \
-    chmod 700 /tmp/get-docker.sh && \
-    /tmp/get-docker.sh
+# RUN curl -fsSL https://get.docker.com -o /tmp/get-docker.sh && \
+#     chmod 700 /tmp/get-docker.sh && \
+#     /tmp/get-docker.sh
 
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py313_25.5.1-0-Linux-x86_64.sh -O /tmp/miniconda.sh \
     && bash /tmp/miniconda.sh -b -p /opt/conda \
