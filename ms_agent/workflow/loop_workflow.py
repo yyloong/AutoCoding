@@ -115,17 +115,8 @@ class LoopWorkflow(Workflow):
                         logger.info(f'Running task: {task_name}')
                     
                     agent = AgentLoader.build(**init_args)
-                    
-                    print('='*100)
-                    print(agent.config)
-                    print('='*100)
-
                     outputs = await agent.run(inputs)
                     logger.info(f'Task {task_name} completed')
-
-                    print('='*20 + ' OUTPUT ' + '='*20)
-                    print(outputs)
-                    print('='*50)
                     
                     # 如果是 breaker 任务（refiner），检查是否应该退出循环
                     if task_info.get('breaker', False):
