@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: preparedness_turn_completer
+Version: 0.1.0
+Requires-Python: >=3.11
+Requires-Dist: openai
+Requires-Dist: tenacity
+Requires-Dist: chz
+Requires-Dist: structlog
+Requires-Dist: tiktoken

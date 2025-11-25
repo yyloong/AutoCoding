@@ -1,0 +1,32 @@
+Metadata-Version: 2.4
+Name: alcatraz
+Version: 0.1.0
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: pyyaml
+Requires-Dist: jupyter_client
+Requires-Dist: rich[jupyter]
+Requires-Dist: docker
+Requires-Dist: tenacity
+Requires-Dist: filelock
+Requires-Dist: ipykernel
+Requires-Dist: pydantic
+Requires-Dist: pytest
+Requires-Dist: pytest-asyncio
+Requires-Dist: blobfile
+Requires-Dist: httpx
+Requires-Dist: pillow
+Requires-Dist: msgpack
+Requires-Dist: fastapi
+Requires-Dist: azure-mgmt-compute
+Requires-Dist: azure-mgmt-network
+Requires-Dist: azure-identity
+Requires-Dist: vncdotool
+Requires-Dist: asyncvnc
+Requires-Dist: structlog
+Requires-Dist: async-lru
+Provides-Extra: formatters
+Requires-Dist: black>=23.3; extra == "formatters"
+Requires-Dist: isort>=5.13; extra == "formatters"
+Provides-Extra: dev
+Requires-Dist: pre-commit>=3.7; extra == "dev"
