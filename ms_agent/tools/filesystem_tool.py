@@ -197,6 +197,7 @@ class FileSystemTool(ToolBase):
             Dictionary mapping file path(s) to their content or error messages.
         """
         results = {}
+        truncated_files = []
         for path in paths:
             try:
                 if os.path.isabs(path):
@@ -226,6 +227,7 @@ class FileSystemTool(ToolBase):
                         content = f.read(self.limit_len + 1)
                         if len(content) > self.limit_len:
                             content = content[: self.limit_len] + "\n...[truncated](file too large)"
+                            truncated_files.append(path)
                         results[path] = content
                     else:
                         content = f.read()
@@ -233,7 +235,13 @@ class FileSystemTool(ToolBase):
                     ######################
             except Exception as e:
                 results[path] = f"Read file <{path}> failed, error: " + str(e)
-        return str(results)
+        
+        # 构建输出字符串
+        output = str(results)
+        if truncated_files:
+            output += f"\n\n[TRUNCATED FILES]: The following files were truncated due to size limits: {', '.join(truncated_files)}"
+        
+        return output
 
     async def delete_file_or_dir(self, path: str):
         """Delete a file or a directory.

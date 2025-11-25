@@ -24,19 +24,13 @@ prompt:
     
     具体的工作流程和要求会在后续消息中提供，请仔细阅读并严格执行。
     
-    可用工具：
-    - file_system: 读写文件
-    - run_code: 运行代码文件进行验证
-    - web_search: 搜索技术文档
-    - environment_set_up: 安装依赖
-    - exit_task: 完成任务后退出
-    
     重要原则：
     1. 当前路径在工作目录下
     2. 每次编写或修改代码后，立即使用 run_code 工具验证
     3. 代码要实用、可运行，不要写伪代码或框架代码
     4. 完成所有任务后使用 exit_task 工具退出
     5. 如果是 Kaggle 竞赛，不要直接读取 .csv 文件，而是使用 python 读取 head 查看文件内容，并用 python 写入 .csv 文件。（在此阶段，不要提交 csv 文件到竞赛）
+    6. 当前 run_code 已经包含 python 环境和一些基本库，如果需要其他库，请使用 environment_set_up 工具安装。
 
 code_file: simple_agent
 
