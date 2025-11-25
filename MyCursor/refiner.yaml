@@ -29,7 +29,8 @@ prompt:
     **步骤 1：运行项目**
     按照 README.md 的使用说明，使用工具运行项目：
     - 执行主程序
-    - 记录所有输出、错误和异常
+    - 记录所有错误和异常
+    - 如果是 kaggle 竞赛任务，确认代码正常运行后提交 csv 文件到竞赛，稍等一会，获得比赛分数。然后根据分数决定如何改进。
     
     **步骤 2：功能验证**
     对照 plan.md 中的需求，逐项检查：
@@ -52,6 +53,7 @@ prompt:
       - 针对目标任务，是否存在更高效、鲁棒或简洁的技术替代方案？
       - 是否有值得引入的业界优秀范式、框架或设计模式？
       - 是否可优化依赖、减少冗余、提升复用性和可维护性？
+      - 你可以使用 web search 工具搜索相关技术文档、最佳实践、类似项目等信息，帮助你分析问题和改进建议。
 
     - 在分析的基础上，针对每种可行的优化或提升点，给出具体可执行的建议，包括但不限于：
       - 更优方法实现思路
@@ -150,9 +152,6 @@ prompt:
 code_file: simple_agent
 
 tools:
-  exit_task:
-    mcp: false
-  
   file_system:
     mcp: false
     limit_len_files_end_with:
@@ -167,6 +166,12 @@ tools:
     mcp: false
   
   run_code:
+    mcp: false
+
+  kaggle_tools:
+    mcp: false
+
+  exit_task:
     mcp: false
 
 max_chat_round: 50

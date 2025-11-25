@@ -36,7 +36,7 @@ prompt:
     2. 每次编写或修改代码后，立即使用 run_code 工具验证
     3. 代码要实用、可运行，不要写伪代码或框架代码
     4. 完成所有任务后使用 exit_task 工具退出
-    5. 如果是 Kaggle 竞赛，不要直接读取 .csv 文件，而是使用 python 读取 head 查看文件内容，并用 python 写入 .csv 文件。
+    5. 如果是 Kaggle 竞赛，不要直接读取 .csv 文件，而是使用 python 读取 head 查看文件内容，并用 python 写入 .csv 文件。（在此阶段，不要提交 csv 文件到竞赛）
 
 code_file: simple_agent
 
