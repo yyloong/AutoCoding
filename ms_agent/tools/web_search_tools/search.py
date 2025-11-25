@@ -1,16 +1,7 @@
-import json
-from concurrent.futures import ThreadPoolExecutor
-from typing import List, Union
-import requests
-from ms_agent.llm.utils import Tool
-from ms_agent.tools.base import ToolBase
-import asyncio
-from typing import Dict, List, Optional, Union
-import uuid
-import http.client
-import json
-
 import os
+import json
+import requests
+from typing import List, Union
 
 
 SERPER_KEY=os.environ.get('SERPER_KEY_ID')
@@ -20,7 +11,9 @@ class Search:
     def google_search_with_serp(cls, query: str):
         def contains_chinese_basic(text: str) -> bool:
             return any('\u4E00' <= char <= '\u9FFF' for char in text)
-        conn = http.client.HTTPSConnection("google.serper.dev")
+        
+        url = "https://google.serper.dev/search"
+        
         if contains_chinese_basic(query):
             payload = json.dumps({
                 "q": query,
@@ -44,8 +37,8 @@ class Search:
         
         for i in range(5):
             try:
-                conn.request("POST", "/search", payload, headers)
-                res = conn.getresponse()
+                response = requests.post(url, data=payload, headers=headers, timeout=30)
+                response.raise_for_status()
                 break
             except Exception as e:
                 print(e)
@@ -53,8 +46,7 @@ class Search:
                     return f"Google search Timeout, return None, Please try again later."
                 continue
 
-        data = res.read()
-        results = json.loads(data.decode("utf-8"))
+        results = response.json()
 
         try:
             if "organic" not in results:

@@ -2,6 +2,6 @@ memory/
 log/
 run.sh
 output/
-__pycache__
+__pycache__/
 tmp.sh
 .venv/
