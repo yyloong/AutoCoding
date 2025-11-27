@@ -41,6 +41,7 @@ python run_qwen.py \
   --dataset_name_or_path /home/u-wuhc/AutoCoding/SWE-bench/base_datasets/SWE-bench-Verified-oracle \
   --model_name_or_path qwen3-coder-flash \
   --output_dir ./outputs \
+  --max_instances 100 \
   --model_args "temperature=0.2,top_p=0.95"
 ```
 

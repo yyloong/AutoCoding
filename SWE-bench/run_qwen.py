@@ -117,6 +117,7 @@ def main(
     output_dir,
     model_args,
     max_cost,
+    max_instances,
     api_key,
     base_url,
 ):
@@ -153,6 +154,9 @@ def main(
         )
     if shard_id is not None and num_shards is not None:
         dataset = dataset.shard(num_shards, shard_id, contiguous=True)
+    if max_instances is not None and len(dataset) > max_instances:
+        dataset = dataset.select(range(max_instances))
+        logger.info(f"Limited to first {max_instances} instances")
     inference_args = {
         "test_dataset": dataset,
         "model_name_or_path": model_name_or_path,
@@ -216,6 +220,12 @@ if __name__ == "__main__":
         type=float,
         default=None,
         help="Maximum cost to spend on inference.",
+    )
+    parser.add_argument(
+        "--max_instances",
+        type=int,
+        default=None,
+        help="Maximum number of instances to process. If None, process all instances.",
     )
     parser.add_argument(
         "--api_key",
