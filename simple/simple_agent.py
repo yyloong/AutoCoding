@@ -38,7 +38,7 @@ class SimpleAgent(LLMAgent):
             messages = await self.condense_memory(messages)
             await self.on_generate_response(messages)
             tools = await self.tool_manager.get_tools()
-            print(tools)
+            # print(tools)
 
             if self.stream:
                 self.log_output('[assistant]:')

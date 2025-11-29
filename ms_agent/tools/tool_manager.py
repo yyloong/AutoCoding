@@ -14,9 +14,11 @@ from ms_agent.tools.base import ToolBase
 from ms_agent.tools.kaggle_tools import kaggle_tools
 from ms_agent.tools.code.code_executor import CodeExecutionTool
 from ms_agent.tools.filesystem_tool import FileSystemTool
-from ms_agent.tools.environment_set_up import Environment_set_up
 from ms_agent.tools.web_research import Web_research
-from ms_agent.tools.debug_cmd import run_code
+# from ms_agent.tools.environment_set_up import Environment_set_up
+# from ms_agent.tools.debug_cmd import run_code
+from ms_agent.tools.debug import Environment_set_up, run_code
+from ms_agent.tools.docker_shell import docker_shell
 from ms_agent.tools.findata.findata_fetcher import FinancialDataFetcher
 from ms_agent.tools.mcp_client import MCPClient
 from ms_agent.tools.exit_task import exit_task
@@ -51,6 +53,8 @@ class ToolManager:
             self.extra_tools.append(Environment_set_up(config, trust_remote_code=self.trust_remote_code))
         if hasattr(config, 'tools') and hasattr(config.tools, 'run_code'):
             self.extra_tools.append(run_code(config, trust_remote_code=self.trust_remote_code))
+        if hasattr(config, 'tools') and hasattr(config.tools, 'docker_shell'):
+            self.extra_tools.append(docker_shell(config, trust_remote_code=self.trust_remote_code))
         if hasattr(config, 'tools') and hasattr(config.tools, 'split_task'):
             self.extra_tools.append(SplitTask(config))
         if hasattr(config, 'tools') and hasattr(config.tools, 'kaggle_tools'):
