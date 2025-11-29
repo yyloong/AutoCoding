@@ -706,6 +706,8 @@ class SingleFileParser:
             'pdb': parse_txt,
             'py': parse_txt,
             "png": parse_png,
+            "jpeg": parse_png,
+            "jpg": parse_png,
             'html': parse_html,
             'xml': parse_xml,
             'csv': lambda p: parse_tabular_file(p, sep=','),

@@ -5,6 +5,7 @@ from ms_agent.utils import get_logger
 from ms_agent.workflow.base import Workflow
 from ms_agent.llm import Message
 from omegaconf import DictConfig
+from ms_agent.tools.file_parser_tools.file_parser import SingleFileParser
 
 logger = get_logger()
 
@@ -39,6 +40,16 @@ class LoopWorkflow(Workflow):
             shutil.rmtree('output')
         #if os.path.exists('memory'):
         #    shutil.rmtree('memory')
+        if self.input_file_path: 
+            if not os.path.exists(self.input_file_path):
+                raise FileNotFoundError(f"Input file not found: {self.input_file_path}")
+            parser = SingleFileParser(cfg={
+                'path': os.getcwd()
+            })
+            input_params = {"url": self.input_file_path}
+            file_parser_result = parser.call(input_params)
+            inputs = inputs + "\n\ninput file content:\n" + file_parser_result
+
 
         max_iterations = kwargs.get('max_iterations', 10)
         iteration_count = 0

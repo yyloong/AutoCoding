@@ -78,6 +78,8 @@ tools:
     mcp: false
     exclude:
       - download_dataset
+  deepresearch:
+    mcp: false
 
 max_chat_round: 100
 

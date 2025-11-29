@@ -11,13 +11,12 @@ from .base import CLICommand
 
 
 def subparser_func(args):
-    """ Function which will be called for a specific sub parser.
-    """
+    """Function which will be called for a specific sub parser."""
     return RunCMD(args)
 
 
 class RunCMD(CLICommand):
-    name = 'run'
+    name = "run"
 
     def __init__(self, args):
         self.args = args
@@ -27,64 +26,73 @@ class RunCMD(CLICommand):
         """Define args for run command."""
         parser: argparse.ArgumentParser = parsers.add_parser(RunCMD.name)
         parser.add_argument(
-            '--query',
+            "--query",
             required=False,
             type=str,
-            help=
-            'The query or prompt to send to the LLM. If not set, will enter an interactive mode.'
+            help="The query or prompt to send to the LLM. If not set, will enter an interactive mode.",
         )
         parser.add_argument(
-            '--config',
+            "--config",
             required=False,
             type=str,
             default=None,
-            help='The directory or the repo id of the config file')
-        parser.add_argument(
-            '--trust_remote_code',
-            required=False,
-            type=str,
-            default='false',
-            help='Trust the code belongs to the config file, default False')
-        parser.add_argument(
-            '--load_cache',
-            required=False,
-            type=str,
-            default='false',
-            help=
-            'Load previous step histories from cache, this is useful when a query fails and retry'
+            help="The directory or the repo id of the config file",
         )
         parser.add_argument(
-            '--mcp_config',
+            "--trust_remote_code",
             required=False,
             type=str,
-            default=None,
-            help='The extra mcp server config')
+            default="false",
+            help="Trust the code belongs to the config file, default False",
+        )
         parser.add_argument(
-            '--mcp_server_file',
+            "--load_cache",
             required=False,
             type=str,
-            default=None,
-            help='An extra mcp server file.')
+            default="false",
+            help="Load previous step histories from cache, this is useful when a query fails and retry",
+        )
         parser.add_argument(
-            '--openai_api_key',
+            "--input_file_path",
             required=False,
             type=str,
-            default=None,
-            help='API key for accessing an OpenAI-compatible service.')
+            help="The input file path for the workflow.",
+        )
         parser.add_argument(
-            '--modelscope_api_key',
+            "--mcp_config",
             required=False,
             type=str,
             default=None,
-            help='API key for accessing ModelScope api-inference services.')
+            help="The extra mcp server config",
+        )
         parser.add_argument(
-            '--animation_mode',
+            "--mcp_server_file",
             required=False,
             type=str,
-            choices=['auto', 'human'],
             default=None,
-            help=
-            'Animation mode for video_generate project: auto (default) or human.'
+            help="An extra mcp server file.",
+        )
+        parser.add_argument(
+            "--openai_api_key",
+            required=False,
+            type=str,
+            default=None,
+            help="API key for accessing an OpenAI-compatible service.",
+        )
+        parser.add_argument(
+            "--modelscope_api_key",
+            required=False,
+            type=str,
+            default=None,
+            help="API key for accessing ModelScope api-inference services.",
+        )
+        parser.add_argument(
+            "--animation_mode",
+            required=False,
+            type=str,
+            choices=["auto", "human"],
+            default=None,
+            help="Animation mode for video_generate project: auto (default) or human.",
         )
         parser.set_defaults(func=subparser_func)
 
@@ -95,54 +103,55 @@ class RunCMD(CLICommand):
                 self.args.config = os.path.join(current_dir, AGENT_CONFIG_FILE)
         elif not os.path.exists(self.args.config):
             from modelscope import snapshot_download
+
             self.args.config = snapshot_download(self.args.config)
-        self.args.trust_remote_code = strtobool(
-            self.args.trust_remote_code)  # noqa
+        self.args.trust_remote_code = strtobool(self.args.trust_remote_code)  # noqa
         self.args.load_cache = strtobool(self.args.load_cache)
 
         # Propagate animation mode via environment variable for downstream code agents
-        if getattr(self.args, 'animation_mode', None):
-            os.environ['MS_ANIMATION_MODE'] = self.args.animation_mode
+        if getattr(self.args, "animation_mode", None):
+            os.environ["MS_ANIMATION_MODE"] = self.args.animation_mode
 
         if os.path.isfile(self.args.config):
             config_path = os.path.abspath(self.args.config)
         else:
             config_path = self.args.config
-        author_file = os.path.join(config_path, 'author.txt')
-        author = ''
+        author_file = os.path.join(config_path, "author.txt")
+        author = ""
         if os.path.exists(author_file):
-            with open(author_file, 'r') as f:
+            with open(author_file, "r") as f:
                 author = f.read()
-        blue_color_prefix = '\033[34m'
-        blue_color_suffix = '\033[0m'
-        print(
-            blue_color_prefix + MS_AGENT_ASCII + blue_color_suffix, flush=True)
-        line_start = '═════════════════════════Workflow Contributed By════════════════════════════'
-        line_end = '════════════════════════════════════════════════════════════════════════════'
+        blue_color_prefix = "\033[34m"
+        blue_color_suffix = "\033[0m"
+        print(blue_color_prefix + MS_AGENT_ASCII + blue_color_suffix, flush=True)
+        line_start = "═════════════════════════Workflow Contributed By════════════════════════════"
+        line_end = "════════════════════════════════════════════════════════════════════════════"
         if author:
-            print(
-                blue_color_prefix + line_start + blue_color_suffix, flush=True)
-            print(
-                blue_color_prefix + author.strip() + blue_color_suffix,
-                flush=True)
+            print(blue_color_prefix + line_start + blue_color_suffix, flush=True)
+            print(blue_color_prefix + author.strip() + blue_color_suffix, flush=True)
             print(blue_color_prefix + line_end + blue_color_suffix, flush=True)
 
         config = Config.from_task(self.args.config)
 
         if Config.is_workflow(config):
             from ms_agent.workflow.loader import WorkflowLoader
+
             engine = WorkflowLoader.build(
                 config_dir_or_id=self.args.config,
                 config=config,
                 mcp_server_file=self.args.mcp_server_file,
                 load_cache=self.args.load_cache,
-                trust_remote_code=self.args.trust_remote_code)
+                trust_remote_code=self.args.trust_remote_code,
+                input_file_path=self.args.input_file_path,
+            )
         else:
             from ms_agent.agent.loader import AgentLoader
+
             engine = AgentLoader.build(
                 config_dir_or_id=self.args.config,
                 config=config,
                 mcp_server_file=self.args.mcp_server_file,
                 load_cache=self.args.load_cache,
-                trust_remote_code=self.args.trust_remote_code)
+                trust_remote_code=self.args.trust_remote_code,
+            )
         asyncio.run(engine.run(self.args.query))

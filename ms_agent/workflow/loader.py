@@ -28,6 +28,7 @@ class WorkflowLoader:
         from ms_agent.workflow.loop_workflow import LoopWorkflow
         wf_type = LoopWorkflow.WORKFLOW_NAME.lower()
         wf_type = getattr(wf_config, 'type', '').lower() or wf_type
+        input_file_path = kwargs.get('input_file_path', None)
 
         if wf_type == ChainWorkflow.WORKFLOW_NAME.lower():
             wf_instance = ChainWorkflow(
@@ -36,7 +37,8 @@ class WorkflowLoader:
                 env=env,
                 mcp_server_file=kwargs.get('mcp_server_file'),
                 load_cache=kwargs.get('load_cache', False),
-                trust_remote_code=trust_remote_code
+                trust_remote_code=trust_remote_code,
+                input_file_path=input_file_path
             )
         elif wf_type == DagWorkflow.WORKFLOW_NAME.lower():
             wf_instance = DagWorkflow(
@@ -45,7 +47,8 @@ class WorkflowLoader:
                 env=env,
                 mcp_server_file=kwargs.get('mcp_server_file'),
                 load_cache=kwargs.get('load_cache', False),
-                trust_remote_code=trust_remote_code
+                trust_remote_code=trust_remote_code,
+                input_file_path=input_file_path
             )
         elif wf_type == LoopWorkflow.WORKFLOW_NAME.lower():
             wf_instance = LoopWorkflow(
@@ -54,7 +57,8 @@ class WorkflowLoader:
                 env=env,
                 mcp_server_file=kwargs.get('mcp_server_file'),
                 load_cache=kwargs.get('load_cache', False),
-                trust_remote_code=trust_remote_code
+                trust_remote_code=trust_remote_code,
+                input_file_path=input_file_path
             )
         elif wf_type == 'ResearchWorkflow'.lower():
             # TODO
