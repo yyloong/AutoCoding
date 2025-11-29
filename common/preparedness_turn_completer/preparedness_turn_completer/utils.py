@@ -43,6 +43,9 @@ CONTEXT_WINDOW_LENGTHS: dict[str, int] = {
     "gpt-5-codex": 400_000,
     "gpt-5-pro-2025-10-06": 400_000,
     "gpt-5-pro": 400_000,
+    "qwen3-max": 400_000,
+    "qwen3-coder-flash": 400_000,
+    "deepseek-chat": 400_000,
 }
 
 

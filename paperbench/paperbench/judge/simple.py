@@ -127,7 +127,7 @@ class SimpleJudge(Judge):
         we fallback to a default OpenAICompletionsStructuredCompleter config
         """
         cfg = config or OpenAICompletionsTurnCompleter.Config(
-            model="gpt-4o-2024-08-06",
+            model="qwen3-coder-flash",
             response_format=response_format,
         )
         return cfg, cfg.build()
@@ -711,7 +711,7 @@ class SimpleJudge(Judge):
         messages: list[ChatCompletionMessageParam] = [
             {
                 "role": "system",
-                "content": f"You are given a response output from a judge which should contain a score and an explanation. Please parse the text into a structured object containing `valid_score` (boolean indicating whether the response contains a valid score), the `score` {score_instruction}, and an `explanation` (a short summary of the judge's reasoning). If the response does not contain a valid score, set `valid_score` to False and set the `score` to 0.0.",
+                "content": f"You are given a response output from a judge which should contain a score and an explanation. Please parse the text into a structured object containing `valid_score` (boolean indicating whether the response contains a valid score), the `score` {score_instruction}, and an `explanation` (a short summary of the judge's reasoning). If the response does not contain a valid score, set `valid_score` to False and set the `score` to 0.0. Return the result as valid JSON.",
             },
             {
                 "role": "user",
