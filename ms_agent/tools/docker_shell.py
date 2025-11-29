@@ -25,6 +25,10 @@ class DockerBaseTool(ToolBase):
         if not os.path.isabs(self.output_dir):
             self.output_dir = os.path.abspath(self.output_dir)
 
+        if not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir, exist_ok=True)
+            logger.info(f"Created output directory: {self.output_dir}")
+
         # Get specific tool config or empty dict
         tool_config = getattr(config.tools, tool_name_key, {})
         
