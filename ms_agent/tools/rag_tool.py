@@ -12,6 +12,7 @@ from ms_agent.rag.ensemble_rag import MultiLlamaIndexRAG
 logger = get_logger()
 
 rag_model_cache = None
+initialized_rag = False
 
 class RAGTool(ToolBase):
     """RAG Tool"""
@@ -33,7 +34,10 @@ class RAGTool(ToolBase):
     
     async def connect(self):
         """Connect to RAG model"""
-        await self.rag_model.initialize_all_components()
+        global initialized_rag
+        if not initialized_rag:
+            await self.rag_model.initialize_all_components()
+            initialized_rag = True
         logger.info("RAG model connected.")
     
     async def get_tools(self):

@@ -7,7 +7,6 @@ from ms_agent.tools.base import ToolBase
 from omegaconf import OmegaConf
 from ms_agent.utils import get_logger
 from ms_agent.utils.constants import DEFAULT_OUTPUT_DIR
-from ms_agent.agent.llm_agent import LLMAgent
 
 logger = get_logger()
 
@@ -25,7 +24,6 @@ class DeepresearchTool(ToolBase):
 
     async def connect(self):
         """Connect to DeepResearch model"""
-        await self.research_model.initialize_all_components()
         logger.info("DeepResearch model connected.")
 
     async def get_tools(self):
@@ -55,15 +53,15 @@ class DeepresearchTool(ToolBase):
             os.path.dirname(__file__), "research.yaml"
         ))
         trust_remote_code = getattr(config, "trust_remote_code", False)
+        from ms_agent.agent.llm_agent import LLMAgent
         agent = LLMAgent(
             config=config,
             trust_remote_code=trust_remote_code,
-            tag=self.tag_prefix + "deepresearch_tool",
-            load_cache=config.load_cache,
+            tag="deepresearch_tool",
         )
         message = await agent.run(request)
         assert (
             message[-1].role == "tool"
-            and message[-1].tool_name == "exit_task---exit_task"
+            and message[-1].name == "exit_task---exit_task"
         ), "DeepResearch tool did not exit properly."
         return message[-1].content

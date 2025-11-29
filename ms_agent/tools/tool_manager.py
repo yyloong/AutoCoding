@@ -17,6 +17,7 @@ from ms_agent.tools.filesystem_tool import FileSystemTool
 from ms_agent.tools.environment_set_up import Environment_set_up
 from ms_agent.tools.web_research import Web_research
 from ms_agent.tools.debug_cmd import run_code
+from ms_agent.tools.deepresearch import DeepresearchTool
 from ms_agent.tools.findata.findata_fetcher import FinancialDataFetcher
 from ms_agent.tools.mcp_client import MCPClient
 from ms_agent.tools.rag_tool import RAGTool
@@ -50,6 +51,8 @@ class ToolManager:
         self.extra_tools: List[ToolBase] = []
         self.has_split_task_tool = False
         self.extra_tools.append(exit_task(config))
+        if hasattr(config, 'tools') and hasattr(config.tools, 'deepresearch'):
+            self.extra_tools.append(DeepresearchTool(config, trust_remote_code=self.trust_remote_code))
         if hasattr(config, 'tools') and hasattr(config.tools, 'rag'):
             self.extra_tools.append(RAGTool(config, trust_remote_code=self.trust_remote_code))
         if hasattr(config, 'tools') and hasattr(config.tools, 'environment_set_up'):

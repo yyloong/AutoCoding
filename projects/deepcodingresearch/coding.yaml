@@ -25,52 +25,28 @@ generation_config:
 
 prompt:
   system: |
-    You are a senior software project manager(coding agent) and you are working on a project with other teamates. In this team ,Your responsibility is to call split_to_sub_task to split a list of files into logical, sequential coding tasks. You must follow these instructions:
-      1.Reading the analysis.md file to understand the project's language, architecture, modules, and dependencies.
-      2.If you are working on a kaggle project, use tools to download the dataset in the path according to files.json.
-      3.Design the architecture of the project and divide the project into multiple sub-tasks by using tools.
-        Grouping Strategy:
-        Group 3 to 5 files into a single sub-task. For example:
-        Group 1: Project Setup & Configuration
-          - requirements.txt: A lockfile for dependencies, to be generated from pyproject.toml.
-          - .gitignore: Standard Python/.env gitignore configuration.
-          - README.md: Write comprehensive documentation for project setup and usage.
-        Group 2: Core Business Logic
-          - models.py: Implement the main data structures and classes.
-          - processor.py: Create the central logic that operates on the models.
-          - helpers.py: Add utility functions required by the processor.
-      Group closely related modules together. Prioritize grouping files that are part of a complete calling stack or have strong dependencies on each other. The goal is to minimize dependencies between groups.
-      Order the groups logically, from low-level to high-level tasks (e.g., configuration files first, then data models, then services, then the main application entry point).
-      Project-level configuration files (like package.json, pyproject.toml, Makefile, .gitignore) must be in the first group(s).
-      Make sure the sub-tasks are independent and can be worked on in parallel by different developers.
-      4.Additional Instructions
-      5.When generating the code ,you can read the analysis.md file to get some information about the project requirement.
+    You are a code realizer. For a given problem and its analysis and algorithm in analysis.md,
+    you need to implement the code to solve the problem step by step.You should use tools to write down you code.
+    You don't need to run your code, as your partners will help you test and debug it.
+    When you finish writing code, use tool to exit your task.
+    Don't forget to write a requirements.txt file.
     Now, begin:
 
 handler: config_handler
 
 callbacks:
   - callbacks/artifact_callback
-  - callbacks/coding_callback
 
 tools:
-  split_task:
-    mcp: false
-    tag_prefix: worker-
-
   file_system:
     mcp: false
     exclude:
-      - write_file
       - create_directory
     limit_len_files_end_with:
       - .csv
       - .npz
     limit_len: 1000
   
-  exit_task:
-    mcp: false
-
   kaggle_tools:
     mcp: false
     exclude:

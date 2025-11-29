@@ -32,7 +32,7 @@ prompt:
     2. Search by using the 'rag_tool' to find relevant information.
     3. If the information is sufficient, summarize your findings.
     4. If more information is needed, consider using tools to search on the website to get more information.
-    5. If you think you have finished the research, use the 'exit_task' tool to exit the task with your final result.
+    5. If you think you have finished the research, use tool to exit the task with your final result.
     6. Pay attention that if you search in rag, please use English as the data of the rag is in English.
 
 tools:
