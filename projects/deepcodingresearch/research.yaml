@@ -2,6 +2,7 @@ llm:
   service: openai
   #model: a6000mnt/Qwen-235B-A35B-thinking
   #model: a6000mnt/Qwen_30B_code
+  #model: a6000mnt/Qwen_30B_thinking
   #model: Qwen_30B_code
   model: qwen3-max
   openai_api_key:  
@@ -29,10 +30,7 @@ prompt:
     1.Use tools to research on the internet about the user's requirement and find the detailed information about the problem.
     2.Analysis the problem based on the information you have found and give a brief solution for your team.
     3.Give a judgement about the scale of the project: small, medium, large or extra large.
-    4.Write your findings and analysis in a markdown file named spec.md according to the format below:
-    ```markdown: analysis.md
-    # problem analysis and solution
-
+    4.Write your findings and analysis in a markdown file named analysis.md that concludes the following content by using the provided tools:
     ## 1. Problem/Requirement Description
     * The detailed information about the problem or requirement based on your research.Make sure it is enough for your team to solve the problem.
 
@@ -43,7 +41,7 @@ prompt:
     ## 3. The Scale of the Project
     * a brief judgement about the scale of the project: small, medium, large or extra large.
     for example,if it is a simple problem that can be solved with one file,you should suggest to write a simple script rather than a complex system.
-    ```
+
     5.Once you have written the analysis.md(pay attention that it means you use tools to create a analysis.md file rather than givern in your output), you should use tools to exit the task.
     6.you are not allow to do other things since it is not you responsibility.
     Now begin:
@@ -59,6 +57,7 @@ tools:
     exclude:
       - create_directory
       - delete_file_or_dir
+      - create_directory
     limit_len_files_end_with:
       - .csv
       - .npz

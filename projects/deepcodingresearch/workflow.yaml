@@ -1,13 +1,7 @@
 research:
   next:
-    - architecture
-  agent_config: research.yaml
-
-architecture:
-  next:
     - coding
-  agent_config: architecture.yaml
-
+  agent_config: research.yaml
 
 coding:
   next:

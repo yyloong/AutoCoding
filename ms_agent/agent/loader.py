@@ -45,7 +45,6 @@ class AgentLoader:
             agent_config.local_dir = config_dir_or_id
 
         from .llm_agent import LLMAgent
-        from .code_agent import CodeAgent
         agent_type = LLMAgent.AGENT_NAME
         if 'code_file' in kwargs:
             code_file = kwargs.pop('code_file')
@@ -68,9 +67,6 @@ class AgentLoader:
             if agent_type == LLMAgent.AGENT_NAME.lower():
                 agent_instance = LLMAgent(agent_config, agent_tag,
                                           trust_remote_code, **kwargs)
-            elif agent_type == CodeAgent.AGENT_NAME.lower():
-                agent_instance = CodeAgent(agent_config, agent_tag,
-                                           trust_remote_code, **kwargs)
             else:
                 raise ValueError(f'Unknown agent type: {agent_type}')
         return agent_instance

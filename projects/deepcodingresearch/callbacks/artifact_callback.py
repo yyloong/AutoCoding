@@ -48,6 +48,7 @@ class ArtifactCallback(Callback):
             if tc['tool_name'] == 'kaggle_tools---download_dataset' or tc['tool_name'] == 'kaggle_tools---submit_csv':
                 os.environ["http_proxy"] = os.environ.get("shorttime_http_proxy","")
                 os.environ["https_proxy"] = os.environ.get("shorttime_https_proxy","")
+            
             if tc['tool_name'] == 'file_system---write_file':
                 await self.file_system.create_directory()
                 path = json.loads(tc['arguments']).get('path', '')
@@ -59,47 +60,17 @@ class ArtifactCallback(Callback):
                     messages[-1].tool_calls.remove(tc)
                     continue
 
-                if self.agent_type == "architecture" and path != "files.json":
-                    logger.warning(
-                        f"Only files.json can be written in architecture agent.Skipped writing file {path}.")
-                    results.append(
-                        f"Only files.json can be written in architecture agent.Skipped writing file {path}.")
-                    messages[-1].tool_calls.remove(tc)
-                    continue
-
-                if not await self.check_file_right(path):
-                    logger.warning(
-                        f"File {path} is not allowed to be written.Skipped,Please check files.json for the file paths.The path must be strictly the same.")
-                    results.append(
-                        f"File {path} is not allowed to be written.Skipped,Please check files.json for the file paths.The path must be strictly the same.")
-                    messages[-1].tool_calls.remove(tc)
-                    continue
-
-        r = '\n'.join(results)
-        if len(r) > 0:
-            messages.append(Message(role='user', content=r))
-        #import pdb
-        #pdb.set_trace()
-    
-    async def check_file_right(self,filename: str) -> bool:
-
-        if not os.path.exists(os.path.join(self.file_system.output_dir, "files.json")):
-            print(f"try to create new file {self.file_system.output_dir} {filename}")
-            return True
-        if self.files_json is None:
-            with open(os.path.join(self.file_system.output_dir, "files.json"), "r") as f:
-                self.files_json = json.load(f)
-                
-        for f in self.files_json:
-            if f == filename:
-                return True
-        return False
-    
     async def after_tool_call(self, runtime, messages):
         # reset proxy after web research tool call
-        if self.agent_type == "research":
-            if messages[-1].tool_calls:
-                for tc in messages[-1].tool_calls:
+        if messages[-1].tool_calls:
+            for tc in messages[-1].tool_calls:
+                if self.agent_type == "research":
                     if tc['tool_name'] == 'web_research---search' or tc['tool_name'] == 'web_research---visit_page':
-                        del os.environ["http_proxy"] 
-                        del os.environ["https_proxy"] 
+                        os.environ["http_proxy"] = ""
+                        os.environ["https_proxy"] = ""
+                if tc['tool_name'] == 'kaggle_tools---download_dataset' or tc['tool_name'] == 'kaggle_tools---submit_csv':
+                    logger.info("Resetting proxy settings after kaggle_tools usage.")
+                    os.environ["http_proxy"] = ""
+                    os.environ["https_proxy"] = ""
+        
+        

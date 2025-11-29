@@ -19,6 +19,7 @@ class kaggle_tools(ToolBase):
     def __init__(self, config,**kwargs):
         super().__init__(config)
         self.output_dir = getattr(config, 'output_dir', DEFAULT_OUTPUT_DIR)
+        self.exclude_func(getattr(config.tools, "kaggle_tools", None))
     
     async def get_tools(self):
         tools = {
@@ -85,13 +86,28 @@ class kaggle_tools(ToolBase):
                 )
             ]
         }
-        return tools
+        return {
+            "kaggle_tools": [
+                t
+                for t in tools["kaggle_tools"]
+                if t["tool_name"] not in self.exclude_functions
+            ]
+        }
 
     async def call_tool(self, server_name, *, tool_name, tool_args):
-        return await getattr(self, tool_name)(**tool_args)
+        now_dir = os.getcwd()
+        os.chdir(self.output_dir)
+        logger.info(f"Changed working directory to {self.output_dir} for running code.")
+        try:
+            result = await getattr(self, tool_name)(**tool_args)
+        except Exception as e:
+            result = f"System error: {str(e)}"
+        finally:
+            os.chdir(now_dir)
+            logger.info(f"Changed working directory back to {os.getcwd()} after running code.")
+        return result
         
     async def download_dataset(self, competition: str, path: str) -> str:
-        path = os.path.join(self.output_dir, path)
         cmd_set = [
             f'kaggle competitions download -c {competition} -p {path}',
             f'unzip {path}/*.zip -d {path}',
@@ -114,7 +130,6 @@ class kaggle_tools(ToolBase):
 
     
     async def submit_csv(self, competition: str, file_path: str, submit_message: str) -> str:
-        file_path = os.path.join(self.output_dir, file_path)
         cmd = f'kaggle competitions submit -c {competition} -f {file_path} -m "{submit_message}"'
         process = await asyncio.create_subprocess_shell(
             cmd,

@@ -2,6 +2,7 @@ llm:
   service: openai
   #model: a6000mnt/Qwen-235B-A35B-thinking
   #model: a6000mnt/Qwen_30B_code
+  #model: a6000mnt/Qwen_30B_thinking
   #model: Qwen_30B_code
   model: qwen3-max
   openai_api_key:  
@@ -29,6 +30,7 @@ prompt:
       each time you try to write the code , you should think if there is a clearly root cause for the bug and fix it rather than write your own project.
       Your workflow is the process below:
         Step 1: Environment Setup. First,you should use the provided tools to set up the project environment. This involves installing all dependencies specified in the project's configuration files (package.json for Node.js projects, requirements.txt or pyproject.toml for Python projects) using the appropriate package manager command (npm install or uv install). You will be given the complete output from this step, including any error messages encountered during setup.
+        if it is a python project , you should use uv venv --python <python version> to create a virtual environment first before installing the dependencies.
         Step 2: Code Execution and Observation. After step1,you should run the project using the provided tools. You will be provided with the full output from this execution, including any runtime errors or exceptions that occur.
         Step 3: Analyze Errors and Read Files. Based on the error messages from the previous steps, you need to use tools to read the relevant files to analyze the problem:
         The error-reporting file.
@@ -44,6 +46,7 @@ prompt:
         Fix other issues you discover while reading the code files, but only if you have clearly identified their root cause.
         Step 5: Express Your Thinking and Fixes. Express your thinking in concise and clear language. And then use the provided tools to make the necessary code changes to fix the identified issues.
         Step 6: When you try to use python to operate the file,please check their path first since yourt working directory may not be the project root directory.
+        Step 7: Pay attention that you have only 3000 seconds for each tool call,so when you try to execute a code,consider the time limit and ensure it won't exceed this limit.
         When fixing the bug,you can read the analysis.md file to get some information about the project requirement.
         Once you ensure you have finished all the fixes, use tools to exit you task.
     Let's begin:
@@ -52,7 +55,6 @@ agent: refine
 
 callbacks:
   - callbacks/artifact_callback
-  #- callbacks/eval_callback
 
 tools:
   file_system:
@@ -79,7 +81,7 @@ tools:
 
 max_chat_round: 100
 
-tool_call_timeout: 30000
+tool_call_timeout: 3000
 
 output_dir: output
 

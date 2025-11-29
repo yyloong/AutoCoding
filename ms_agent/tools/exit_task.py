@@ -1,14 +1,6 @@
-# Copyright (c) Alibaba, Inc. and its affiliates.
-import subprocess
-import asyncio
-import os
-import shutil
-from typing import Optional
-
 from ms_agent.llm.utils import Tool
 from ms_agent.tools.base import ToolBase
 from ms_agent.utils import get_logger
-from ms_agent.utils.constants import DEFAULT_OUTPUT_DIR
 
 logger = get_logger()
 
@@ -27,7 +19,12 @@ class exit_task(ToolBase):
                     description="If you ensure the task is completed, please use this tool to exit the task. ",
                     parameters={
                         "type": "object",
-                        "properties": {},
+                        "properties": {
+                            "message": {
+                                "type": "string",
+                                "description": "An optional message to log when exiting the task if necessary.",
+                            },
+                        },
                         "required": [],
                         "additionalProperties": False,
                     },
@@ -39,6 +36,9 @@ class exit_task(ToolBase):
     async def call_tool(self, server_name, *, tool_name, tool_args):
         return await getattr(self, tool_name)(**tool_args)
         
-    async def exit_task(self) -> str:
-        logger.info("Exiting the task as requested.")
-        return "Task exited successfully."
+    async def exit_task(self, message: str = "") -> str:
+        if message:
+            logger.info(f"Exiting the task as requested with message: {message}")
+        else:
+            logger.info("Exiting the task as requested.")
+        return message

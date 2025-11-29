@@ -16,7 +16,6 @@ from ms_agent.llm.utils import Message
 from ms_agent.memory import Memory, memory_mapping
 from ms_agent.memory.mem0ai import Mem0Memory, SharedMemoryManager
 from ms_agent.rag.base import RAG
-from ms_agent.rag.utils import rag_mapping
 from ms_agent.tools import ToolManager
 from ms_agent.utils import async_retry, read_history, save_history
 from ms_agent.utils.constants import (DEFAULT_OUTPUT_DIR, DEFAULT_TAG,
@@ -68,7 +67,6 @@ class LLMAgent(Agent):
         self.callbacks: List[Callback] = []
         self.tool_manager: Optional[ToolManager] = None
         self.memory_tools: List[Memory] = []
-        self.limit_memory_size: int = kwargs.get('limit_memory_size', 20000)
         self.rag: Optional[RAG] = None
         self.llm: Optional[LLM] = None
         self.runtime: Optional[Runtime] = None
@@ -317,10 +315,6 @@ class LLMAgent(Agent):
             ]
         return messages
 
-    async def do_rag(self, messages: List[Message]):
-        if self.rag is not None:
-            messages[1].content = await self.rag.query(messages[1].content)
-
     async def load_memory(self):
         """Initialize and append memory tool instances based on the configuration provided in the global config.
 
@@ -366,16 +360,6 @@ class LLMAgent(Agent):
                 for memory in self.memory_tools:
                     # In case any memory tool need other information
                     memory.set_base_config(self.config)
-
-    async def prepare_rag(self):
-        """Load and initialize the RAG component from the config."""
-        if hasattr(self.config, 'rag'):
-            rag = self.config.rag
-            if rag is not None:
-                assert rag.name in rag_mapping, (
-                    f'{rag.name} not in rag_mapping, '
-                    f'which supports: {list(rag_mapping.keys())}')
-                self.rag: RAG = rag_mapping(rag.name)(self.config)
 
     async def condense_memory(self, messages: List[Message]) -> List[Message]:
         """
@@ -451,6 +435,9 @@ class LLMAgent(Agent):
         Returns:
             List[Message]: Updated message history after this step.
         """
+        print("="*50, "SimpleAgent Step", "=="*50)
+        print(messages)
+        print("=="*50)
         messages = deepcopy(messages)
         if (not self.load_cache) or messages[-1].role != 'assistant':
             messages = await self.condense_memory(messages)
@@ -492,10 +479,9 @@ class LLMAgent(Agent):
 
         if _response_message.tool_calls:
             messages = await self.parallel_tool_call(messages)
-        #else:
-        #    self.runtime.should_stop = True
-            if _response_message.tool_calls[-1]["tool_name"] == "exit_task---exit_task":
-                self.runtime.should_stop = True
+
+        if _response_message.tool_calls and _response_message.tool_calls[-1]["tool_name"] == "exit_task---exit_task":
+            self.runtime.should_stop = True
 
         await self.after_tool_call(messages)
         self.log_output(
@@ -529,11 +515,7 @@ class LLMAgent(Agent):
         if not query or not self.load_cache:
             return self.config, self.runtime, messages
 
-        #################
-        #config, _messages = read_history(self.output_dir, self.tag)
-        #################
-
-        config, _messages = read_history("./", self.tag)
+        config, _messages = read_history(self.output_dir, self.tag)
         if config is not None and _messages is not None:
             if hasattr(config, 'runtime'):
                 runtime = Runtime(llm=self.llm)
@@ -616,11 +598,6 @@ class LLMAgent(Agent):
                     if isinstance(memory_tool, Mem0Memory):
                         memory_tool.add_memories_from_conversation(
                             messages, self.get_user_id())
-    
-    def summary_memory(self, messages: List[Message]) -> List[Message]:
-        """
-        Summary memories from the current messages if the memory is too long.
-        """
 
     async def run_loop(self, messages: Union[List[Message], str],
                        **kwargs) -> AsyncGenerator[Any, Any]:
@@ -640,7 +617,6 @@ class LLMAgent(Agent):
             self.prepare_runtime()
             await self.prepare_tools()
             await self.load_memory()
-            await self.prepare_rag()
             self.runtime.tag = self.tag
 
             if messages is None:
@@ -651,7 +627,6 @@ class LLMAgent(Agent):
             if self.runtime.round == 0:
                 # 0 means no history
                 messages = await self.create_messages(messages)
-                await self.do_rag(messages)
                 await self.on_task_begin(messages)
 
             for message in messages:

@@ -74,10 +74,7 @@ class SplitTask(ToolBase):
             config = DictConfig(self.config)
             if not hasattr(config, 'prompt'):
                 config.prompt = DictConfig({})
-            config.prompt.system = escape_yaml_string(system)
-            ############################
-            config.tools.file_system.exclude.remove("write_file")
-            #############################
+            config.prompt.system = escape_yaml_string(system) 
             trust_remote_code = getattr(config, 'trust_remote_code', False)
             agent = LLMAgent(
                 config=config,

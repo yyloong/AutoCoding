@@ -11,7 +11,8 @@ test/
 *.so
 
 memory/
-
+workspace/
+llama_index/
 # Distribution / packaging
 .Python
 build/

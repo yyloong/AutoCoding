@@ -2,6 +2,7 @@ llm:
   service: openai
   #model: a6000mnt/Qwen-235B-A35B-thinking
   #model: a6000mnt/Qwen_30B_code
+  #model: a6000mnt/Qwen_30B_thinking
   #model: Qwen_30B_code
   model: qwen3-max
   openai_api_key:  
@@ -25,15 +26,12 @@ generation_config:
 prompt:
   system: |
     You are a senior software project manager(coding agent) and you are working on a project with other teamates. In this team ,Your responsibility is to call split_to_sub_task to split a list of files into logical, sequential coding tasks. You must follow these instructions:
-      1.Primary Goal: Read the files.json file, which contains all file paths for the project. Your job is to group these files and their implementation descriptions into sub-tasks and assign them all in a single call to the split_to_sub_task tool.
-        Do not miss any file listed in files.json.
-        Do not modify the files.json file itself.
-        the files in files.json are not exists now,you need to create them ,but not by yourself,you need to use tools to split tasks to other teamates to create them.
+      1.Reading the analysis.md file to understand the project's language, architecture, modules, and dependencies.
       2.If you are working on a kaggle project, use tools to download the dataset in the path according to files.json.
-      3.Grouping Strategy:
+      3.Design the architecture of the project and divide the project into multiple sub-tasks by using tools.
+        Grouping Strategy:
         Group 3 to 5 files into a single sub-task. For example:
         Group 1: Project Setup & Configuration
-          - pyproject.toml: Define project metadata and dependencies like 'requests' and 'pytest'.
           - requirements.txt: A lockfile for dependencies, to be generated from pyproject.toml.
           - .gitignore: Standard Python/.env gitignore configuration.
           - README.md: Write comprehensive documentation for project setup and usage.
@@ -41,27 +39,18 @@ prompt:
           - models.py: Implement the main data structures and classes.
           - processor.py: Create the central logic that operates on the models.
           - helpers.py: Add utility functions required by the processor.
-      the paths above are just examples, you should generate according to the files.json provided.
-      for example, if \"src/utils.py\" is in files.json, you should divide them with correct path:\"src/utils.py\" instead of \"utils.py\".:
       Group closely related modules together. Prioritize grouping files that are part of a complete calling stack or have strong dependencies on each other. The goal is to minimize dependencies between groups.
       Order the groups logically, from low-level to high-level tasks (e.g., configuration files first, then data models, then services, then the main application entry point).
       Project-level configuration files (like package.json, pyproject.toml, Makefile, .gitignore) must be in the first group(s).
       Make sure the sub-tasks are independent and can be worked on in parallel by different developers.
-      4.Additional Instructions:
-        Present all information in a concise yet comprehensive manner.
-        If the technical specification mentions key configuration details (like API endpoints, required environment variables, or data exchange formats) needed for modules to interact, briefly remind the developers of these details in the relevant task description.
-        again,make sure you have provided the same path as in files.json for each file in your sub-tasks instead of a relative path or just a file name.
-      5.Ensure the path in the files.json and follow it strictly when you divide the tasks.
-      6.you have no right to run the code and do not need to consider whether the code can run successfully or not.
-      7.Before you are going to finish the task,use tools to check whether all files in files.json are created.If not,you don't need to create all the files again,but just create the missing files.
-      8.You are not allowed to write any things since it is not your responsibility.
-      9.You are not responsible for the runability of the code.You teamates will handle it.
-      10.When generating the code ,you can read the analysis.md file to get some information about the project requirement.
+      4.Additional Instructions
+      5.When generating the code ,you can read the analysis.md file to get some information about the project requirement.
     Now, begin:
 
 handler: config_handler
 
 callbacks:
+  - callbacks/artifact_callback
   - callbacks/coding_callback
 
 tools:
@@ -73,6 +62,7 @@ tools:
     mcp: false
     exclude:
       - write_file
+      - create_directory
     limit_len_files_end_with:
       - .csv
       - .npz

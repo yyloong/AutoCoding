@@ -31,22 +31,3 @@ class RAG(ABC):
             The query result
         """
         pass
-
-    @abstractmethod
-    async def retrieve(self,
-                       query: str,
-                       limit: int = 5,
-                       score_threshold: float = 0.7,
-                       **filters) -> List[Any]:
-        """Retrieve documents
-
-        Args:
-            query(`str`): The query to search for
-            limit(`int`): The number of documents to return
-            score_threshold(`float`): The score threshold
-            **filters: Any extra filters
-
-        Returns:
-            List of documents
-        """
-        pass
