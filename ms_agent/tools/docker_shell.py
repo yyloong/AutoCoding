@@ -76,7 +76,7 @@ class DockerBaseTool(ToolBase):
             # Convert command to list if string (use sh -c for complex strings)
             final_cmd = cmd
             if isinstance(cmd, str):
-                final_cmd = ["/bin/sh", "-c", cmd]
+                final_cmd = ["/bin/bash", "-c", cmd]
 
             container = self.client.containers.run(
                 self.image,
@@ -199,18 +199,7 @@ class docker_shell(DockerBaseTool):
             Command output or error message
         """
         logger.info(f"Executing bash command in {self.image}: {command}")
-        
-        # Check if venv exists and should be activated for python commands
-        venv_activate = os.path.join(self.output_dir, ".venv", "bin", "activate")
-        
-        # If using python image and venv exists, prepend activation
-        if "python" in self.image.lower() and os.path.exists(venv_activate):
-            # Use bash to allow source command
-            full_command = f"bash -c 'source .venv/bin/activate && {command}'"
-        else:
-            full_command = command
-            
-        return await self._execute_in_docker(full_command)
+        return await self._execute_in_docker(command)
 
     async def execute_script(self, script: str) -> str:
         """
@@ -223,15 +212,4 @@ class docker_shell(DockerBaseTool):
             Script output or error message
         """
         logger.info(f"Executing shell script in {self.image}")
-        
-        # Check if venv exists
-        venv_activate = os.path.join(self.output_dir, ".venv", "bin", "activate")
-        
-        # Prepend venv activation if exists and using python image
-        if "python" in self.image.lower() and os.path.exists(venv_activate):
-            script = f"source .venv/bin/activate\n{script}"
-        
-        # Wrap script in bash -c for proper execution
-        full_command = f"bash -c {repr(script)}"
-        
-        return await self._execute_in_docker(full_command)
+        return await self._execute_in_docker(script)

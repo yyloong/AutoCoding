@@ -5,9 +5,10 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV NODE_ENV=production
 
-# 安装系统依赖
+# 安装系统依赖（包括常用文件工具）
 RUN apt-get update && apt-get install -y \
     git curl wget vim nano less tree htop \
+    file unzip zip tar gzip \
     build-essential gcc g++ make cmake pkg-config \
     libssl-dev libffi-dev zlib1g-dev libbz2-dev \
     libreadline-dev libsqlite3-dev liblzma-dev \
@@ -38,6 +39,7 @@ WORKDIR /workspace
 # 验证安装
 RUN python --version && pip --version && uv --version && \
     node --version && npm --version && \
-    git --version && echo "Setup complete!"
+    git --version && file --version && \
+    echo "Setup complete!"
 
 CMD ["/bin/bash"]
