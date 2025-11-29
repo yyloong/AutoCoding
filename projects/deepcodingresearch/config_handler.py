@@ -11,5 +11,5 @@ class ConfigHandler(ConfigLifecycleHandler):
             delattr(config.tools, 'split_task')
             config.tools.file_system.exclude.remove("write_file")
             if hasattr(config.tools, 'kaggle_tools'):
-                config.tools.kaggle_tools = DictConfig({})
+                delattr(config.tools, 'kaggle_tools')
         return config
