@@ -98,6 +98,7 @@ prompt:
       - Contains **only** unified diff content (no extra text, no backticks, no Markdown fences).
       - Uses repository-relative paths in `--- a/...` / `+++ b/...` headers, as expected by the evaluator.
       - Can be applied cleanly: `git apply -v fix.patch` runs successfully without errors.
+      - Don't delete this `fix.patch` file.
     - The Patch fixes the Issue.
     - The bug is covered by at least one reproduction script or test file that passes after your fix.
     - Once you confirm the Patch file is output and validated, use the `exit_task` tool to end the task.

@@ -69,49 +69,47 @@ async def process_dataset(
             instance_id = datum["instance_id"]
             if instance_id in existing_ids:
                 continue
-            
-            # 运行前清理环境，确保无残留
-            cleanup_environment()
-            
-            output_dict = {"instance_id": instance_id}
-            output_dict["model_name_or_path"] = "qwen3-coder-flash"
-            
-            # 获取输入 prompt
-            prompt = datum.get("text", "")
-            if not prompt:
-                for k, v in datum.items():
-                    if isinstance(v, str):
-                        prompt = v
-                        break
-            output_dict["text"] = prompt
-            
-            logger.info(f"Processing instance: {instance_id}")
-            
-            # 异步运行 Agent
-            full_output = await run_agent_inference(prompt, api_key)
-            output_dict["full_output"] = full_output
-            
-            # 提取 Patch
-            # 在output文件夹递归查找 fix.patch 文件
-            patch_file = Path("output").rglob("fix.patch")
-            patch_file = next(patch_file, None)
-            model_patch = None
-            if patch_file.exists():
-                try:
-                    model_patch = patch_file.read_text(encoding='utf-8')
-                    logger.info(f"Found patch for {instance_id}")
-                except Exception as e:
-                    logger.error(f"Failed to read patch file: {e}")
-            else:
-                logger.warning(f"No patch file found for {instance_id}")
-            
-            output_dict["model_patch"] = model_patch
-            
-            # 写入结果
-            print(json.dumps(output_dict, ensure_ascii=False), file=f, flush=True)
-            
-            # 运行后清理
-            cleanup_environment()
+
+            # 用 while True 保证 patch 非空才跳出
+            while True:
+                cleanup_environment()
+                output_dict = {"instance_id": instance_id}
+                output_dict["model_name_or_path"] = "qwen3-coder-flash"
+
+                prompt = datum.get("text", "")
+                if not prompt:
+                    for k, v in datum.items():
+                        if isinstance(v, str):
+                            prompt = v
+                            break
+                output_dict["text"] = prompt
+
+                logger.info(f"Processing instance: {instance_id}")
+
+                full_output = await run_agent_inference(prompt, api_key)
+                output_dict["full_output"] = full_output
+
+                patch_file = Path("output").rglob("fix.patch")
+                patch_file = next(patch_file, None)
+                model_patch = None
+                if patch_file and patch_file.exists():
+                    try:
+                        model_patch = patch_file.read_text(encoding='utf-8')
+                        logger.info(f"Found patch for {instance_id}")
+                    except Exception as e:
+                        logger.error(f"Failed to read patch file: {e}")
+                else:
+                    logger.warning(f"No patch file found for {instance_id}")
+
+                # 检查 patch 是否为空，如果为空则重新跑本轮
+                if not model_patch or len(model_patch.strip()) == 0:
+                    logger.warning(f"Patch file for {instance_id} is empty, retrying this instance.")
+                    continue  # 重新跑本轮
+
+                output_dict["model_patch"] = model_patch
+                print(json.dumps(output_dict, ensure_ascii=False), file=f, flush=True)
+                cleanup_environment()
+                break  # patch 非空，跳出 while，进入下一个 datum
 
 def main(
     dataset_name_or_path,
@@ -191,6 +189,6 @@ if __name__ == "__main__":
         shard_id=None,
         num_shards=None,
         output_dir="my_output",
-        max_instances=None,
+        max_instances=100,
         api_key=api_key,
     )
