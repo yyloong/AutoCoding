@@ -92,7 +92,9 @@ async def process_dataset(
             output_dict["full_output"] = full_output
             
             # 提取 Patch
-            patch_file = Path("output/fix.patch")
+            # 在output文件夹递归查找 fix.patch 文件
+            patch_file = Path("output").rglob("fix.patch")
+            patch_file = next(patch_file, None)
             model_patch = None
             if patch_file.exists():
                 try:
