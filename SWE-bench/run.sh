@@ -63,3 +63,10 @@ python -m swebench.harness.run_evaluation \
     --instance_ids django__django-11099 \
     --predictions_path v.jsonl \
     --run_id validate-gold
+
+# 运行整个数据集的评测
+python -m swebench.harness.run_evaluation \
+    --max_workers 1 \
+    --dataset_name princeton-nlp/SWE-bench_Verified \
+    --predictions_path ./my_output/qwen3-coder-flash__SWE-bench-Verified-oracle__test.jsonl \
+    --run_id qwen3-coder-flash

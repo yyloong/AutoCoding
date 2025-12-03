@@ -37,10 +37,11 @@ prompt:
       - Run any relevant tests you can create or infer from the provided code to ensure no regression errors are introduced.
 
     3. **Submit Patch**
-      - Ensure the generated file conforms to the standard Git Patch format.
-      - **Final step**: Write the generated Patch content to a `fix.patch` file in the current working directory.
+      - Write the Patch content to a `fix.patch` file in the current working directory.
+      - Ensure the Patch conforms to the standard **Unified Diff** format.
+      - After writing `fix.patch`, **run `git apply -v fix.patch`** using the `docker_shell` tool to verify that the patch applies cleanly and that the format is valid. If `git apply` fails, adjust the patch and re-test until it succeeds.
       - Ensure the Patch file includes complete file paths (e.g., `a/package/module.py`) and context lines.
-      - Make sure the final state of the repository includes your reproduction / test files, unless the instructions explicitly say to remove them.
+      - The path of the `fix.patch` file must be at the root of the current working directory.
 
     **Notes**:
     - You must not attempt to access code or files beyond those explicitly provided.
@@ -51,7 +52,8 @@ prompt:
     **Task Completion Criteria**:
     A valid `fix.patch` file is generated in the current directory, and the Patch fixes the Issue.
     The bug is covered by at least one reproduction script or test file that passes after your fix.
-    Once you confirm the Patch file is output, use the `exit_task` tool to end the task.
+    `git apply -v fix.patch` runs successfully without errors.
+    Once you confirm the Patch file is output and validated, use the `exit_task` tool to end the task.
 
 max_chat_round: 9999
 
