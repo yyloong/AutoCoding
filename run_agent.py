@@ -1,0 +1,194 @@
+import os
+import json
+import traceback
+import shutil
+import asyncio
+from pathlib import Path
+from tqdm.auto import tqdm
+import numpy as np
+from datasets import load_dataset, load_from_disk
+import logging
+import dotenv
+
+from ms_agent import LLMAgent
+from ms_agent.config import Config
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+logger = logging.getLogger(__name__)
+
+dotenv.load_dotenv()
+
+async def run_agent_inference(query, api_key):
+    """
+    调用 Agent 执行任务
+    """
+    config = Config.from_task('simple')
+    config.llm.modelscope_api_key = api_key
+    engine = LLMAgent(config=config)
+
+    full_response = ""
+    try:
+        # 运行 Agent
+        generator = await engine.run(query, stream=True)
+        async for response_message in generator:
+            if response_message and len(response_message) > 0:
+                full_response = response_message[-1].content
+    except Exception as e:
+        logger.error(f"Agent execution failed: {e}")
+        traceback.print_exc()
+        full_response += f"\nError during execution: {str(e)}"
+    
+    return full_response
+
+def cleanup_environment():
+    """
+    清空 output 文件夹，并删除 memory 文件夹
+    """
+    # 清空 output 文件夹
+    output_path = Path("output")
+    if output_path.exists():
+        shutil.rmtree(output_path)
+    output_path.mkdir(exist_ok=True)
+    
+    # 删除 memory 文件夹
+    memory_path = Path("memory")
+    if memory_path.exists():
+        shutil.rmtree(memory_path)
+
+async def process_dataset(
+    dataset,
+    output_file,
+    existing_ids,
+    api_key,
+):
+    # 确保 output 目录存在，供 Agent 使用
+    Path("output").mkdir(exist_ok=True, parents=True)
+
+    with open(output_file, "a+") as f:
+        for datum in tqdm(dataset, desc=f"Inference with Agent"):
+            instance_id = datum["instance_id"]
+            if instance_id in existing_ids:
+                continue
+            
+            # 运行前清理环境，确保无残留
+            cleanup_environment()
+            
+            output_dict = {"instance_id": instance_id}
+            output_dict["model_name_or_path"] = "qwen3-coder-flash"
+            
+            # 获取输入 prompt
+            prompt = datum.get("text", "")
+            if not prompt:
+                for k, v in datum.items():
+                    if isinstance(v, str):
+                        prompt = v
+                        break
+            output_dict["text"] = prompt
+            
+            logger.info(f"Processing instance: {instance_id}")
+            
+            # 异步运行 Agent
+            full_output = await run_agent_inference(prompt, api_key)
+            output_dict["full_output"] = full_output
+            
+            # 提取 Patch
+            patch_file = Path("output/fix.patch")
+            model_patch = None
+            if patch_file.exists():
+                try:
+                    model_patch = patch_file.read_text(encoding='utf-8')
+                    logger.info(f"Found patch for {instance_id}")
+                except Exception as e:
+                    logger.error(f"Failed to read patch file: {e}")
+            else:
+                logger.warning(f"No patch file found for {instance_id}")
+            
+            output_dict["model_patch"] = model_patch
+            
+            # 写入结果
+            print(json.dumps(output_dict, ensure_ascii=False), file=f, flush=True)
+            
+            # 运行后清理
+            cleanup_environment()
+
+def main(
+    dataset_name_or_path,
+    split,
+    shard_id,
+    num_shards,
+    output_dir,
+    max_instances,
+    api_key,
+):
+    model_nickname = "qwen3-coder-flash"
+    output_file = f"{model_nickname}__{dataset_name_or_path.split('/')[-1]}__{split}"
+    if shard_id is not None and num_shards is not None:
+        output_file += f"__shard-{shard_id}__num_shards-{num_shards}"
+    output_file = Path(output_dir, output_file + ".jsonl")
+    
+    # 确保输出目录存在
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    logger.info(f"Will write to {output_file}")
+    
+    existing_ids = set()
+    if os.path.exists(output_file):
+        with open(output_file) as f:
+            for line in f:
+                try:
+                    data = json.loads(line)
+                    instance_id = data["instance_id"]
+                    existing_ids.add(instance_id)
+                except json.JSONDecodeError:
+                    pass
+    logger.info(f"Read {len(existing_ids)} already completed ids from {output_file}")
+    
+    if Path(dataset_name_or_path).exists():
+        dataset = load_from_disk(dataset_name_or_path)
+    else:
+        dataset = load_dataset(dataset_name_or_path)
+    
+    if split in dataset:
+        dataset = dataset[split]
+        
+    # 自动过滤超长样本 (参考 run_qwen.py)
+    lens = np.array([len(str(d.get("text", ""))) for d in dataset])
+    dataset = dataset.select(np.argsort(lens))
+    
+    if len(existing_ids) > 0:
+        dataset = dataset.filter(
+            lambda x: x["instance_id"] not in existing_ids,
+            desc="Filtering out existing ids",
+            load_from_cache_file=False,
+        )
+        
+    if shard_id is not None and num_shards is not None:
+        dataset = dataset.shard(num_shards, shard_id, contiguous=True)
+        
+    if max_instances is not None and len(dataset) > max_instances:
+        dataset = dataset.select(range(max_instances))
+        logger.info(f"Limited to first {max_instances} instances")
+
+    # 运行异步处理循环
+    asyncio.run(
+        process_dataset(
+            dataset=dataset,
+            output_file=output_file,
+            existing_ids=existing_ids,
+            api_key=api_key,
+        )
+    )
+    logger.info("Done!")
+
+if __name__ == "__main__":
+    api_key = os.getenv("MODELSCOPE_API_KEY", "")
+    main(
+        dataset_name_or_path="/home/u-wuhc/AutoCoding/SWE-bench/base_datasets/SWE-bench-Verified-oracle",
+        split="test",
+        shard_id=None,
+        num_shards=None,
+        output_dir="my_output",
+        max_instances=None,
+        api_key=api_key,
+    )

@@ -14,30 +14,44 @@ generation_config:
 prompt:
   system: "You are a senior open-source software engineer specializing in solving\
     \ complex codebase issues. Your task is to diagnose problems, fix bugs, and ultimately\
-    \ generate a Git Patch file based on the Issue description in the current codebase.\n\
-    \n  You have powerful tools: the `docker_shell` for executing Linux commands (such\
-    \ as git, python, pytest, ls, grep, cat, etc.) in the current environment, and\
-    \ file system tools for reading and writing files.\n\n  Please strictly follow\
-    \ the standard workflow below:\n\n  1. **Explore & Reproduce**\n     - Use shell\
-    \ commands to explore the repository structure and locate relevant code.\n   \
-    \  - **You must** create a reproduction script (e.g., `reproduce_issue.py`), run\
-    \ it to confirm the bug exists, and capture the error stack.\n     - Do not modify\
-    \ code blindly; first ensure you can reliably reproduce the issue.\n\n  2. **Diagnose\
-    \ & Fix**\n     - Analyze the code logic to find the root cause.\n     - Modify\
-    \ the source code. You can write files using `docker_shell` or file system tools.\n\
-    \     - Run the reproduction script again to verify the fix.\n     - Run existing\
-    \ relevant tests to ensure no regression errors are introduced.\n\n  3. **Submit\
-    \ Patch**\n     - Use `git diff` to generate a standard Unified Diff format.\n\
-    \     - **Final step**: Write the generated Patch content to a `fix.patch` file\
-    \ in the current working directory.\n     - Ensure the Patch file includes complete\
-    \ file paths (e.g., `a/package/module.py`) and context lines.\n\n  **Notes**:\n\
-    \  - You are not limited to any specific type of repository (Python, C++, JS,\
-    \ etc.); adapt your tools accordingly (e.g., use pip, npm, make, etc.).\n  - Your\
-    \ thought process must be detailed: analyze the problem -> make a plan -> execute\
-    \ commands -> check results.\n  - If you encounter permission or environment issues,\
-    \ try to resolve them using standard Linux commands.\n\n  **Task Completion Criteria**:\n\
-    \  A valid `fix.patch` file is generated in the current directory, and the Patch\
-    \ fixes the Issue.\n  Once you confirm the Patch file is output, use the `exit_task`\
+    \ generate a Git Patch file based on the Issue description and the provided code\
+    \ snippets.\n\nYou do **not** have permission to directly `git clone` repositories.\
+    \ Instead, you must work only with the partial code given to you. Create, modify,\
+    \ and debug files as needed, based on your understanding and the provided context.\n\
+    \nYou have powerful tools: the `docker_shell` for executing Linux commands in\
+    \ the current environment, and file system tools for reading and writing files.\n\
+    \nPlease strictly follow the standard workflow below:\n\n1. **Explore & Reproduce**\n\
+    \  - Use shell commands to inspect the files and code snippets provided.\n  -\
+    \ You may need to create a reproduction script (e.g., `reproduce_issue.py`) or\
+    \ **one or more test files** (e.g., `test_issue_123.py`, small unit tests, or\
+    \ simple scripts) in the current workspace.\n  - The purpose of these files is\
+    \ to **reliably reproduce the bug or verify the expected behavior**. Whenever\
+    \ the Issue describes a failing scenario, you **must** encode it into an executable\
+    \ test or script.\n  - Run these reproduction scripts / test files (using `python`,\
+    \ `pytest`, or other appropriate commands) to confirm the bug exists, and capture\
+    \ the error stack or incorrect behavior.\n  - Do not modify source code blindly;\
+    \ first ensure you can reliably reproduce the issue using only the available information.\n\
+    \n2. **Diagnose & Fix**\n  - Analyze the code logic to find the root cause.\n\
+    \  - Modify the source code. You can write files using `docker_shell` or file\
+    \ system tools.\n  - **Update and rerun your reproduction scripts / test files**\
+    \ to verify the fix.\n  - Whenever possible, keep these tests **self-contained\
+    \ and repeatable**, so that they can serve as regression tests for future runs.\n\
+    \  - Run any relevant tests you can create or infer from the provided code to\
+    \ ensure no regression errors are introduced.\n\n3. **Submit Patch**\n  - Ensure\
+    \ the generated file conforms to the standard Git Patch format.\n  - **Final step**:\
+    \ Write the generated Patch content to a `fix.patch` file in the current working\
+    \ directory.\n  - Ensure the Patch file includes complete file paths (e.g., `a/package/module.py`)\
+    \ and context lines.\n  - Make sure the final state of the repository includes\
+    \ your reproduction / test files, unless the instructions explicitly say to remove\
+    \ them.\n\n**Notes**:\n- You must not attempt to access code or files beyond those\
+    \ explicitly provided.\n- Adapt your tools and workflow to the programming language\
+    \ and environment indicated by the given code.\n- Your thought process must be\
+    \ detailed: analyze the problem -> make a plan -> execute commands -> check results.\n\
+    - If you encounter permission or environment issues, try to resolve them using\
+    \ standard Linux commands.\n\n**Task Completion Criteria**:\nA valid `fix.patch`\
+    \ file is generated in the current directory, and the Patch fixes the Issue.\n\
+    The bug is covered by at least one reproduction script or test file that passes\
+    \ after your fix.\nOnce you confirm the Patch file is output, use the `exit_task`\
     \ tool to end the task.\n"
 max_chat_round: 9999
 code_file: simple_agent
@@ -58,4 +72,4 @@ load_cache: false
 runtime:
   should_stop: false
   tag: Agent-default
-  round: 2
+  round: 15
