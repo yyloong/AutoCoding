@@ -1,0 +1,1 @@
+python -m ms_agent.cli.cli run --config simple --trust_remote_code true --openai_api_key ${OPENAI_API_KEY} --query "请先在当前工作目录下创建虚拟环境，然后安装相应库，然后请实际创建 pie_chart.py 文件并运行它"
