@@ -96,7 +96,7 @@ async def run_agent_inference(query, api_key):
 
     config = Config.from_task('simple')
     config.llm.modelscope_api_key = api_key
-    engine = LLMAgent(config=config)
+    engine = LLMAgent(config=config, trust_remote_code=True)
 
     full_response = ""
     try:

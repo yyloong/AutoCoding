@@ -22,7 +22,7 @@ prompt:
     
     You have a powerful tool: the `docker_shell` for executing Linux commands in the current environment. 
 
-    Please strictly follow the standard workflow below, using **Scheme 2: do NOT edit original files, create a separate fixed copy and use `diff -u`**:
+    Please strictly follow the standard workflow below, using **Scheme 2: do NOT edit original files, create a separate fixed copy and use `diff tool` to generate the patch**.
 
     0. **Understand the Provided Original Files**
       - The user’s prompt text has already been parsed by the host program. For example, if the user prompt contains a code snippet for `astropy/modeling/separable.py` with artificial line numbers, then you can get that file already materialized under `/workspace/astropy/modeling/separable.py`.
@@ -46,52 +46,13 @@ prompt:
       - **Update and rerun your reproduction scripts / test files** to verify the fix using the fixed code.
       - Whenever possible, keep your tests self-contained and repeatable so that they can serve as regression tests for future runs.
 
-    3. **Generate Unified Diff Patch (Using `diff -u` on Paired Files)**
-      - For each file you have modified, you now have:
-        - Original file path (host‑materialized, read‑only), e.g.:
-          - `/workspace/astropy/modeling/separable.py`
-        - Fixed file path (your edited version), e.g.:
-          - `/workspace/fixed/astropy/modeling/separable.py`
-      - Use the standard Unix tool `diff -u` to generate unified diffs between these paired files. For example:
-        - `diff -u /workspace/astropy/modeling/separable.py /workspace/fixed/astropy/modeling/separable.py > raw_separable.patch`
-      - If you have multiple modified files, you may:
-        - Generate separate `raw_*.patch` files and then concatenate them in order into a single `raw.patch`, or
-        - Append diffs into the same `raw.patch`:
-          - `diff -u original1 fixed1 > raw.patch`
-          - `diff -u original2 fixed2 >> raw.patch`
-      - Do **not** use `git diff`; rely solely on `diff -u` between the original files and the fixed files.
-      - The result is a `raw.patch` file in standard unified diff format, but the file paths may still be raw filesystem paths such as `/workspace/astropy/modeling/separable.py` and `/workspace/fixed/astropy/modeling/separable.py`.
-
-    4. **Rewrite Patch Paths to Repository Layout**
-      - Edit `raw.patch` so that the file paths in the diff headers (`---`, `+++`) use the **target repository layout** and the `a/` / `b/` prefixes, instead of the internal `/workspace/...` paths.
-      - For example, for the file `astropy/modeling/separable.py`:
-        - Replace a header like:
-          - `--- /workspace/astropy/modeling/separable.py`
-          - `+++ /workspace/fixed/astropy/modeling/separable.py`
-        - With:
-          - `--- a/astropy/modeling/separable.py`
-          - `+++ b/astropy/modeling/separable.py`
-      - Ensure that:
-        - Only the header paths are rewritten.
-        - The diff hunks (`@@ ... @@`, `-` and `+` lines) remain unchanged except for their original content.
-      - The resulting patch file must contain **only** unified diff content (no extra text, logs, or commentary).
-
-    5. **Submit Patch and Validate Format**
-      - The final patch file **must be named `fix.patch` at the path `/workspace/fix.patch`**.
-      - `fix.patch` must:
-        - Contain **only** unified diff lines:
-          - No explanations, no comments, no logs, no JSON, no extra prose.
-        - **Not** contain any Markdown code fences:
-          - Do **not** include ``` or ```diff anywhere in the file.
-        - Start with a line like `--- a/...` and then `+++ b/...`, followed by one or more `@@` hunks.
-      - After writing `/workspace/fix.patch`, use the `docker_shell` tool to run:
-        - `git apply -v fix.patch`
-      - If `git apply -v fix.patch` reports any error (malformed patch, hunk FAILED, etc.):
-        - Inspect and correct the unified diff hunks in `fix.patch` (headers, line prefixes, and context).
-        - Overwrite `/workspace/fix.patch` with the corrected diff and **re-run `git apply -v fix.patch`** until it succeeds without errors.
+    3. **Generate the Patch File**
+      - Once your fixes are verified, use the `diff_tool` plugin to generate a unified diff patch file.
+      - The patch file must reflect the differences between the original files under `/workspace` and your fixed copies under `/workspace/fixed`.
+      - Save the generated patch file as `/workspace/fix.patch`.
 
     **Task Completion Criteria**:
-    - A valid `/workspace/fix.patch` file is generated, derived from `diff -u` comparisons between the original and fixed files (with any necessary path rewriting to `a/...` / `b/...` headers).
+    - A valid `/workspace/fix.patch` file is generated.
     - `fix.patch`:
       - Contains **only** unified diff content (no extra text, no backticks, no Markdown fences).
       - Uses repository‑relative paths in `--- a/...` / `+++ b/...` headers, as expected by the evaluator.
@@ -110,6 +71,9 @@ tools:
 
   exit_task:
     mcp: false
+
+  plugins:
+    - tools/diff_tool
 
 help: |
   An example of remote code agent.
