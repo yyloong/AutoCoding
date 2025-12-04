@@ -86,7 +86,10 @@ def _extract_and_save_code_blocks(prompt: str, base_dir: Path) -> None:
                 content = parts[1]
             else:
                 content = line
-            current_lines.append(content + ("\n" if not content.endswith("\n") else ""))
+
+            # 统一去掉末尾换行，再手动补一个，这样每行恰好一个 '\n'
+            content = content.rstrip("\n")
+            current_lines.append(content + "\n")
 
 
 async def run_agent_inference(query, api_key):

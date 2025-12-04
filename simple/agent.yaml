@@ -98,7 +98,7 @@ prompt:
       - Can be applied cleanly: `git apply -v fix.patch` runs successfully without errors.
     - The patch fixes the Issue.
     - The bug is covered by at least one reproduction script or test file that passes after your fix.
-    - Once you confirm the patch file is output and validated, use the `exit_task` tool to end the task.
+    - Once you confirm the patch file is output and validated, use the `exit_task---exit_task` tool to end the task.
 
 max_chat_round: 9999
 
