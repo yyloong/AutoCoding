@@ -12,6 +12,9 @@ from ms_agent.utils.constants import DEFAULT_OUTPUT_DIR
 
 logger = get_logger()
 
+MAX_OUTPUT_LINES = 500  # 建议缩小，防止输出过多
+MAX_OUTPUT_CHARS = 4000  # 限制最大字符数
+
 class DockerBaseTool(ToolBase):
     """
     Base class for tools that execute commands inside Docker containers.
@@ -97,8 +100,6 @@ class DockerBaseTool(ToolBase):
         try:
             container = await asyncio.to_thread(_run_container_blocking)
             
-            captured_output = []
-
             # Stream logs function
             def _stream_logs():
                 chunk_output = []
@@ -106,7 +107,14 @@ class DockerBaseTool(ToolBase):
                     decoded = line.decode('utf-8', errors='replace').strip()
                     print(decoded) # Real-time print to host console
                     chunk_output.append(decoded + "\n")
-                return chunk_output
+                # 截断输出行数
+                if len(chunk_output) > MAX_OUTPUT_LINES:
+                    chunk_output = chunk_output[-MAX_OUTPUT_LINES:]
+                joined = "".join(chunk_output)
+                # 截断输出字符数
+                if len(joined) > MAX_OUTPUT_CHARS:
+                    joined = joined[-MAX_OUTPUT_CHARS:]
+                return [joined]
 
             captured_output = await asyncio.to_thread(_stream_logs)
             
@@ -127,7 +135,6 @@ class DockerBaseTool(ToolBase):
             return f"Command failed (Exit Code {e.returncode}):\n{e.output}"
         except Exception as e:
             return f"Docker execution system error: {str(e)}"
-
 
 class docker_shell(DockerBaseTool):
     """A tool for executing arbitrary shell commands inside Docker containers."""
