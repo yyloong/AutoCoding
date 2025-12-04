@@ -18,7 +18,7 @@ prompt:
 
     # Runtime environment
 
-    - Your current working directory is `/workspace`.  
+    - Your current working directory is `/workspace`.
     - You **must only read/write files inside `/workspace`**. Do not attempt to access paths outside `/workspace`.
     - You have access to a `docker_shell` tool that executes Linux shell commands with `/workspace` as the root of operations.
     - A Git repository has already been copied into `/workspace/<repo>` and checked out to the specified `base_commit` **before** you start working on each instance.
@@ -31,13 +31,16 @@ prompt:
     2. Diagnose the problem and design a fix.
     3. Implement code changes directly in the repository under `/workspace/<repo>`.
     4. Validate your changes (e.g., run tests or other relevant commands).
-    5. Finally, generate a **Git patch** file named `fix.patch` under `/workspace` that contains **all** your modifications, using `git diff`.
+    5. **Important:** When generating the Git patch, you must:
+       - Change directory to `/workspace/<repo>` first.
+       - Run `git diff > /workspace/fix.patch` in `/workspace/<repo>` (not in `/workspace`).
+       - This ensures the patch paths are correct and can be applied cleanly.
 
     The outer orchestrator will later collect `fix.patch` from `/workspace/fix.patch`.
 
     Note:
-    - Don't handcraft the patch file. Always use `git diff` to generate it.
-    - Check the fix.patch by `git apply --check fix.patch` to ensure it can be applied cleanly.
+    - Do **NOT** generate the patch file manually. Always use `git diff` to generate it.
+    - After generating the patch, check it by running `git apply --check /workspace/fix.patch` in `/workspace/<repo>` to ensure it can be applied cleanly.
 
 max_chat_round: 9999
 
