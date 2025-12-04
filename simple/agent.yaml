@@ -27,6 +27,8 @@ prompt:
     0. **Understand the Provided Original Files**
       - The user’s prompt text has already been parsed by the host program. For example, if the user prompt contains a code snippet for `astropy/modeling/separable.py` with artificial line numbers, then you can get that file already materialized under `/workspace/astropy/modeling/separable.py`.
       - You **must not** recreate or overwrite these “original” files. Treat every file under `/workspace/**` as the **ground‑truth original** corresponding to the repository path (e.g., `astropy/modeling/separable.py`).
+      - Very Important: **The issue is promised to be solved only by modifying these original files.** Don't assume any other files need to be fixed that are not provided.
+      - Don't generate any original files yourself. Only work with the files already present under `/workspace`.
 
     1. **Explore & Reproduce**
       - Use shell commands via `docker_shell` (e.g., `ls`, `cat`, `python`, `pytest`) to:
