@@ -18,10 +18,86 @@ logger = logging.getLogger(__name__)
 
 dotenv.load_dotenv()
 
+
+def _extract_and_save_code_blocks(prompt: str, base_dir: Path) -> None:
+    """
+    从 prompt 文本中提取 <code>...</code> 段落里的代码块，
+    对于形如:
+      [start of astropy/modeling/separable.py]
+      1 line...
+      ...
+      [end of astropy/modeling/separable.py]
+    的内容：
+      - 去掉每行开头的行号和一个空格
+      - 保存为 base_dir/astropy/modeling/separable.py
+    """
+    in_code_section = False
+    in_file_block = False
+    current_path = None
+    current_lines = []
+
+    lines = prompt.splitlines()
+
+    for line in lines:
+        stripped = line.strip()
+        if stripped == "<code>":
+            in_code_section = True
+            continue
+        if stripped == "</code>":
+            # 结束所有文件块
+            if in_file_block and current_path is not None:
+                target = base_dir / current_path
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text("".join(current_lines), encoding="utf-8")
+            break
+
+        if not in_code_section:
+            continue
+
+        if stripped.startswith("[start of ") and stripped.endswith("]"):
+            # 若已有未关闭的块，先写入
+            if in_file_block and current_path is not None:
+                target = base_dir / current_path
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text("".join(current_lines), encoding="utf-8")
+            in_file_block = True
+            current_lines = []
+            # 解析路径
+            inner = stripped[len("[start of ") : -1].strip()
+            current_path = inner
+            continue
+
+        if stripped.startswith("[end of ") and stripped.endswith("]"):
+            # 结束当前文件块并写入
+            if in_file_block and current_path is not None:
+                target = base_dir / current_path
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text("".join(current_lines), encoding="utf-8")
+            in_file_block = False
+            current_path = None
+            current_lines = []
+            continue
+
+        if in_file_block and current_path is not None:
+            # 去掉行号：形如 "1 xxx" -> "xxx"
+            # 简单规则：如果行首是整数+空格，则去掉这一段
+            parts = line.split(" ", 1)
+            if len(parts) == 2 and parts[0].isdigit():
+                content = parts[1]
+            else:
+                content = line
+            current_lines.append(content + ("\n" if not content.endswith("\n") else ""))
+
+
 async def run_agent_inference(query, api_key):
     """
     调用 Agent 执行任务
     """
+    # 在调用 Agent 之前，先根据 prompt 把代码文件写入到 ./output 目录
+    output_root = Path("output")
+    output_root.mkdir(exist_ok=True, parents=True)
+    _extract_and_save_code_blocks(query, output_root)
+
     config = Config.from_task('simple')
     config.llm.modelscope_api_key = api_key
     engine = LLMAgent(config=config)
