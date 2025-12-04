@@ -515,7 +515,8 @@ class LLMAgent(Agent):
         if not query or not self.load_cache:
             return self.config, self.runtime, messages
 
-        config, _messages = read_history(self.output_dir, self.tag)
+        #config, _messages = read_history(self.output_dir, self.tag)
+        config, _messages = read_history("./", self.tag)
         if config is not None and _messages is not None:
             if hasattr(config, 'runtime'):
                 runtime = Runtime(llm=self.llm)
@@ -621,7 +622,7 @@ class LLMAgent(Agent):
 
             if messages is None:
                 messages = self.query
-
+            
             self.config, self.runtime, messages = self.read_history(messages)
 
             if self.runtime.round == 0:

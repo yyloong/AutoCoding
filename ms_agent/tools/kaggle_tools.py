@@ -57,7 +57,7 @@ class kaggle_tools(ToolBase):
                             },
                             "file_path": {
                                 "type": "string",
-                                "description": "The path to the csv file to be submitted.",
+                                "description": "The path to the csv file to be submitted.Pay attention that the file name type must be \"submission.xxx\".",
                             },
                             "submit_message": {
                                 "type": "string",
@@ -131,6 +131,12 @@ class kaggle_tools(ToolBase):
     
     async def submit_csv(self, competition: str, file_path: str, submit_message: str) -> str:
         cmd = f'kaggle competitions submit -c {competition} -f {file_path} -m "{submit_message}"'
+        #get file name
+        file_name = os.path.basename(file_path)
+        if file_name.split('.')[0] != 'submission':
+            logger.error(f'Error: The submission file name must be "submission.xxx".')
+            return f'Error: The submission file name must be "submission.xxx".'
+
         process = await asyncio.create_subprocess_shell(
             cmd,
             stdout=asyncio.subprocess.PIPE,

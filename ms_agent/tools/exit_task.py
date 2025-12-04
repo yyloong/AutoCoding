@@ -22,7 +22,7 @@ class exit_task(ToolBase):
                         "properties": {
                             "message": {
                                 "type": "string",
-                                "description": "An optional message to log when exiting the task if necessary.",
+                                "description": "The message you want to pass when exiting the task if necessary.",
                             },
                         },
                         "required": [],

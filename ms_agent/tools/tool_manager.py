@@ -17,6 +17,7 @@ from ms_agent.tools.filesystem_tool import FileSystemTool
 from ms_agent.tools.environment_set_up import Environment_set_up
 from ms_agent.tools.web_research import Web_research
 from ms_agent.tools.debug_cmd import run_code
+from ms_agent.tools.state_transition import State_transition
 from ms_agent.tools.deepresearch import DeepresearchTool
 from ms_agent.tools.findata.findata_fetcher import FinancialDataFetcher
 from ms_agent.tools.mcp_client import MCPClient
@@ -25,6 +26,7 @@ from ms_agent.tools.split_task import SplitTask
 #from ms_agent.tools.debug import Environment_set_up, run_code
 from ms_agent.tools.exit_task import exit_task
 from ms_agent.utils import get_logger
+from ms_agent.tools.mle_tool import env_tools
 from ms_agent.utils.constants import TOOL_PLUGIN_NAME
 
 logger = get_logger()
@@ -50,7 +52,14 @@ class ToolManager:
 
         self.extra_tools: List[ToolBase] = []
         self.has_split_task_tool = False
-        self.extra_tools.append(exit_task(config))
+        if hasattr(config, 'tools') and hasattr(config.tools, 'env_tools'):
+            self.extra_tools.append(
+                env_tools(config,
+                          trust_remote_code=self.trust_remote_code))
+        if hasattr(config, 'tools') and hasattr(config.tools, 'state_transition'):
+            self.extra_tools.append(State_transition(config, trust_remote_code=self.trust_remote_code))
+        if hasattr(config, 'tools') and hasattr(config.tools, 'exit_task'):
+            self.extra_tools.append(exit_task(config, trust_remote_code=self.trust_remote_code))
         if hasattr(config, 'tools') and hasattr(config.tools, 'deepresearch'):
             self.extra_tools.append(DeepresearchTool(config, trust_remote_code=self.trust_remote_code))
         if hasattr(config, 'tools') and hasattr(config.tools, 'rag'):

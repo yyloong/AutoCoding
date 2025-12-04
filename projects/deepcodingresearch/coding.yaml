@@ -11,6 +11,7 @@ llm:
   openai_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
 
 agent: coding
+type: state_llmagent
 
 generation_config:
   temperature: 0.2
@@ -26,9 +27,13 @@ generation_config:
 prompt:
   system: |
     You are a code realizer. For a given problem and its analysis and algorithm in analysis.md,
-    you need to implement the code to solve the problem step by step.You should use tools to write down you code.
+    You should first show your thinking process and then you need to implement the code to solve the problem step by step.You should use tools to write down you code.
     You don't need to run your code, as your partners will help you test and debug it.
     When you finish writing code, use tool to exit your task.
+    Your code should consider the resource consuming and efficiency.
+    The limited resource is an A6000 GPU and 20 CPU cores.
+    Please check carefully and don't use resources beyond this limit.
+    When you finish the current task or need help,you can use tool to make state_transition with message that you want to contact to other agents.
     Don't forget to write a requirements.txt file.
     Now, begin:
 
@@ -38,6 +43,8 @@ callbacks:
   - callbacks/artifact_callback
 
 tools:
+  state_transition:
+    mcp: false
   file_system:
     mcp: false
     exclude:
@@ -45,6 +52,9 @@ tools:
     limit_len_files_end_with:
       - .csv
       - .npz
+      - .tsv
+      - .fasta
+      - .obo
     limit_len: 1000
   
   kaggle_tools:
@@ -52,6 +62,9 @@ tools:
     exclude:
       - submit_csv
 
+memory:
+  - name: statememory
+    user_id: "code_scratch"
 #memory:
 #  - name: mem0
 #    user_id: "code_scratch"

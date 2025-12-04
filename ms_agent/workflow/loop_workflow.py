@@ -36,15 +36,15 @@ class LoopWorkflow(Workflow):
            - 如果 accept=true，退出循环；否则继续循环
         """
         # clean 当前目录下的 output 和 memory 目录
-        if os.path.exists('output'):
-            shutil.rmtree('output')
+        #if os.path.exists('output'):
+        #    shutil.rmtree('output')
         #if os.path.exists('memory'):
         #    shutil.rmtree('memory')
         if self.input_file_path: 
             if not os.path.exists(self.input_file_path):
                 raise FileNotFoundError(f"Input file not found: {self.input_file_path}")
             parser = SingleFileParser(cfg={
-                'path': os.getcwd()
+                'path': os.path.join(os.getcwd(),'workspace','parser_cache')
             })
             input_params = {"url": self.input_file_path}
             file_parser_result = parser.call(input_params)

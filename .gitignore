@@ -11,6 +11,8 @@ test/
 *.so
 
 memory/
+kaggle_output/
+score_set
 workspace/
 llama_index/
 # Distribution / packaging

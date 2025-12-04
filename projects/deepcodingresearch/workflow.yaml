@@ -2,12 +2,27 @@ research:
   next:
     - coding
   agent_config: research.yaml
+  description: 
+    Research about the problem and design the algorithm to solve the problem,write down the information in analysis.md.
 
 coding:
   next:
     - refine
+    - research
   agent_config: coding.yaml
-
+  description: 
+    Implement the code to solve the problem step by step based on the designed algorithm in analysis.md.
 
 refine:
+  next:
+    - exit
+    - coding
   agent_config: refine.yaml
+  description: 
+    Test and debug the code until it works correctly based on the information in analysis.md.
+
+exit:
+  description: 
+    Exit the task when all the code works correctly.
+
+  
