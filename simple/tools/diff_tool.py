@@ -121,35 +121,120 @@ class DiffTool(ToolBase):
         if not diff_text.strip():
             return "No differences found; patch not generated."
 
-        # Process lines and rewrite the first two header lines
-        lines = diff_text.splitlines(keepends=False)
-        if len(lines) < 2 or not lines[0].startswith('--- ') or not lines[1].startswith('+++ '):
-            # If diff output is not standard unified diff header, return raw diff for debugging
-            return (
-                "Error: diff output does not start with unified headers.\n"
-                f"stdout:\n{diff_text}\n\nstderr:\n{proc.stderr}"
-            )
+        # Process lines and rewritimport os
+import subprocess
+from ms_agent.llm.utils import Tool
+from ms_agent.tools.base import ToolBase
+from omegaconf import DictConfig
+from ms_agent.tools.docker_shell import docker_shell
 
-        # Rewrite header lines to required repository paths
-        lines[0] = f"--- a/{remote_original_path}"
-        lines[1] = f"+++ b/{remote_modified_path}"
+class DiffTool(ToolBase):
+    """
+    A tool to generate a unified diff patch file inside Docker and return the patch content.
 
-        # Ensure each line ends with a newline, including the last line
-        patched_text = "".join(line + "\n" for line in lines)
+    Parameters:
+      - local_original_path: Local original file path (used as diff left side, e.g. /workspace/output/xxx.py)
+      - local_modified_path: Local modified file path (used as diff right side, e.g. /workspace/fixed/xxx.py)
+      - remote_original_path: Repository-relative path for patch header (e.g. xxx.py)
+      - remote_modified_path: Repository-relative path for patch header (e.g. xxx.py)
+      - output_patch_path: Output path for the generated patch file (e.g. /workspace/fix.patch)
 
-        # Write patch file
-        output_dir = os.path.dirname(output_patch_path)
-        if output_dir and not os.path.exists(output_dir):
-            os.makedirs(output_dir, exist_ok=True)
+    Logic:
+      1. Use docker_shell to execute diff -u inside Docker.
+      2. Rewrite the first two header lines to '--- a/...' and '+++ b/...'.
+      3. Write the result to output_patch_path.
+      4. Return the patch content as the tool's result.
+    """
 
-        with open(output_patch_path, "w", encoding="utf-8") as f:
-            f.write(patched_text)
+    def __init__(self, config: DictConfig):
+        super(DiffTool, self).__init__(config)
+        self.exclude_func(getattr(config.tools, 'diff_tool', None))
+        # Prepare docker_shell tool for running commands in Docker
+        self.docker_shell = docker_shell(config)
 
-        return (
-            f"Patch generated successfully at: {output_patch_path}\n"
-            f"From local: {local_original_path} -> {local_modified_path}\n"
-            f"To remote: a/{remote_original_path} -> b/{remote_modified_path}"
-        )
+    async def get_tools(self):
+        tools = {
+            'diff_tool': [
+                Tool(
+                    tool_name='generate_patch',
+                    server_name='diff_tool',
+                    description=(
+                        'Generate a unified diff patch file from local original/modified '
+                        'files inside Docker, rewrite headers to repo paths, and return the patch content.'
+                    ),
+                    parameters={
+                        'type': 'object',
+                        'properties': {
+                            'local_original_path': {
+                                'type': 'string',
+                                'description': 'Local original file path (diff left side, e.g. /workspace/output/xxx.py).',
+                            },
+                            'local_modified_path': {
+                                'type': 'string',
+                                'description': 'Local modified file path (diff right side, e.g. /workspace/fixed/xxx.py).',
+                            },
+                            'remote_original_path': {
+                                'type': 'string',
+                                'description': 'Repository-relative path for patch header (e.g. xxx.py).',
+                            },
+                            'remote_modified_path': {
+                                'type': 'string',
+                                'description': 'Repository-relative path for patch header (e.g. xxx.py).',
+                            },
+                            'output_patch_path': {
+                                'type': 'string',
+                                'description': 'Output path for the generated patch file (e.g. /workspace/fix.patch).',
+                            },
+                        },
+                        'required': [
+                            'local_original_path',
+                            'local_modified_path',
+                            'remote_original_path',
+                            'remote_modified_path',
+                            'output_patch_path',
+                        ],
+                        'additionalProperties': False,
+                    },
+                ),
+            ],
+        }
+
+        return {
+            'diff_tool': [
+                t for t in tools['diff_tool']
+                if t['tool_name'] not in self.exclude_functions
+            ]
+        }
+
+    async def generate_patch(
+        self,
+        local_original_path: str,
+        local_modified_path: str,
+        remote_original_path: str,
+        remote_modified_path: str,
+        output_patch_path: str,
+    ) -> str:
+        """
+        Generate a unified diff patch file inside Docker, rewrite headers, save to output_patch_path, and return patch content.
+        """
+        # Compose the shell script to run in Docker
+        script = f"""
+set -e
+if ! diff -u "{local_original_path}" "{local_modified_path}" > /tmp/raw.patch; then
+    # diff returns 1 if files differ, which is expected
+    if [ $? -ne 1 ]; then
+        echo "Error: diff failed"
+        exit 1
+    fi
+fi
+# Rewrite the first two header lines to repo paths
+awk 'NR==1{{print "--- a/{remote_original_path}";next}} NR==2{{print "+++ b/{remote_modified_path}";next}} {{print}}' /tmp/raw.patch > "{output_patch_path}"
+cat "{output_patch_path}"
+"""
+
+        # Use docker_shell to execute the script in Docker
+        result = await self.docker_shell.execute_script(script)
+        return result
 
     async def call_tool(self, server_name: str, tool_name: str, tool_args: dict) -> str:
         if tool_name == 'generate_patch':
