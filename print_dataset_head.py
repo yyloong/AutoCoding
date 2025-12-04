@@ -29,7 +29,7 @@ def main():
         print("\n前 3 个样本的 text 字段:")
         print("=" * 50)
 
-        for i in range(min(1, len(test_dataset))):
+        for i in range(min(2, len(test_dataset))):
             sample = test_dataset[i]
             instance_id = sample.get("instance_id", f"sample_{i}")
             text = sample.get("text", "")

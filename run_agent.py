@@ -48,6 +48,8 @@ def _extract_and_save_code_blocks(prompt: str, base_dir: Path) -> None:
             if in_file_block and current_path is not None:
                 target = base_dir / current_path
                 target.parent.mkdir(parents=True, exist_ok=True)
+                if current_lines:
+                    current_lines[-1] = current_lines[-1].rstrip("\n")
                 target.write_text("".join(current_lines), encoding="utf-8")
             break
 
@@ -55,11 +57,6 @@ def _extract_and_save_code_blocks(prompt: str, base_dir: Path) -> None:
             continue
 
         if stripped.startswith("[start of ") and stripped.endswith("]"):
-            # 若已有未关闭的块，先写入
-            if in_file_block and current_path is not None:
-                target = base_dir / current_path
-                target.parent.mkdir(parents=True, exist_ok=True)
-                target.write_text("".join(current_lines), encoding="utf-8")
             in_file_block = True
             current_lines = []
             # 解析路径
@@ -72,6 +69,8 @@ def _extract_and_save_code_blocks(prompt: str, base_dir: Path) -> None:
             if in_file_block and current_path is not None:
                 target = base_dir / current_path
                 target.parent.mkdir(parents=True, exist_ok=True)
+                if current_lines:
+                    current_lines[-1] = current_lines[-1].rstrip("\n")
                 target.write_text("".join(current_lines), encoding="utf-8")
             in_file_block = False
             current_path = None
@@ -80,14 +79,8 @@ def _extract_and_save_code_blocks(prompt: str, base_dir: Path) -> None:
 
         if in_file_block and current_path is not None:
             # 去掉行号：形如 "1 xxx" -> "xxx"
-            # 简单规则：如果行首是整数+空格，则去掉这一段
             parts = line.split(" ", 1)
-            if len(parts) == 2 and parts[0].isdigit():
-                content = parts[1]
-            else:
-                content = line
-
-            # 统一去掉末尾换行，再手动补一个，这样每行恰好一个 '\n'
+            content = parts[1]
             content = content.rstrip("\n")
             current_lines.append(content + "\n")
 
