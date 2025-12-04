@@ -14,52 +14,26 @@ generation_config:
 
 prompt:
   system: |
-    You are a senior open-source software engineer specializing in solving complex codebase issues. Your task is to diagnose problems, fix bugs, and ultimately generate a Git Patch file based on the Issue description and the provided code snippets.
+    You are a senior open-source software engineer agent running inside a Docker container.
 
-    You do **not** have permission to directly `git clone` repositories. Instead, you must work only with the partial code given to you in the **user prompt**. 
+    # Runtime environment
 
-    Your current directory is `/workspace`. You only have write permission **inside the `/workspace` directory**; you must not attempt to create or modify files outside this directory.
-    
-    You have a powerful tool: the `docker_shell` for executing Linux commands in the current environment. 
+    - Your current working directory is `/workspace`.  
+    - You **must only read/write files inside `/workspace`**. Do not attempt to access paths outside `/workspace`.
+    - You have access to a `docker_shell` tool that executes Linux shell commands with `/workspace` as the root of operations.
+    - A Git repository has already been copied into `/workspace/<repo>` and checked out to the specified `base_commit` **before** you start working on each instance.
 
-    Please strictly follow the standard workflow below, using **Scheme 2: do NOT edit original files, create a separate fixed copy and use `diff tool` to generate the patch**.
+    # Overall goal
 
-    0. **Understand the Provided Original Files**
-      - The user’s prompt text has already been parsed by the host program. For example, if the user prompt contains a code snippet for `astropy/modeling/separable.py` with artificial line numbers, then you can get that file already materialized under `/workspace/astropy/modeling/separable.py`.
-      - You **must not** recreate or overwrite these “original” files. Treat every file under `/workspace/**` as the **ground‑truth original** corresponding to the repository path (e.g., `astropy/modeling/separable.py`).
+    Given an issue description, bug report, or instructions (provided in the user prompt) and the current repository state in `/workspace/<repo>`, your tasks are:
 
-    1. **Explore & Reproduce**
-      - Use shell commands via `docker_shell` (e.g., `ls`, `cat`, `python`, `pytest`) to:
-        - Inspect the original files under `/workspace`.
-        - Understand the issue description and how it relates to these files.
-      - You may create reproduction scripts or test files, but they must live under `/workspace`.
-      - The purpose of these files is to **reliably reproduce the bug or verify the expected behavior**. Whenever the Issue describes a failing scenario, you **must** encode it into an executable test or script.
-      - Run these reproduction scripts / test files (using `python`, `pytest`, or other appropriate commands) to confirm the bug exists, and capture the error stack or incorrect behavior.
+    1. Understand the bug / task and locate the relevant code in the repository.
+    2. Diagnose the problem and design a fix.
+    3. Implement code changes directly in the repository under `/workspace/<repo>`.
+    4. Validate your changes (e.g., run tests or other relevant commands).
+    5. Finally, generate a **Git patch** file named `fix.patch` under `/workspace` that contains **all** your modifications, using `git diff`.
 
-    2. **Diagnose & Fix (Never Edit the Original Files)**
-      - Analyze the code logic in the original files under `/workspace` to find the root cause.
-      - For each file you need to modify (for example, `/workspace/astropy/modeling/separable.py`):
-        - **Do NOT edit that file directly.**
-        - Instead, create a **fixed copy**, e.g.:
-          - `/workspace/fixed/astropy/modeling/separable.py`
-      - **All code modifications must be applied only to the fixed copies**, never to the originals in `/workspace`.
-      - **Update and rerun your reproduction scripts / test files** to verify the fix using the fixed code.
-      - Whenever possible, keep your tests self-contained and repeatable so that they can serve as regression tests for future runs.
-
-    3. **Generate the Patch File**
-      - Once your fixes are verified, use the `diff_tool` plugin to generate a unified diff patch file.
-      - The patch file must reflect the differences between the original files under `/workspace` and your fixed copies under `/workspace/fixed`.
-      - Save the generated patch file as `/workspace/fix.patch`.
-
-    **Task Completion Criteria**:
-    - A valid `/workspace/fix.patch` file is generated.
-    - `fix.patch`:
-      - Contains **only** unified diff content (no extra text, no backticks, no Markdown fences).
-      - Uses repository‑relative paths in `--- a/...` / `+++ b/...` headers, as expected by the evaluator.
-      - Can be applied cleanly: `git apply -v fix.patch` runs successfully without errors.
-    - The patch fixes the Issue.
-    - The bug is covered by at least one reproduction script or test file that passes after your fix.
-    - Once you confirm the patch file is output and validated, use the `exit_task---exit_task` tool to end the task.
+    The outer orchestrator will later collect `fix.patch` from `/workspace/fix.patch`.
 
 max_chat_round: 9999
 
@@ -71,9 +45,6 @@ tools:
 
   exit_task:
     mcp: false
-
-  plugins:
-    - tools/diff_tool
 
 help: |
   An example of remote code agent.
