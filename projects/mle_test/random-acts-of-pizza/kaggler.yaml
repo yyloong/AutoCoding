@@ -60,9 +60,6 @@ prompt:
             In the limited steps, you should try to improve your Position Score as much as possible.
     Let's begin:
 
-callbacks:
-  - callbacks/artifact_callback
-
 tools:
   exit_task:
     mcp: false

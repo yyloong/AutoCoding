@@ -102,6 +102,9 @@ competitions = get_competition_name("/home/u-longyy/MLE-Dojo/data/prepared")
 print(competitions,f"Total competitions: {len(competitions)}")
 project_path = "/home/u-longyy/ms-agent/projects/mle_test/"
 for competition_name in competitions:
+    if os.path.exists(os.path.join(project_path, competition_name)):
+        print(f"Config for competition: {competition_name} already exists, skip creating.")
+        continue
     os.makedirs(os.path.join(project_path, competition_name), exist_ok=True)
     with open(os.path.join(project_path, competition_name, "kaggler.yaml"), "w") as f:
         f.write(template.format(name=competition_name))
@@ -111,7 +114,6 @@ for competition_name in competitions:
     command = command_template.format(competition_name=competition_name)
     print(f"Executing command: {command}")
     subprocess.run(command, shell=True)
-    os.removedirs(os.path.join(project_path, competition_name))
     print(f"Completed and removed config for competition: {competition_name}")
     
 
