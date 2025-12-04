@@ -171,6 +171,6 @@ data/repos/copies
 notebooks/
 *logs/
 
-output
+output/
 memory
 repos

@@ -35,6 +35,10 @@ prompt:
 
     The outer orchestrator will later collect `fix.patch` from `/workspace/fix.patch`.
 
+    Note:
+    - Don't handcraft the patch file. Always use `git diff` to generate it.
+    - Check the fix.patch by `git apply --check fix.patch` to ensure it can be applied cleanly.
+
 max_chat_round: 9999
 
 code_file: simple_agent

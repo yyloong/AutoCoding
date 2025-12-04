@@ -12,8 +12,8 @@ from ms_agent.utils.constants import DEFAULT_OUTPUT_DIR
 
 logger = get_logger()
 
-MAX_OUTPUT_LINES = 500  # 建议缩小，防止输出过多
-MAX_OUTPUT_CHARS = 4000  # 限制最大字符数
+MAX_OUTPUT_LINES = 100  # 建议缩小，防止输出过多
+MAX_OUTPUT_CHARS = 1000  # 限制最大字符数
 
 class DockerBaseTool(ToolBase):
     """
@@ -114,6 +114,9 @@ class DockerBaseTool(ToolBase):
                 # 截断输出字符数
                 if len(joined) > MAX_OUTPUT_CHARS:
                     joined = joined[-MAX_OUTPUT_CHARS:]
+                # 加上提示信息
+                if len(chunk_output) > MAX_OUTPUT_LINES or len(joined) > MAX_OUTPUT_CHARS:
+                    joined = f"\n[Output truncated to last {MAX_OUTPUT_LINES} lines or {MAX_OUTPUT_CHARS} characters]\n" + joined
                 return [joined]
 
             captured_output = await asyncio.to_thread(_stream_logs)

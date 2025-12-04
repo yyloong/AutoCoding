@@ -29,14 +29,17 @@ def main():
         print("\n前 3 个样本的 text 字段:")
         print("=" * 50)
 
-        for i in range(min(2, len(test_dataset))):
+        for i in range(min(100, len(test_dataset))):
             sample = test_dataset[i]
             instance_id = sample.get("instance_id", f"sample_{i}")
             text = sample.get("text", "")
+            repo = sample.get("repo", "")
+            base_commit = sample.get("base_commit", "")
 
             print(f"\n--- 样本 {i+1} (ID: {instance_id}) ---")
-            print(text)  # 只显示前500字符
-            print("-" * 50)
+            # print(text)
+            print(repo)
+            # print("-" * 50)
 
     except Exception as e:
         print(f"加载数据集时出错: {e}")
