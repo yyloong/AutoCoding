@@ -10,7 +10,7 @@ from ms_agent.utils.constants import DEFAULT_OUTPUT_DIR
 
 logger = get_logger()
 
-MAX_OUTPUT_LINES = 1000  # 建议缩小，防止输出过多
+MAX_OUTPUT_LINES = 1000  # 防止输出过多
 MAX_OUTPUT_CHARS = 10000  # 限制最大字符数
 
 class DockerBaseTool(ToolBase):
@@ -83,7 +83,7 @@ class DockerBaseTool(ToolBase):
                 user=f"{current_uid}:{current_gid}",
                 environment={"HOME": workdir},
                 detach=True,
-                tty=True,                # 伪终端
+                tty=False,
                 stdin_open=True,
                 stdout=True,
                 stderr=True,
@@ -113,7 +113,7 @@ class DockerBaseTool(ToolBase):
                 cmd=["/bin/bash", "-lc", cmd],
                 stdout=True,
                 stderr=True,
-                tty=True,
+                tty=False,
             )
             return exec_result
 

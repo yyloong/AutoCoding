@@ -29,7 +29,7 @@ from ms_agent.utils.constants import TOOL_PLUGIN_NAME
 logger = get_logger()
 
 MAX_TOOL_NAME_LEN = int(os.getenv('MAX_TOOL_NAME_LEN', 64))
-TOOL_CALL_TIMEOUT = int(os.getenv('TOOL_CALL_TIMEOUT', 30))
+TOOL_CALL_TIMEOUT = int(os.getenv('TOOL_CALL_TIMEOUT', 1200))
 MAX_CONCURRENT_TOOLS = int(os.getenv('MAX_CONCURRENT_TOOLS', 20))
 
 

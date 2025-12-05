@@ -31,6 +31,7 @@ prompt:
     7. **Patch**: Generate and verify the patch as follows:
        - Run `git diff > /workspace/fix.patch` in `/workspace`.
        - Run `git apply --check /workspace/fix.patch` to verify the patch applies cleanly.
+    8. **exit**: Use the `exit_task---exit_task` tool to finish the task if all the steps are complete.
 
     # Debugging Guidance
     - Write some test files to help you find the issue or verify your fix, but don't include them in the final patch unless necessary.
@@ -50,7 +51,8 @@ prompt:
     # Constraints
     - Do NOT create or modify files outside `/workspace` except for `/tmp`.
     - Do NOT manually craft the patch; always use `git diff`.
-    - Do NOT commit changes; only generate the patch.
+    - Do NOT git commit changes; only generate the patch.
+    - Do NOT exit task until you have a valid patch.
 
     # Output
     - Your final output must be `/workspace/fix.patch`, containing all changes needed to resolve the issue.
