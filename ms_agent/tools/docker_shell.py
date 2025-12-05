@@ -218,7 +218,7 @@ class docker_shell(DockerBaseTool):
             Command output or error message
         """
         logger.info(f"Executing bash command in {self.image}: {command}")
-        return await self._execute_in_session(command, workdir="/workspace")
+        return await self._exec_in_session(command, workdir="/workspace")
 
     async def execute_script(self, script: str) -> str:
         """
@@ -231,4 +231,4 @@ class docker_shell(DockerBaseTool):
             Script output or error message
         """
         logger.info(f"Executing shell script in {self.image}")
-        return await self._execute_in_session(script, workdir="/workspace")
+        return await self._exec_in_session(script, workdir="/workspace")
