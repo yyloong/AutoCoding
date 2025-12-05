@@ -6,39 +6,21 @@ from ms_agent import LLMAgent
 from ms_agent.llm import Message
 
 
-class SimpleAgent(LLMAgent):
+class DockerAgent(LLMAgent):
 
     async def step(
         self, messages: List[Message]
     ) -> AsyncGenerator[List[Message], Any]:  # type: ignore
         """
-        Execute a single step in the agent's interaction loop.
+        A agent that can execute commands in Docker containers.
 
-        This method performs the following operations in sequence:
-        1. Deep copies the current message history to avoid mutation issues.
-        2. Refines memory based on the current conversation state.
-        3. Triggers pre-response callbacks.
-        5. Generates a response from the LLM using available tools.
-        6. Optionally streams the response output to stdout.
-        7. Triggers post-response callbacks.
-        8. Handles parallel tool calls if needed.
-        9. Triggers post-tool-call callbacks.
-        10. Returns the updated message history.
-
-        The step may be retried up to two times on failure due to the `@async_retry` decorator.
-
-        Args:
-            messages (List[Message]): Current message history.
-
-        Returns:
-            List[Message]: Updated message history after this step.
+        Exit the current task by calling the tool `exit_task---exit_task`.
         """
         messages = deepcopy(messages)
         if (not self.load_cache) or messages[-1].role != 'assistant':
             messages = await self.condense_memory(messages)
             await self.on_generate_response(messages)
             tools = await self.tool_manager.get_tools()
-            # print(tools)
 
             if self.stream:
                 self.log_output('[assistant]:')
@@ -72,12 +54,11 @@ class SimpleAgent(LLMAgent):
             # Meaning the latest message is `assistant`, this prevents a different response if there are sub-tasks.
             _response_message = messages[-1]
         self.save_history(messages)
-        
-        # print(_response_message)
-        # print(f"Tool calls: {_response_message.tool_calls}")
+
         if _response_message.tool_calls:
             messages = await self.parallel_tool_call(messages)
-        else:
+
+        if _response_message.tool_calls and _response_message.tool_calls[-1]["tool_name"] == "exit_task---exit_task":
             self.runtime.should_stop = True
 
         await self.after_tool_call(messages)
