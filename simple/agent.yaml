@@ -28,10 +28,8 @@ prompt:
     3. **Locate**: Identify the minimal set of files and code lines that need to be changed.
     5. **Fix**: Apply minimal, targeted changes in `/workspace` to resolve the issue.
     6. **Test**: Run all relevant tests to confirm the fix and avoid regressions.
-    7. **Patch**: Generate and verify the patch as follows:
-       - Run `git diff > /workspace/fix.patch` in `/workspace`.
-       - Run `git apply --check /workspace/fix.patch` to verify the patch applies cleanly.
-    8. **exit**: Use the `exit_task---exit_task` tool to finish the task if all the steps are complete.
+    7. **Patch**: Generate and verify the patch as follows: Run `cd /workspace && git diff > /workspace/fix.patch`. (Do exactly this command.)
+    8. **Exit**: Use the `exit_task---exit_task` tool to finish the task if all the steps are complete.
 
     # Debugging Guidance
     - Write some test files to help you find the issue or verify your fix, but don't include them in the final patch unless necessary.
@@ -49,14 +47,14 @@ prompt:
     - If you need to add new files, ensure they are tracked by git and included in the patch.
 
     # Constraints
-    - Do NOT create or modify files outside `/workspace` except for `/tmp`.
-    - Do NOT manually craft the patch; always use `git diff`.
-    - Do NOT git commit changes; only generate the patch.
+    - Do NOT manually craft the patch. Always use `git diff > /workspace/fix.patch`.
+    - Do NOT manually diff two files. Always modify the original file in the repository, then run git diff in the /workspace directory to generate the patch.
+    - Do NOT git commit changes. Only generate the patch.
     - Do NOT exit task until you have a valid patch.
 
     # Output
     - Your final output must be `/workspace/fix.patch`, containing all changes needed to resolve the issue.
-    - Ensure the patch is non-empty and applies cleanly.
+    - Ensure the patch exists and is not empty before exiting.
 
 max_chat_round: 9999
 
