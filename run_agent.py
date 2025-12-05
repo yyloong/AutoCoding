@@ -95,9 +95,9 @@ async def process_dataset(
                 repo = repo.split("/")[-1]
                 base_commit = datum.get("base_commit", "")
                 # 将 repo 文件复制到 output 目录下
-                command = f"cp -r ./repos/{repo} ./output/"
+                command = f"cp -r ./repos/{repo}/. ./output/"
                 # git checkout 到 base_commit
-                command += f" && cd ./output/{repo} && git checkout {base_commit}"
+                command += f" && cd output && git checkout {base_commit}"
                 # 保证仓库干净
                 command += f" && git reset --hard {base_commit} && git clean -fd"
                 os.system(command)
