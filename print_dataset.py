@@ -28,23 +28,29 @@ def main():
         print(f"数据集字段: {test_dataset.column_names}")
         print("\n前 3 个样本的 text 字段:")
         print("=" * 50)
+        repos = set()
 
-        for i in range(min(100, len(test_dataset))):
+        for i in range(min(600, len(test_dataset))):
             sample = test_dataset[i]
             instance_id = sample.get("instance_id", f"sample_{i}")
             text = sample.get("text", "")
             repo = sample.get("repo", "")
             base_commit = sample.get("base_commit", "")
 
-            print(f"\n--- 样本 {i+1} (ID: {instance_id}) ---")
+            # print(f"\n--- 样本 {i+1} (ID: {instance_id}) ---")
             # print(text)
-            print(repo)
+            # print(repo)
+            repos.add(repo)
             # print("-" * 50)
 
     except Exception as e:
         print(f"加载数据集时出错: {e}")
         import traceback
         traceback.print_exc()
+
+    print("\n涉及的代码库:")
+    for repo in repos:
+        print(repo)
 
 if __name__ == "__main__":
     main()
