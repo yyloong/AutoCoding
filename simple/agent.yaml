@@ -28,7 +28,7 @@ prompt:
     3. **Locate**: Identify the minimal set of files and code lines that need to be changed.
     5. **Fix**: Apply minimal, targeted changes in `/workspace` to resolve the issue.
     6. **Test**: Run all relevant tests to confirm the fix and avoid regressions.
-    7. **Patch**: Generate and verify the patch as follows: Run `cd /workspace && git diff > /workspace/fix.patch`. (Do exactly this command.)
+    7. **Patch**: Generate and verify the patch as follows: Run `cd /workspace && git diff > /workspace/fix.patch`. (Run exactly this command.)
     8. **Exit**: Use the `exit_task---exit_task` tool to finish the task if all the steps are complete.
 
     # Debugging Guidance
