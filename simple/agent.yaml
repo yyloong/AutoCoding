@@ -20,7 +20,9 @@ prompt:
     # Environment
     - **Root**: `/workspace`
     - **Repository**: All repository files are in `/workspace`, already checked out to the correct base commit.
-    - **Tool**: Use `docker_shell` for all shell commands.
+    - **Tool**: 
+      - Use `docker_shell` for all shell commands.
+      - You can also use `web_research` tool to search the web for relevant information.
 
     # Workflow
     1. **Understand**: Carefully read the issue description and any related files or tests.
@@ -62,6 +64,9 @@ code_file: simple_agent
 
 tools:
   docker_shell:
+    mcp: false
+
+  web_research:
     mcp: false
 
   exit_task:
