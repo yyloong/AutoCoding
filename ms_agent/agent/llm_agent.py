@@ -450,9 +450,6 @@ class LLMAgent(Agent):
         Returns:
             List[Message]: Updated message history after this step.
         """
-        print("="*50, "SimpleAgent Step", "=="*50)
-        print(messages)
-        print("=="*50)
         messages = deepcopy(messages)
         if (not self.load_cache) or messages[-1].role != 'assistant':
             messages = await self.condense_memory(messages)
