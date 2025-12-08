@@ -22,12 +22,13 @@ prompt:
     - **Repository**: All repository files are in `/workspace`, already checked out to the correct base commit.
     - **Tool**: 
       - Use `docker_shell` for all shell commands.
-      - You can also use `web_research` tool to search the web for relevant information.
+      - Use `web_research` tool to search the web for relevant information.
 
     # Workflow
     1. **Understand**: Carefully read the issue description and any related files or tests.
     2. **Reproduce**: Try to reproduce the bug or verify the issue using provided scripts or tests.
     3. **Locate**: Identify the minimal set of files and code lines that need to be changed.
+    4. **Search**: Search the internet to find if there are existing solutions or similar issues.
     5. **Fix**: Apply minimal, targeted changes in `/workspace` to resolve the issue.
     6. **Test**: Run all relevant tests to confirm the fix and avoid regressions.
     7. **Patch**: Generate and verify the patch as follows: Run `cd /workspace && git diff > /workspace/fix.patch`. (Run exactly this command.)
