@@ -66,15 +66,13 @@ class execute_shell(ToolBase):
                 Tool(
                     tool_name="run_shell_command",
                     server_name="execute_shell",
-                    description="Execute a shell command or script safely. "
-                                "Features: Content scanning for .sh files, disabled dangerous cmds, "
-                                f"and output truncated at {MAX_OUTPUT_CHARS} chars to protect context.",
+                    description=f"Execute a shell command or script safely.Commands below is forbidden: {', '.join(FORBIDDEN_CLI_COMMANDS)}. Output is limited to {MAX_OUTPUT_CHARS} characters to prevent overload.",
                     parameters={
                         "type": "object",
                         "properties": {
                             "command": {
                                 "type": "string",
-                                "description": "The command or script to execute."
+                                "description": "The command or script to execute.Don't change the working directory.",
                             }
                         },
                         "required": ["command"],

@@ -38,7 +38,7 @@ prompt:
     8.Make sure the result you return is the most valuable information you have gathered during the research.
 
 tools:
-  exit_task:
+  finish:
     mcp: false
   rag:
     mcp: false 

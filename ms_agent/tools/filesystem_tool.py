@@ -22,6 +22,9 @@ class FileSystemTool(ToolBase):
         self.exclude_func(getattr(config.tools, "file_system", None))
         self.output_dir = getattr(config, "output_dir", DEFAULT_OUTPUT_DIR)
         self.trust_remote_code = kwargs.get("trust_remote_code", False)
+        self.ignore_files = getattr(
+            getattr(config.tools, "file_system", {}), "ignore_files", []
+        )
         self.limit_len_files_end_with = getattr(
             getattr(config.tools, "file_system", {}), "limit_len_files_end_with", []
         )
@@ -199,6 +202,12 @@ class FileSystemTool(ToolBase):
         results = {}
         for path in paths:
             try:
+                if path in self.ignore_files:
+                    results[path] = f"Access denied: Reading file <{path}> is ignored."
+                    logger.warning(
+                        f"Attempt to read ignored file blocked: {path}"
+                    )
+                    continue
                 if os.path.isabs(path):
                     target_path = path
                 else:
@@ -275,6 +284,8 @@ class FileSystemTool(ToolBase):
             for root, dirs, files in os.walk(path):
                 for file in files:
                     if "node_modules" in root or "dist" in root or file.startswith("."):
+                        continue
+                    if file in self.ignore_files:
                         continue
                     absolute_path = os.path.join(root, file)
                     relative_path = os.path.relpath(absolute_path, path)

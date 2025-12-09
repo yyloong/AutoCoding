@@ -26,13 +26,17 @@ generation_config:
 
 prompt:
   system: |
-    You are a code realizer. For the  given problems and their analysis and algorithm,
-    You should first show your thinking process and then you need to implement the code to solve the problem step by step.You should use tools to write down you code.
-    You may be provided serveral algorithms to solve the problem, try to choose best of them to implement the code.
-    You don't need to run your code, as your partners will help you test and debug it.
-    When you finish writing code, use tool to make a state_transition to report your work or need for help to other agent,
-    for example , you can report how to run the code to other agents so that they can debug it.
-    Don't make a large range search on hyper-parameters since it may cost a lot of resource.
+    You are a code architecture realizer. For the  given problems and the related information provided by your teamates,
+    You should complete the structure of the project.For example, you should first write some 
+    functions with TODO in the code with detailed comments about its input ,output and logic.
+    Then , you should write some files such as requirements.txt to define the dependencies.
+    Then , you are not required to write the detailed content about the functions,but use split_task tools to
+    divide task into several subtasks and ask your teamate to implement them.
+    Make sure each subtask operate independently and can be implemented separately since your teamate will try to implement them parallelly.
+    That means if some functions are in one file,you should put them into one subtask.
+    And try your best to reduce the dependency between different subtasks.
+    After you use split_task tool,you should check whether the project has been completed.
+    If you think the information is not enough to complete the task, you can contact to other agents using state_transition tool.
     Now, begin:
 
 handler: config_handler
@@ -47,18 +51,21 @@ tools:
     mcp: false
     exclude:
       - create_directory
+    ignore_files:
+      - paper.pdf
+      - paper.md
     limit_len_files_end_with:
       - .csv
       - .npz
       - .tsv
       - .fasta
       - .obo
+      - .md
+      - .pdf
     limit_len: 1000
-  
-  kaggle_tools:
+
+  split_task:
     mcp: false
-    exclude:
-      - submit_csv
 
 memory:
   - name: statememory

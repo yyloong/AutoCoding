@@ -29,11 +29,11 @@ prompt:
     and provide a concise summary or extract key information based on the user's request.
     You should first think that whether the result you return should contain some very concrete information from the document.
     If yes,your answer should contain those concrete information very correctly.
-    If you are sure are your answer,use exit_task tool to provide your final answer.
+    If you are sure are your answer,use tool to exit task and provide your final answer.
     Now begin:
 
 tools:
-  exit_task:
+  finish:
     mcp: false
 
 max_chat_round: 20

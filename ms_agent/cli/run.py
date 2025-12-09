@@ -52,12 +52,7 @@ class RunCMD(CLICommand):
             default="false",
             help="Load previous step histories from cache, this is useful when a query fails and retry",
         )
-        parser.add_argument(
-            "--input_file_path",
-            required=False,
-            type=str,
-            help="The input file path for the workflow.",
-        )
+
         parser.add_argument(
             "--mcp_config",
             required=False,
@@ -142,7 +137,6 @@ class RunCMD(CLICommand):
                 mcp_server_file=self.args.mcp_server_file,
                 load_cache=self.args.load_cache,
                 trust_remote_code=self.args.trust_remote_code,
-                input_file_path=self.args.input_file_path,
             )
         else:
             from ms_agent.agent.loader import AgentLoader

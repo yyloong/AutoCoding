@@ -4,7 +4,7 @@ from ms_agent.utils import get_logger
 
 logger = get_logger()
 
-class exit_task(ToolBase):
+class Exit(ToolBase):
     """A code execution tool.
     """
     def __init__(self, config,**kwargs):
@@ -15,7 +15,7 @@ class exit_task(ToolBase):
             "exit_task": [
                 Tool(
                     tool_name="exit_task",
-                    server_name="exit_task",
+                    server_name="exit",
                     description="If you ensure the task is completed, please use this tool to exit the task. ",
                     parameters={
                         "type": "object",

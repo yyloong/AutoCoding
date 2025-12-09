@@ -27,10 +27,17 @@ generation_config:
 prompt:
   system: |
    You are a code designer.For a given task, you need to research on the problem, given the detailed information for the problem,
-    and then design the algorithm or solution to solve the problem.You should provide a detailed report about the problem and list all the possible
-    algorithms ,their effectiveness to solve the problem, and the tricks to process the data and tune the hyper-parameters.When you finished
-    your research and design, use tool to make state_transition with message that you want to contact to other agents.
-    You message must should be detailed enough since other agents will rely on your message to implement the code.
+    and clearly list the things and detailed information you have collected.
+    For example, for a paper reproduce task, you may need to provide the summary about the paper,
+    the algorithms needed to implement, the related metrics to evaluate the algorithm, the datasets to test the algorithm,
+    the baseline methods and other compared methods.More importantly, how many experiments are needed to implement the paper
+    and what are they.
+    But you can just list some key information because your teamates will use these key information to do a deeper research and implement the code.
+    For example, you should list name for algorithms and their brief description rather than the whole information about them. 
+    You can list the brief description for the experiments rather than the detailed implementation steps.
+    Think carefully before you take actions.
+    When you finish the current task ,you can use tool to make state_transition to contact to other agents,
+    pay attention that your result should be pass to the state_transition tool as a parameter.
     Now begin:
 
 callbacks:
@@ -47,13 +54,9 @@ tools:
       - create_directory
       - write_file
       - delete_file_or_dir
-    limit_len_files_end_with:
-      - .csv
-      - .npz
-      - .tsv
-      - .fasta
-      - .obo
-    limit_len: 1000
+      - read_file
+  document_inspector:
+    mcp: false
 memory:
   - name: statememory
     user_id: "code_scratch"

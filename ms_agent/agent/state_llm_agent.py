@@ -150,7 +150,7 @@ class State_LLMAgent(LLMAgent):
 
         if (
             _response_message.tool_calls
-            and _response_message.tool_calls[-1]["tool_name"] == "exit_task---exit_task"
+            and _response_message.tool_calls[-1]["tool_name"] == "finish---exit_task"
         ):
             self.runtime.should_stop = True
 

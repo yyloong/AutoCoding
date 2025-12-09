@@ -438,12 +438,11 @@ class LLMAgent(Agent):
         print("="*50, "SimpleAgent Step", "=="*50)
         print(messages)
         print("=="*50)
-        messages = deepcopy(messages)
+        tools = await self.tool_manager.get_tools()
         if (not self.load_cache) or messages[-1].role != 'assistant':
+            messages = deepcopy(messages)
             messages = await self.condense_memory(messages)
             await self.on_generate_response(messages)
-            tools = await self.tool_manager.get_tools()
-
             if self.stream:
                 self.log_output('[assistant]:')
                 _content = ''
@@ -480,8 +479,9 @@ class LLMAgent(Agent):
         if _response_message.tool_calls:
             messages = await self.parallel_tool_call(messages)
 
-        if _response_message.tool_calls and _response_message.tool_calls[-1]["tool_name"] == "exit_task---exit_task":
-            self.runtime.should_stop = True
+        if _response_message.tool_calls:
+            if _response_message.tool_calls[-1]["tool_name"] == "finish---exit_task" or "exit_task":
+                self.runtime.should_stop = True
 
         await self.after_tool_call(messages)
         self.log_output(

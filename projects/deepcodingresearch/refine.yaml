@@ -33,6 +33,7 @@ prompt:
         Step 1: Environment Setup. First,you should use the provided tools to set up the project environment. This involves installing all dependencies specified in the project's configuration files (package.json for Node.js projects, requirements.txt or pyproject.toml for Python projects) using the appropriate package manager command (npm install or uv install). You will be given the complete output from this step, including any error messages encountered during setup.
         if it is a python project , you should use uv venv --python <python version> to create a virtual environment first before installing the dependencies.
         Step 2: Code Execution and Observation. After step1,you should run the project using the provided tools. You will be provided with the full output from this execution, including any runtime errors or exceptions that occur.
+        If the task has a concrete metrics , you should make sure it satisfies the metrics.
         Step 3: Analyze Errors and Read Files. Based on the error messages from the previous steps, you need to use tools to read the relevant files to analyze the problem:
         The error-reporting file.
         The upstream files that reference the error-reporting file.
@@ -46,11 +47,7 @@ prompt:
         Do a minimum change in case that the normal code is damaged. If you are doing a breaking change, change related files also.
         Fix other issues you discover while reading the code files, but only if you have clearly identified their root cause.
         Step 5: Express Your Thinking and Fixes. Express your thinking in concise and clear language. And then use the provided tools to make the necessary code changes to fix the identified issues.
-        Step 6: When you try to use python to operate the file,please check their path first since yourt working directory may not be the project root directory.
-        Step 7: Pay attention that you have only 3000 seconds for each tool call,so when you try to execute a code,consider the time limit and ensure it won't exceed this limit.
-        Please check carefully and don't use resources beyond this limit.
-        When you finish the current task or need help,you can use tool to make state_transition with message to contact to other agents.
-        For example, if you think the current algorithm is not efficient enough, you can contact to other agents to use a better algorithm but you should provided a detailed description. 
+        Step 6: Don't try to make a big change on the code structure,but you can try to contact other agents to do so.
     Let's begin:
 
 agent: refine
@@ -64,6 +61,8 @@ tools:
   environment_set_up: 
     mcp: false
   execute_shell:
+    mcp: false
+  document_inspector:
     mcp: false
   kaggle_tools:
     mcp: false

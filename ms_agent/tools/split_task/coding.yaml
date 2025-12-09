@@ -1,0 +1,67 @@
+llm:
+  service: openai
+  #model: a6000mnt/Qwen-235B-A35B-thinking
+  #model: a6000mnt/Qwen_30B_code
+  #model: a6000mnt/Qwen_30B_thinking
+  #model: Qwen_30B_code
+  model: qwen3-max
+  openai_api_key:  
+  #openai_base_url: http://210.28.134.171:8000/v1
+  #openai_base_url: http://210.28.135.93:8000/v1
+  openai_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+
+agent: coding
+type: state_llmagent
+
+generation_config:
+  temperature: 0.2
+  top_k: 20
+  stream: true
+  max_tokens: 32000
+  extra_body:
+    dashscope_extend_params:
+      provider: b
+    enable_thinking: false
+
+
+prompt:
+  system: |
+    You are a code implementer,for the given description about your task,you should
+    complete the function with TODO in the code according to the comments about its input,output and logic.
+    Before writing code, you should use tools to maks sure you have understood the detailed
+    Don't try to modify the files you are not asked to modify.And if you find some dependencies
+    problems in the project, you can use tools to exit your task with detailed explanation.
+    If you finish your task successfully, you can also use tool to report your work to other agents and exit your task.
+    Pay attention that the tool to exit your task is named finish---exit_task.
+    Now, begin:
+
+tools:
+  finish:
+    mcp: false
+  file_system:
+    mcp: false
+    exclude:
+      - create_directory
+    ignore_files:
+      - paper.md
+    limit_len_files_end_with:
+      - .csv
+      - .npz
+      - .tsv
+      - .fasta
+      - .obo
+      - .md
+      - .pdf
+    limit_len: 1000
+  document_inspector:
+    mcp: false
+
+tag: subtask_coding
+
+max_chat_round: 100
+
+tool_call_timeout: 30000
+
+output_dir: new_output
+
+help: |

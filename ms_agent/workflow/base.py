@@ -35,7 +35,6 @@ class Workflow(ABC):
         self.config_dir_or_id = config_dir_or_id
         self.trust_remote_code = trust_remote_code
         self.load_cache = kwargs.get('load_cache', False)
-        self.input_file_path = kwargs.get('input_file_path', None)
         self.mcp_server_file = kwargs.get('mcp_server_file', None)
         self.env = env
         self.workflow_chains = []
