@@ -14,75 +14,27 @@ generation_config:
 
 prompt:
   system: |
-    你是一位资深的开源软件工程师，专注于解决复杂的代码库问题。你的任务是根据 Issue 描述，在当前代码库中诊断问题、修复 Bug，并最终生成一个 Git Patch 文件。
-
-    你拥有强大的 `docker_shell` 工具，可以在当前环境中执行 Linux 命令（如 git, python, pytest, ls, grep, cat 等），以及文件系统工具用于读写文件。
-
-    请严格遵守以下标准工作流程：
-
-    1. **环境探索与复现 (Explore & Reproduce)**
-       - 使用 shell 命令探索仓库结构，定位相关代码。
-       - **必须**创建一个复现脚本（如 `reproduce_issue.py`），运行它以确认 Bug 存在并捕获错误堆栈。
-       - 不要盲目修改代码，先确保你能稳定复现问题。
-
-    2. **诊断与修复 (Diagnose & Fix)**
-       - 分析代码逻辑，找到根本原因。
-       - 修改源代码。你可以使用 `docker_shell` 写入文件，或者使用文件系统工具。
-       - 再次运行复现脚本验证修复效果。
-       - 运行现有的相关测试，确保没有引入回归错误（Regression）。
-
-    3. **提交成果 (Submit Patch)**
-       - 使用 `git diff` 生成标准的 Unified Diff 格式内容。
-       - **最终步骤**：将生成的 Patch 内容写入到当前工作目录下的 `fix.patch` 文件中。
-       - 确保 Patch 文件包含完整的文件路径（如 `a/package/module.py`）和上下文行。
-
-    **注意事项**：
-    - 你不限制于特定类型的仓库（如 Python, C++, JS 等），请根据仓库内的文件类型灵活调整工具（如使用 pip, npm, make 等）。
-    - 你的思考过程必须详细展示：分析问题 -> 制定计划 -> 执行命令 -> 检查结果。
-    - 如果遇到权限或环境问题，尝试使用标准 Linux 命令解决。
-
-    **任务完成标志**：
-    当前目录下生成了有效的 `fix.patch` 文件，且该 Patch 修复了 Issue。
-    如果确认输出了 Patch 文件，请使用 `exit_task` 工具结束任务。
+    You are a highly intelligent coding assistant. You will be provided with a user's request, and you need to generate code to fulfill the request. Use the available tools to help you complete the task. Always think step by step and explain your reasoning before generating code. Ensure that the generated code is efficient, clean, and well-documented.
 
 max_chat_round: 9999
 
-code_file: simple_agent
+# code_file: simple_agent
 
 tools:
-  file_system:
-    mcp: false
+  # kaggle_tools:
+  #   mcp: false
+  #   exclude:
+  #     - submit_csv
+  #     - get_scores
 
   exit_task:
     mcp: false
 
-  # code_executor:
-  #   mcp: false
-  #   sandbox:
-  #     mode: local
-  #     image: jupyter-kernel-gateway:latest
-
-  # run_code:
+  # docker_shell:
   #   mcp: false
 
-  # environment_set_up:
-  #   mcp: false
-
-  docker_shell:
+  query_human:
     mcp: false
-
-  # fetch:
-  #   mcp: true
-  #   type: sse
-  #   url: https://mcp.api-inference.modelscope.net/f415381703a74c/sse
-
-  # firecrawl-mcp-server:
-  #   mcp: true
-  #   type: sse
-  #   url: https://mcp-857f48a0-8bdd-49dc.api-inference.modelscope.net/sse
-
-  # plugins:
-  #   - tools/python_executor
 
 help: |
   An example of remote code agent.

@@ -1,4 +1,4 @@
-# Copyright (c) Alibaba, Inc. and its affiliates.
+# Copyright (c) Nanjing University.
 import re
 import subprocess
 import os
