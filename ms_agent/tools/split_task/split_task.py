@@ -41,8 +41,7 @@ class SplitTask(ToolBase):
                         "properties": {
                             "tasks": {
                                 "type": "array",
-                                "description": "MANDATORY: Each element is a dict, which must contains two fields: "
-                                "`system`(str) and `query`(str) to start one sub task.",
+                                "description": "MANDATORY: Each element is a string, which describes a subtask to be done.",
                             },
                             "user_origin_input": {
                                 "type": "string",
@@ -72,15 +71,13 @@ class SplitTask(ToolBase):
 
         sub_tasks = []
         for i, task in enumerate(tasks):
-            system = task["system"]
-            query = task["query"]
+            query = task
             query = f"Overall Goal: {user_origin_input}\n Your Task:{query}"
             config = OmegaConf.load(
                 os.path.join(os.path.dirname(__file__), "coding.yaml")
             )
             if not hasattr(config, "prompt"):
                 config.prompt = DictConfig({})
-            config.prompt.system = escape_yaml_string(system)
             trust_remote_code = getattr(config, "trust_remote_code", False)
             agent = LLMAgent(
                 config=config,
@@ -110,7 +107,7 @@ class SplitTask(ToolBase):
         for messages in result:
             assert (
                 messages[-1].role == "tool"
-                and messages[-1].name == "exit_task---exit_task"
+                and messages[-1].name == "finish---exit_task"
             )," split_task tool did not exit properly."
             res.append(messages[-1].content)
         self.round += 1

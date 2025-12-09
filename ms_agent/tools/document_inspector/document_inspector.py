@@ -107,7 +107,7 @@ class document_inspector(ToolBase):
                 )
                 config["output_dir"] = self.output_dir
                 if query == []:
-                    query = "Provide a concise summary of the document:"
+                    combine_query = "Provide a concise summary of the document:"
                 else:
                     combine_query = ",".join(query)
                 combine_query = f"{combine_query}\n\nDocument Content:\n{file_parser_result}"
@@ -122,7 +122,7 @@ class document_inspector(ToolBase):
                 message = await agent.run(combine_query)
                 assert (
                     message[-1].role == "tool"
-                    and message[-1].name == "exit_task---exit_task"
+                    and message[-1].name == "finish---exit_task"
                 ), "document_inspector tool did not exit properly."
                 if query == []:
                     return f"The file is large,here is the summary:{message[-1].content},for more details, please use query parameter to get more information."

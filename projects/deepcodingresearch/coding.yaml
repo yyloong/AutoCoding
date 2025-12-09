@@ -52,7 +52,6 @@ tools:
     exclude:
       - create_directory
     ignore_files:
-      - paper.pdf
       - paper.md
     limit_len_files_end_with:
       - .csv
@@ -63,7 +62,8 @@ tools:
       - .md
       - .pdf
     limit_len: 1000
-
+  document_inspector:
+    mcp: false
   split_task:
     mcp: false
 

@@ -1,3 +1,10 @@
+research:
+  next:
+    - coding
+  agent_config: research.yaml
+  description: 
+    Research about the problem and detailed information.
+
 coding:
   next:
     - structure_arrange
@@ -5,13 +12,6 @@ coding:
   agent_config: coding.yaml
   description: 
     Implement the code to solve the problem step by step.
-
-research:
-  next:
-    - coding
-  agent_config: research.yaml
-  description: 
-    Research about the problem and detailed information.
 
 structure_arrange:
   next:

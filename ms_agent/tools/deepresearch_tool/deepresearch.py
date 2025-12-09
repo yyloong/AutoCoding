@@ -62,6 +62,6 @@ class DeepresearchTool(ToolBase):
         message = await agent.run(request)
         assert (
             message[-1].role == "tool"
-            and message[-1].name == "exit_task---exit_task"
+            and message[-1].name == "finish---exit_task"
         ), "DeepResearch tool did not exit properly."
         return message[-1].content

@@ -12,10 +12,10 @@ class Exit(ToolBase):
     
     async def get_tools(self):
         tools = {
-            "exit_task": [
+            "finish": [
                 Tool(
                     tool_name="exit_task",
-                    server_name="exit",
+                    server_name="finish",
                     description="If you ensure the task is completed, please use this tool to exit the task. ",
                     parameters={
                         "type": "object",

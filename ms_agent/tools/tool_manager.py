@@ -13,14 +13,10 @@ from ms_agent.llm.utils import Tool, ToolCall
 from ms_agent.tools.base import ToolBase
 from ms_agent.tools.kaggle_tools import kaggle_tools
 from ms_agent.tools.run_shell import execute_shell
-from ms_agent.tools.code.code_executor import CodeExecutionTool
 from ms_agent.tools.filesystem_tool import FileSystemTool
-from ms_agent.tools.environment_set_up import Environment_set_up
 from ms_agent.tools.web_research import Web_research
-from ms_agent.tools.debug_cmd import run_code
 from ms_agent.tools.state_transition import State_transition
 from ms_agent.tools.deepresearch_tool.deepresearch import DeepresearchTool
-from ms_agent.tools.findata.findata_fetcher import FinancialDataFetcher
 from ms_agent.tools.document_inspector.document_inspector import document_inspector
 from ms_agent.tools.mcp_client import MCPClient
 from ms_agent.tools.rag_tool import RAGTool
@@ -29,7 +25,6 @@ from ms_agent.tools.split_task.split_task import SplitTask
 # from ms_agent.tools.debug import Environment_set_up, run_code
 from ms_agent.tools.exit_task import Exit as exit_task
 from ms_agent.utils import get_logger
-from ms_agent.tools.mle_tool import env_tools
 from ms_agent.utils.constants import TOOL_PLUGIN_NAME
 
 logger = get_logger()
@@ -56,10 +51,6 @@ class ToolManager:
 
         self.extra_tools: List[ToolBase] = []
         self.has_split_task_tool = False
-        if hasattr(config, "tools") and hasattr(config.tools, "env_tools"):
-            self.extra_tools.append(
-                env_tools(config, trust_remote_code=self.trust_remote_code)
-            )
         if hasattr(config, "tools") and hasattr(config.tools, "document_inspector"):
             self.extra_tools.append(
                 document_inspector(config, trust_remote_code=self.trust_remote_code)
@@ -84,14 +75,6 @@ class ToolManager:
             self.extra_tools.append(
                 RAGTool(config, trust_remote_code=self.trust_remote_code)
             )
-        if hasattr(config, "tools") and hasattr(config.tools, "environment_set_up"):
-            self.extra_tools.append(
-                Environment_set_up(config, trust_remote_code=self.trust_remote_code)
-            )
-        if hasattr(config, "tools") and hasattr(config.tools, "run_code"):
-            self.extra_tools.append(
-                run_code(config, trust_remote_code=self.trust_remote_code)
-            )
         if hasattr(config, "tools") and hasattr(config.tools, "split_task"):
             self.extra_tools.append(SplitTask(config))
         if hasattr(config, "tools") and hasattr(config.tools, "kaggle_tools"):
@@ -106,10 +89,6 @@ class ToolManager:
             self.extra_tools.append(
                 FileSystemTool(config, trust_remote_code=self.trust_remote_code)
             )
-        if hasattr(config, "tools") and hasattr(config.tools, "code_executor"):
-            self.extra_tools.append(CodeExecutionTool(config))
-        if hasattr(config, "tools") and hasattr(config.tools, "financial_data_fetcher"):
-            self.extra_tools.append(FinancialDataFetcher(config))
         self.tool_call_timeout = getattr(config, "tool_call_timeout", TOOL_CALL_TIMEOUT)
         local_dir = self.config.local_dir if hasattr(self.config, "local_dir") else None
         if hasattr(config, "tools") and hasattr(config.tools, TOOL_PLUGIN_NAME):

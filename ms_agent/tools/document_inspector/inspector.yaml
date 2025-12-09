@@ -4,7 +4,7 @@ llm:
   #model: a6000mnt/Qwen_30B_code
   #model: a6000mnt/Qwen_30B_thinking
   #model: Qwen_30B_code
-  model: qwen3-max
+  model: deepseek-v3.2
   openai_api_key:  
   #openai_base_url: http://210.28.134.171:8000/v1
   #openai_base_url: http://210.28.135.93:8000/v1
