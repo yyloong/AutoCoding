@@ -123,9 +123,9 @@ class ExactStateMemory(Memory):
             os.path.join(os.path.dirname(StateMemoryManager.shared_memory_path), memory_file),
         )
         self.condense_limit = getattr(
-            config.memory, "condense_limit", 3000
+            config.memory, "condense_limit", 200000
         )  # if tokens exceed, condense the memory
-        self.single_msg_limit = getattr(config.memory, "single_msg_limit", 200000)
+        self.single_msg_limit = getattr(config.memory, "single_msg_limit", 30000)
         self.last_n_messages = getattr(config.memory, "last_n_messages", 8)
         self.memory_type = getattr(config.memory, "memory_type", "long-term")
         self.initialize_condense_llm()

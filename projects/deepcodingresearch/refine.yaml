@@ -34,6 +34,7 @@ prompt:
         if it is a python project , you should use uv venv --python <python version> to create a virtual environment first before installing the dependencies.
         Step 2: Code Execution and Observation. After step1,you should run the project using the provided tools. You will be provided with the full output from this execution, including any runtime errors or exceptions that occur.
         If the task has a concrete metrics , you should make sure it satisfies the metrics.
+        For example,in the paper reproduction task, you should check whether all the experiments have been done,and whether the results are consistent with the paper.
         Step 3: Analyze Errors and Read Files. Based on the error messages from the previous steps, you need to use tools to read the relevant files to analyze the problem:
         The error-reporting file.
         The upstream files that reference the error-reporting file.

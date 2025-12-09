@@ -49,8 +49,6 @@ tools:
     mcp: false
   file_system:
     mcp: false
-    exclude:
-      - create_directory
     ignore_files:
       - paper.md
     limit_len_files_end_with:
