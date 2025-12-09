@@ -2,9 +2,10 @@
 
 import os
 from collections import defaultdict
-
+from ms_agent.utils.file_parser_utils.file_parser import SingleFileParser
 from ms_agent.agent.loader import AgentLoader
 from ms_agent.utils import get_logger
+import tiktoken
 from ms_agent.workflow.base import Workflow
 from omegaconf import DictConfig
 
@@ -74,6 +75,36 @@ class GraphWorkflow(Workflow):
             )
 
     async def run(self, inputs, **kwargs):
+        if self.input_file_path: 
+            if not os.path.exists(self.input_file_path):
+                raise FileNotFoundError(f"Input file not found: {self.input_file_path}")
+            parser = SingleFileParser(cfg={
+                'path': os.path.join(os.getcwd(),'workspace','parser_cache')
+            })
+            input_params = {"url": self.input_file_path}
+            file_parser_result = parser.call(input_params)
+
+            # ------------------- 新增 Token 统计逻辑 Start -------------------
+            try:
+                encoding = tiktoken.get_encoding("cl100k_base")
+                file_tokens = len(encoding.encode(file_parser_result))
+                prefix_text = "\n\ninput file content:\n"
+                prefix_tokens = len(encoding.encode(prefix_text))
+                total_added_tokens = file_tokens + prefix_tokens
+        
+                print(f"-------- Token Statistics --------")
+                print(f"File Path: {self.input_file_path}")
+                print(f"Content Length (Chars): {len(file_parser_result)}")
+                print(f"Token Count (Est.): {file_tokens}")
+                print(f"Total Added Tokens: {total_added_tokens}")
+                print(f"----------------------------------")
+                if total_added_tokens > 30000:
+                    raise ValueError("File content exceeds token limit!")
+
+            except Exception as e:
+                print(f"Warning: Failed to count tokens. Error: {e}")
+            inputs = inputs + "\n\ninput file content:\n" + file_parser_result
+
         agent_config = None
         task = self.start_task
         while True:
@@ -103,8 +134,6 @@ class GraphWorkflow(Workflow):
             await engine.exit_state()
             self.tasks_count[task] += 1
             task = engine.next_flow()
-            import pdb
-            pdb.set_trace()
             if task == self.end_task:
                 break
         return inputs

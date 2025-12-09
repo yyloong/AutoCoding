@@ -3,15 +3,22 @@ research:
     - coding
   agent_config: research.yaml
   description: 
-    Research about the problem and design the algorithm to solve the problem,write down the information in analysis.md.
+    Research about the problem and design the algorithm.
 
 coding:
   next:
-    - refine
+    - structure_arrange
     - research
   agent_config: coding.yaml
   description: 
-    Implement the code to solve the problem step by step based on the designed algorithm in analysis.md.
+    Implement the code to solve the problem step by step.
+
+structure_arrange:
+  next:
+    - refine
+  agent_config: structure_arrange.yaml
+  description: 
+    Arrange the code structure to make the project more organized and easier to understand.
 
 refine:
   next:

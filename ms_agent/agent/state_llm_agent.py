@@ -165,7 +165,7 @@ class State_LLMAgent(LLMAgent):
             self.next_task = _response_message.tool_calls[-1]["tool_name"].split("---")[-1]
             exit_message = _response_message.tool_calls[-1]["arguments"]
             exit_message = json.loads(exit_message)
-            self.exit_description = exit_message.get("message", "")
+            self.exit_description = f"request to make a state transition to {self.next_task} with message"+exit_message.get("message", "")
             self.messages = messages
 
         await self.after_tool_call(messages)
@@ -263,6 +263,10 @@ class State_LLMAgent(LLMAgent):
                     await memory_tool.save_messages(self.messages)
 
     def next_flow(self):
+        if self.next_task is None:
+            logger.warning("Next task is None, try to debug it.")
+            import pdb
+            pdb.set_trace()
         return self.next_task
 
     def save_history(self, messages: List[Message], **kwargs):

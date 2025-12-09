@@ -12,13 +12,14 @@ import json
 from ms_agent.llm.utils import Tool, ToolCall
 from ms_agent.tools.base import ToolBase
 from ms_agent.tools.kaggle_tools import kaggle_tools
+from ms_agent.tools.run_shell import execute_shell
 from ms_agent.tools.code.code_executor import CodeExecutionTool
 from ms_agent.tools.filesystem_tool import FileSystemTool
 from ms_agent.tools.environment_set_up import Environment_set_up
 from ms_agent.tools.web_research import Web_research
 from ms_agent.tools.debug_cmd import run_code
 from ms_agent.tools.state_transition import State_transition
-from ms_agent.tools.deepresearch import DeepresearchTool
+from ms_agent.tools.deepresearch_tool.deepresearch import DeepresearchTool
 from ms_agent.tools.findata.findata_fetcher import FinancialDataFetcher
 from ms_agent.tools.mcp_client import MCPClient
 from ms_agent.tools.rag_tool import RAGTool
@@ -58,6 +59,8 @@ class ToolManager:
                           trust_remote_code=self.trust_remote_code))
         if hasattr(config, 'tools') and hasattr(config.tools, 'state_transition'):
             self.extra_tools.append(State_transition(config, trust_remote_code=self.trust_remote_code))
+        if hasattr(config, 'tools') and hasattr(config.tools, 'execute_shell'):
+            self.extra_tools.append(execute_shell(config, trust_remote_code=self.trust_remote_code))
         if hasattr(config, 'tools') and hasattr(config.tools, 'exit_task'):
             self.extra_tools.append(exit_task(config, trust_remote_code=self.trust_remote_code))
         if hasattr(config, 'tools') and hasattr(config.tools, 'deepresearch'):

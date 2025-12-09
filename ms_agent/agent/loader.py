@@ -46,7 +46,7 @@ class AgentLoader:
 
         from .llm_agent import LLMAgent
         from .state_llm_agent import State_LLMAgent
-        agent_type = LLMAgent.AGENT_NAME
+        agent_type = State_LLMAgent.AGENT_NAME
         if 'code_file' in kwargs:
             code_file = kwargs.pop('code_file')
         elif agent_config is not None:

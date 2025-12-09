@@ -27,7 +27,7 @@ class WorkflowLoader:
         from ms_agent.workflow.dag_workflow import DagWorkflow
         from ms_agent.workflow.loop_workflow import LoopWorkflow
         from ms_agent.workflow.graph_workflow import GraphWorkflow
-        wf_type = ChainWorkflow.WORKFLOW_NAME.lower()
+        wf_type = GraphWorkflow.WORKFLOW_NAME.lower()
         wf_type = getattr(wf_config, 'type', '').lower() or wf_type
         input_file_path = kwargs.get('input_file_path', None)
 

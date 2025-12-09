@@ -98,9 +98,14 @@ class Search:
         except:
             return "[Search] Invalid request format: Input must be a JSON object containing 'query' field"
         
+        try:
+            query = json.loads(query)
+        except:
+            print("failed to parse query as json, treat as string")
+        
         if isinstance(query, str):
-            # 单个查询
-            response = Search.search_with_serp(query)
+            #response = Search.search_with_serp(query)
+            return "query must be in list format"
         else:
             # 多个查询
             assert isinstance(query, List)

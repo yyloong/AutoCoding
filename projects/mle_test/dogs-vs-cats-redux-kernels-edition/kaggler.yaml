@@ -5,7 +5,7 @@ llm:
   #model: a6000mnt/Qwen_30B_code
   #model: a6000mnt/Qwen_30B_thinking
   #model: Qwen_30B_code
-  model: qwen3-max
+  model: deepseek-v3.2
   openai_api_key:  
   #openai_base_url: http://210.28.134.171:8000/v1
   #openai_base_url: http://210.28.135.93:8000/v1
@@ -34,13 +34,14 @@ prompt:
             Use cuda and PyTorch for faster training whenever needed.
 
             You have a total of 15 actions available for the env_tools.
-            But you the deepresearch tools can be used unlimitedly.
+            But web_research tool has no action limit.
             You have a total of 43200 seconds, including code execution time.
             You can get competition information by using tool "env_tools---request_info".
-            You can alse use other tools to get more information.
             You can use tool to interact with the environment and get feedback.
             Before you take an action show your thinking process clearly.
-            deepresearch tools may help you to research and design the algorithm to solve the problem.
+            When your code don't perform , try to modify your algorithm/model/parameters/data processing method to improve the performance.
+            Try to use different query to search for more usefule algorithm or method.
+            Since you have limited steps, please think carefully before taking each action,and try to test more content in a single running.
 
             Code requirements:
             - Request all information first
@@ -55,15 +56,15 @@ prompt:
             - Optimize your Model/Parameters/Data Processing/Algorithm for continuous improvement
 
             Only if "env_tools---execute_code" action taken, code successfully executed and valid submission generated, 
-            The code must be in the correct format of shell since it will be executed in the shell environment directly.
+            The code must be in Python language, and should be able to run with single file.
             you'll be able to get a Position Score (Your rank in the leaderboard) for this competition.
             In the limited steps, you should try to improve your Position Score as much as possible.
+            If your position score has reached 1.0, you can exit your task directly.
+            Give the process of your thinking when you are choosing algorithm.
     Let's begin:
 
 tools:
   exit_task:
-    mcp: false
-  deepresearch:
     mcp: false
   env_tools:
     mcp: false
@@ -72,6 +73,8 @@ tools:
     output_dir: /home/u-longyy/ms-agent/kaggle_output/dogs-vs-cats-redux-kernels-edition
     limited_step_num: 15
     time_limit: 43200
+  web_research:
+    mcp: false
 
 max_chat_round: 100
 

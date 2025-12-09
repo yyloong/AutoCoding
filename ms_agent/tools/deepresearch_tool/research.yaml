@@ -10,7 +10,7 @@ llm:
   #openai_base_url: http://210.28.135.93:8000/v1
   openai_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
 
-agent : planning
+agent : research
 
 generation_config:
   temperature: 0.3

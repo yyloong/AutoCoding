@@ -26,7 +26,7 @@ class State_transition(ToolBase):
                         "properties": {
                             "message": {
                                 "type": "string",
-                                "description": "Summary the situation of your current state.",
+                                "description": "Detailed description about your purpose for transitioning to this state.If you want to ask for other state for help,please describe your request very clear.If you just finish your work,you can summary what you have done.",
                             },
                         },
                         "required": ["message"],

@@ -19,6 +19,7 @@ class kaggle_tools(ToolBase):
     def __init__(self, config,**kwargs):
         super().__init__(config)
         self.output_dir = getattr(config, 'output_dir', DEFAULT_OUTPUT_DIR)
+        os.makedirs(self.output_dir, exist_ok=True)
         self.exclude_func(getattr(config.tools, "kaggle_tools", None))
     
     async def get_tools(self):
@@ -125,8 +126,10 @@ class kaggle_tools(ToolBase):
                 logger.error(f'Error executing command "{cmd}": {stderr.decode().strip()}')
                 return f'Error executing command "{cmd}": {stderr.decode().strip()}'
             results.append(stdout.decode().strip())
-
-        return f'Dataset for competition {competition} downloaded successfully to {self.output_dir}/{competition}.'
+        if not os.path.exists(path) or not os.listdir(path):
+            logger.error(f'Error: Dataset for competition {competition} not found after download.')
+            return f'Error: Dataset for competition {competition} not found after download.'
+        return f'Dataset for competition {competition} downloaded successfully.'
 
     
     async def submit_csv(self, competition: str, file_path: str, submit_message: str) -> str:

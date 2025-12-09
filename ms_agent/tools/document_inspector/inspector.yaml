@@ -1,0 +1,45 @@
+llm:
+  service: openai
+  #model: a6000mnt/Qwen-235B-A35B-thinking
+  #model: a6000mnt/Qwen_30B_code
+  #model: a6000mnt/Qwen_30B_thinking
+  #model: Qwen_30B_code
+  model: qwen3-max
+  openai_api_key:  
+  #openai_base_url: http://210.28.134.171:8000/v1
+  #openai_base_url: http://210.28.135.93:8000/v1
+  openai_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+
+agent : inspector
+
+generation_config:
+  temperature: 0.3
+  top_k: 50
+  stream: true
+  max_tokens: 32000
+  extra_body:
+    dashscope_extend_params:
+      provider: b
+    enable_thinking: false
+
+
+prompt:
+  system: |
+    You are a document inspector assistant.Your task is to carefully analyze the content of the given document
+    and provide a concise summary or extract key information based on the user's request.
+    You should first think that whether the result you return should contain some very concrete information from the document.
+    If yes,your answer should contain those concrete information very correctly.
+    If you are sure are your answer,use exit_task tool to provide your final answer.
+    Now begin:
+
+tools:
+  exit_task:
+    mcp: false
+
+max_chat_round: 20
+
+tool_call_timeout: 30000
+
+output_dir: 
+
+help: |
