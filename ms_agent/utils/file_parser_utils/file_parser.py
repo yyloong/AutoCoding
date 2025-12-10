@@ -469,6 +469,12 @@ def parse_pdf(pdf_path: str, extract_image: bool = True) -> List[dict]:
                     logger.error(f"Image processing failed for page {page_num}: {e}")
 
             doc_content.append(page_data)
+
+        if extract_image:
+            try:
+                os.rmdir(temp_dir)
+            except OSError:
+                pass  # 目录非空或其他问题，忽略
             
     return doc_content
 
