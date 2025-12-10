@@ -11,6 +11,10 @@ generation_config:
   temperature: 0.5
   top_k: 50
   stream: true
+  extra_body:
+    dashscope_extend_params:
+      provider: b
+    enable_thinking: false
 
 prompt:
   system: |

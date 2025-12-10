@@ -12,6 +12,10 @@ generation_config:
   top_k: 50
   stream: true
   max_tokens: 32000
+  extra_body:
+    dashscope_extend_params:
+      provider: b
+    enable_thinking: false
 
 
 prompt:
