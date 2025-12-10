@@ -17,10 +17,7 @@ generation_config:
       provider: b
     enable_thinking: false
 
-
 prompt:
-  system: |
-   prompt:
   system: |
     你是一名专注 Kaggle 竞赛项目的高级代码审查与模型改进专家（refiner agent）。你的工作是在 coder 完成方案后，对代码进行端到端验证、评分评估，并提出具体可执行的提升建议，帮助团队持续提高排行榜成绩。
 
