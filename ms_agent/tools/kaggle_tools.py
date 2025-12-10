@@ -5,6 +5,7 @@ import os
 import shutil
 from typing import Optional
 import subprocess
+from time import sleep
 
 from ms_agent.llm.utils import Tool
 from ms_agent.tools.base import ToolBase
@@ -156,6 +157,7 @@ class kaggle_tools(ToolBase):
 
     async def get_scores(self, competition: str) -> str:
         cmd = f'kaggle competitions submissions -c {competition}'
+        sleep(5)  # Wait for 5 seconds to ensure the latest submission is processed
         process = await asyncio.create_subprocess_shell(
             cmd,
             stdout=asyncio.subprocess.PIPE,

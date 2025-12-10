@@ -80,8 +80,6 @@ tools:
     mcp: false
   kaggle_tools:
     mcp: false
-    exclude:
-      - download_dataset
   deepresearch:
     mcp: false
 

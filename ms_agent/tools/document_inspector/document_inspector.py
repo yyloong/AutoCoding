@@ -38,21 +38,26 @@ class document_inspector(ToolBase):
         document_inspector_tool = Tool(
             tool_name="inspect_document",
             server_name="document_inspector_tool",
-            description="Reads non-standard documents (PDF, DOCX, etc.). If the file is small,it will return the full content.If 'query' is not provided and the file is large,it will return a summary of it.If 'query' is provided and the file is large, it will research and return an answer.",
+            description=(
+                "Reads non-standard documents (PDF, DOCX, etc.). "
+                "If the file is small, the full content will be returned. "
+                "If 'query' is not provided and the file is large, a concise summary will be returned. "
+                "If 'query' is provided and the file is large, the tool will analyze the document and return answers to the specified queries."
+            ),
             parameters={
-                "type": "object",
-                "properties": {
-                    "document_path": {
-                        "type": "string",
-                        "description": "The path to the document to be inspected.",
-                    },
-                    "query": {
-                        "type": "array",
-                        "items": {"type": "string"},
-                        "description": "The list of queries to be inspected in depth. Each should be a concrete question.",
-                    },
+            "type": "object",
+            "properties": {
+                "document_path": {
+                    "type": "string",
+                    "description": "The path to the document to be inspected.",
                 },
-                "required": ["document_path"],
+                "query": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "A list of specific questions for in-depth inspection of the document.",
+                },
+            },
+            "required": ["document_path"],
             },
         )
         return {"document_inspector_tool": [document_inspector_tool]}

@@ -1,30 +1,21 @@
-# Copyright (c) Alibaba, Inc. and its affiliates.
-import importlib
-import inspect
 import os.path
 import sys
-import uuid
-from contextlib import contextmanager
 from copy import deepcopy
-from typing import Any, AsyncGenerator, Dict, List, Optional, Tuple, Union
+from typing import Any, AsyncGenerator, List, Tuple, Union
 
 import json
 from ms_agent.agent.runtime import Runtime
-from ms_agent.callbacks import Callback, callbacks_mapping
-from ms_agent.llm.llm import LLM
 from ms_agent.llm.utils import Message
-from ms_agent.memory import Memory, memory_mapping
-from ms_agent.memory.mem0ai import Mem0Memory, SharedMemoryManager
-from ms_agent.memory.statememory import StateMemoryManager, ExactStateMemory
-from ms_agent.rag.base import RAG
-from ms_agent.tools import ToolManager
+from ms_agent.memory import memory_mapping
+from ms_agent.memory.mem0ai import SharedMemoryManager
+from ms_agent.memory.statememory import ExactStateMemory
 from ms_agent.agent.llm_agent import LLMAgent
 from ms_agent.utils import async_retry, read_history, save_history
 from ms_agent.utils.constants import DEFAULT_OUTPUT_DIR, DEFAULT_TAG, DEFAULT_USER
 from ms_agent.utils.logger import logger
 from omegaconf import DictConfig, OmegaConf
 
-from ..config.config import Config, ConfigLifecycleHandler
+from ..config.config import Config
 from .base import Agent
 
 
@@ -161,7 +152,7 @@ class State_LLMAgent(LLMAgent):
             self.next_task = _response_message.tool_calls[-1]["tool_name"].split("---")[-1]
             exit_message = _response_message.tool_calls[-1]["arguments"]
             exit_message = json.loads(exit_message)
-            self.exit_description = f"request to make a state transition to {self.next_task} with message"+exit_message.get("message", "")
+            self.exit_description = f"request to make a state transition to {self.next_task} with message" + exit_message.get("message", "")
             self.messages = messages
 
         await self.after_tool_call(messages)
