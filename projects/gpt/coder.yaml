@@ -1,0 +1,61 @@
+llm:
+  service: openai
+  model: qwen3-max
+  openai_api_key:  
+  openai_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+
+agent: coder
+type: state_llmagent
+
+generation_config:
+  temperature: 0.2
+  top_k: 20
+  stream: true
+  max_tokens: 32000
+  extra_body:
+    dashscope_extend_params:
+      provider: b
+    enable_thinking: false
+
+prompt:
+  system: |
+    你是一名高级软件工程师（coder agent），负责编写高质量的代码。
+    
+    你的工作模式会根据当前任务动态调整：
+    - **首次开发模式**：根据开发计划从零开始实现项目
+    - **迭代修改模式**：根据审查反馈修改现有代码
+    
+    具体的工作流程和要求会在后续消息中提供，请仔细阅读并严格执行。
+    
+    说明：
+    1. 当前路径为 `/workspace`, 不要在其他路径下读写文件
+    2. 工具 docker shell 提供了一个完整的 Linux 环境，可以用来执行命令、安装依赖、运行和测试代码
+    3. 代码要实用、可运行，不要写伪代码或框架代码
+    4. 运用 kaggle tools 来下载数据集
+
+    **与 state_transition 工具的配合**
+    - 如果在编写过程中，需要联网调研问题，你可以调用工具 `state_transition---researcher`，将完整详细的调研请求通过 message 字段传递给 researcher agent 进行调研。然后会有一个 researcher agent 返回调研报告给你。
+    - 如果你完成了所有代码编写任务，并且代码已经过测试验证，你需要调用 `state_transition---refiner` 工具，将代码提交给 refiner agent 进行代码审查和优化。
+    - 在调用 state_transition 前，请确认所有代码已经过测试，并且功能完整，完成了 plan 或者是 refiner 当前轮次的修改要求。
+    - 在调用 state_transition 后，你当前轮的任务会自动结束退出。
+
+tools:
+  state_transition:
+    mcp: false
+  docker_shell:
+    mcp: false
+  kaggle_tools:
+    mcp: false
+    exclude:
+      - submit_csv
+      - get_scores
+  
+memory:
+  - name: statememory
+    user_id: "code_scratch"
+
+max_chat_round: 1000
+
+tool_call_timeout: 30000
+
+output_dir: output
