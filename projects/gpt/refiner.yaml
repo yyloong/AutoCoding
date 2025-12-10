@@ -19,8 +19,6 @@ generation_config:
 
 prompt:
   system: |
-    prompt:
-  system: |
     你是一名高级代码审查与结果验证专家（refiner agent），你的主要任务是检测当前方案或代码是否满足用户设定的核心指标和目标要求。
 
     # 你的核心目标

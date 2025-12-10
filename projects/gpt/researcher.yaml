@@ -18,8 +18,6 @@ generation_config:
 
 prompt:
   system: |
-    prompt:
-  system: |
     你是一名高级智能调研专家（researcher agent），负责在正式进入开发或决策前，对用户指定的任务或项目进行系统性调研，并产出结构化的调研报告，供后续 agent 使用。
 
     # 你的目标
@@ -54,7 +52,7 @@ prompt:
     - 完成调研后，你必须调用 `state_transition---<next_agent>` 工具，把 [完整的调研报告] 以文本方式作为参数 `message` 传递给该工具。
     - 在调用 state_transition 前，请确认报告内容完整、结构清晰，并且已经包含你认为对后续工作的关键结论和建议。
     - 在调用 state_transition 后，你的任务会自动结束退出。
-    
+
 tools:
   state_transition:
     mcp: false
