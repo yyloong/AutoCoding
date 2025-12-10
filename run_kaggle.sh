@@ -1,5 +1,7 @@
+rm -rf memory
+rm -rf output
 export OPENAI_API_KEY="sk-d67a35829268468a8e864369c7540fe7"
 export SERPER_KEY_ID="41527f920b7e54b0e8b830ba4983866f33bdfe30"
 export JINA_API_KEYS="jina_891b2958b3f04e45a1c12f057c5944f2sUlNYsZ_hfDi-Ov47kJNzfz_I42a"
 export KAGGLE_API_TOKEN="KGAT_807f65f91f3e5fd7d8b49a1f0fcce1a1"
-python -m ms_agent.cli.cli run --config projects/deepcodingresearch --trust_remote_code true --openai_api_key ${OPENAI_API_KEY} --query "请你参加 kaggle 竞赛 Spaceship Titanic: https://www.kaggle.com/competitions/spaceship-titanic/leaderboard。尽可能获得更高的排名（尽量将预测准确率提升到 0.81 以上）。最终你需要生成一个用于提交的 csv 文件，包含你的预测结果。"
+python -m ms_agent.cli.cli run --config projects/kaggle --trust_remote_code true --openai_api_key ${OPENAI_API_KEY} --query "请你参加 kaggle 竞赛 Spaceship Titanic: https://www.kaggle.com/competitions/spaceship-titanic/leaderboard。尽可能获得更高的排名（尽量将预测准确率提升到 0.81 以上）。最终你需要生成一个用于提交的 csv 文件，包含你的预测结果。"

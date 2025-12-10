@@ -38,11 +38,6 @@ prompt:
     - 在调用 state_transition 前，请确认所有代码已经过测试，并且功能完整，完成了 plan 或者是 refiner 当前轮次的修改要求。
     - 在调用 state_transition 后，你当前轮的任务会自动结束退出。
 
-handler: config_handler
-
-callbacks:
-  - callbacks/tool_use_callback
-
 tools:
   state_transition:
     mcp: false
@@ -51,7 +46,8 @@ tools:
   kaggle_tools:
     mcp: false
     exclude:
-      - 
+      - submit_csv
+      - get_scores
   
 memory:
   - name: statememory
