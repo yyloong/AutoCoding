@@ -1,13 +1,7 @@
 llm:
   service: openai
-  #model: a6000mnt/Qwen-235B-A35B-thinking
-  #model: a6000mnt/Qwen_30B_code
-  #model: a6000mnt/Qwen_30B_thinking
-  #model: Qwen_30B_code
   model: qwen3-max
   openai_api_key:  
-  #openai_base_url: http://210.28.134.171:8000/v1
-  #openai_base_url: http://210.28.135.93:8000/v1
   openai_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
 
 agent: research
