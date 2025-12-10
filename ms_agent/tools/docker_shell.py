@@ -109,28 +109,17 @@ class DockerBaseTool(ToolBase):
         cmd = " ".join(cmd) if isinstance(cmd, list) else cmd
 
         def _exec_blocking():
-            # 使用流式输出
-            exec_stream = self.session_container.exec_run(
+            exec_result = self.session_container.exec_run(
                 cmd=["/bin/bash", "-lc", cmd],
                 stdout=True,
                 stderr=True,
                 tty=False,
-                stream=True,
             )
-            chunks = []
-            for chunk in exec_stream:
-                if not chunk:
-                    continue
-                text = chunk.decode("utf-8", errors="replace")
-                # 实时打印到运行 agent 的终端
-                print(text, end="", flush=True)
-                chunks.append(text)
-            # 返回完整输出（字符串）
-            return "".join(chunks)
+            return exec_result
 
         try:
-            # 这里拿到的就是完整输出的字符串
-            output = await asyncio.to_thread(_exec_blocking)
+            exec_result = await asyncio.to_thread(_exec_blocking)
+            output = exec_result.output.decode("utf-8", errors="replace")
             # 这里仍然做输出截断
             lines = output.splitlines(keepends=True)
             if len(lines) > MAX_OUTPUT_LINES:
