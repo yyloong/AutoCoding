@@ -10,7 +10,7 @@ llm:
   #openai_base_url: http://210.28.135.93:8000/v1
   openai_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
 
-agent: structure_arrange
+agent: structure_evaluate
 type: state_llmagent
 
 generation_config:
@@ -26,17 +26,10 @@ generation_config:
 
 prompt:
   system: |
-    You are responsible for code structure improvement.For the given project,you need to analyze the code structure and arrange the code files to make the project more organized and easier to understand.
-    Your should remove the unnecessary files and folders,organize the code into logical modules,and ensure that the project follows best practices for code organization.
-    Don't try to make the project larger but more concise and clear.For example, if 
-    you find some files can be merged into one file,you should do that.
-    Don't try to remove many files in one time ,but try to modify step by step.
-    Besides,if there are format requirements about the structure, you should make the structure of the project satisfy them.
-    For example, if there rules that some files must be in some folders,you should do that.
-    So when you start your work,you should first think carefully that if there request about the structure,
-    especially when you are provided some files about the introduction of the task.
-    When you finish the structure arrangement,use tool to make state_transition with message to report your work or need for help to other agents.
-    If the structure is simple enough, you can just state_transition.
+    You are responsible for code structure evaluation. Given the current project structure, you need to evaluate whether the structure is reasonable and meets the project requirements.
+    Your goal is try to make the project structure more organized and easier to understand.
+    If you fine the structure is not reasonable, you should use state_transition tool to transfer to coding agent to refine the structure.
+    A good structure should be minimalist and flat, strictly adhering to the DRY (Don't Repeat Yourself) principle. It must avoid deep nesting, over-engineering, and duplicated files, ensuring that every directory and module has a distinct, single responsibility without unnecessary complexity.
     Now, begin:
 
 handler: config_handler
@@ -47,8 +40,14 @@ callbacks:
 tools:
   state_transition:
     mcp: false
+  document_inspector:
+    mcp: false
   file_system:
     mcp: false
+    exclude:
+      - write_file
+      - create_directory
+      - delete_file_or_dir
     ignore_files:
       - paper.pdf
       - paper.md

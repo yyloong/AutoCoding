@@ -7,18 +7,19 @@ research:
 
 coding:
   next:
-    - structure_arrange
+    - structure_evaluate
     - research
+    - refine
   agent_config: coding.yaml
   description: 
     Complete the code structure based on the information provided by research agent.
 
-structure_arrange:
+structure_evaluate:
   next:
-    - refine
-  agent_config: structure_arrange.yaml
+    - coding
+  agent_config: structure_evaluate.yaml
   description: 
-    Arrange the code structure to make the project more organized and easier to understand.
+    Judge whether the project structure is correct and ask coding agent to fix it if needed.
 
 refine:
   next:

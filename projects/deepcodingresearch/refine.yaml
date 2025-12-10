@@ -52,6 +52,7 @@ prompt:
         Step 6: Express Your Thinking and Fixes. Express your thinking in concise and clear language. And then use the provided tools to make the necessary code changes to fix the identified issues.
         Step 7: Don't try to make a big change on the code structure,but you can try to contact other agents to do so by using tool to make a state transition.
         Tips: If you have forget some of the requirements or evaluation of the project,you can check them again. 
+        Pay attention that some of the shell commands are not allowed.
     Let's begin:
 
 agent: refine
