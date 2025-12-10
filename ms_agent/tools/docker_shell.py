@@ -105,22 +105,36 @@ class DockerBaseTool(ToolBase):
         if self.session_container is None:
             return "Error: Failed to create session container."
 
-        # 在 bash 中执行命令，保持同一会话上下文（cd/环境变量等）
         cmd = " ".join(cmd) if isinstance(cmd, list) else cmd
 
         def _exec_blocking():
+            # 使用流式输出
             exec_result = self.session_container.exec_run(
                 cmd=["/bin/bash", "-lc", cmd],
                 stdout=True,
                 stderr=True,
                 tty=False,
+                stream=True,
             )
-            return exec_result
+
+            chunks = []
+            # 关键：迭代 exec_result.output，而不是 exec_result 本身
+            for chunk in exec_result.output:
+                if not chunk:
+                    continue
+                # chunk 是 bytes
+                text = chunk.decode("utf-8", errors="replace")
+                print(text, end="", flush=True)  # 实时打印
+                chunks.append(text)
+
+            # 返回完整输出字符串
+            return "".join(chunks)
 
         try:
-            exec_result = await asyncio.to_thread(_exec_blocking)
-            output = exec_result.output.decode("utf-8", errors="replace")
-            # 这里仍然做输出截断
+            # 这里拿到的就是完整输出的字符串
+            output = await asyncio.to_thread(_exec_blocking)
+
+            # 下面保留原来的截断 + 保存逻辑，但不再 decode
             lines = output.splitlines(keepends=True)
             if len(lines) > MAX_OUTPUT_LINES:
                 lines = lines[-MAX_OUTPUT_LINES:]
@@ -128,11 +142,15 @@ class DockerBaseTool(ToolBase):
             if len(joined) > MAX_OUTPUT_CHARS:
                 joined = joined[-MAX_OUTPUT_CHARS:]
             if len(output) > len(joined):
-                # 将完整输出保存到文件
                 full_output_path = os.path.join(self.output_dir, "full_docker_output.txt")
                 with open(full_output_path, "w", encoding="utf-8") as f:
                     f.write(output)
-                joined = f"\n[Output truncated to last {MAX_OUTPUT_LINES} lines or {MAX_OUTPUT_CHARS} characters. Full ouput have been saved to {full_output_path}, You can use shell tools like 'head', 'tail', or 'less' to view parts of the file if needed.]\n\n" +  joined
+                joined = (
+                    f"\n[Output truncated to last {MAX_OUTPUT_LINES} lines or "
+                    f"{MAX_OUTPUT_CHARS} characters. Full ouput have been saved to "
+                    f"{full_output_path}, You can use shell tools like 'head', 'tail', "
+                    f"or 'less' to view parts of the file if needed.]\n\n"
+                ) + joined
             return joined if joined.strip() else "Execution successful (no output)."
         except Exception as e:
             return f"Docker execution system error: {str(e)}"
@@ -236,3 +254,36 @@ class docker_shell(DockerBaseTool):
         """
         logger.info(f"Executing shell script in {self.image}")
         return await self._exec_in_session(script, workdir="/workspace")
+    
+
+if __name__ == "__main__":
+    import asyncio
+
+    # 最小配置 stub，满足 DockerBaseTool 的依赖
+    class _DummyTools:
+        docker_shell = {}
+
+    class _DummyConfig:
+        output_dir = "./output"   # 会被挂载到容器的 /workspace
+        tools = _DummyTools()
+
+    async def _test_docker_shell():
+        print("[Test] 初始化 docker_shell 工具...")
+        tool = docker_shell(_DummyConfig(), trust_remote_code=True)
+        await tool.connect()
+
+        # 在容器里简单跑两条命令：打印一句话 + 列一下 /workspace
+        cmd = "cd /workspace && echo 'hello from docker_shell' && pwd && ls"
+        print(f"[Test] 执行命令: {cmd}")
+        result = await tool.execute_bash(cmd)
+
+        print("\n[Test] 工具返回的最终汇总输出（截断后）：")
+        print("--------------------------------------------------")
+        print(result)
+        print("--------------------------------------------------")
+
+        # 清理 session 容器
+        await tool.cleanup()
+        print("[Test] 清理完成。")
+
+    asyncio.run(_test_docker_shell())
