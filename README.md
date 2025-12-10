@@ -25,7 +25,7 @@ unit_test/            # 单元测试样例
 - 已获取的 OpenAI 兼容 API Key 或 ModelScope API Key
 
 ```bash
-conda create -n autocoding python=3.11 -y
+conda create -n autocoding python=3.11
 conda activate autocoding
 pip install -r requirements.txt
 # 可在项目根目录创建 .env，写入 OPENAI_API_KEY / OPENAI_BASE_URL / MODELSCOPE_API_KEY 等
