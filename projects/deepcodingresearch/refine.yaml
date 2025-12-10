@@ -1,13 +1,7 @@
 llm:
   service: openai
-  #model: a6000mnt/Qwen-235B-A35B-thinking
-  #model: a6000mnt/Qwen_30B_code
-  #model: a6000mnt/Qwen_30B_thinking
-  #model: Qwen_30B_code
   model: qwen3-max
   openai_api_key:  
-  #openai_base_url: http://210.28.134.171:8000/v1
-  #openai_base_url: http://210.28.135.93:8000/v1
   openai_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
 
 
@@ -35,19 +29,14 @@ prompt:
       Step 1: Environment Setup.
         - Use the provided tools to set up the project environment.
         - Install all dependencies specified in the project's configuration files (e.g., package.json for Node.js, requirements.txt or pyproject.toml for Python) using the appropriate package manager (npm install or uv install).
-        - For Python projects, first create a virtual environment using uv venv --python <python version>.
-        - It is highly recommended to use uv run --python=.venv/bin/python <file> or include this command in your scripts to run the code, as there may be conflicts with a conda environment, especially if the Python version is not as expected.
-        - You will be provided with the complete output from this step, including any error messages encountered during setup.
 
       Step 2: Requirements Checking.
         - Carefully verify each requirement, including file locations and other project-specific needs.
         - For example, if a requirement specifies that a file should be in a certain folder, check this thoroughly.
 
       Step 3: Code Execution and Observation.
-        - After environment setup, run the project using the provided tools.
-        - You will receive the full output from this execution, including any runtime errors or exceptions.
+        - Run the project using the docker shell tool.
         - If the task has specific metrics, ensure they are satisfied.
-        - Check not only if the code runs, but also if it runs as required (e.g., starting from specified files).
         - For paper reproduction tasks, verify that all experiments have been conducted and that results are consistent with the paper.
 
       Step 4: Analyze Errors and Read Files.
@@ -85,7 +74,7 @@ callbacks:
 tools:
   state_transition:
     mcp: false
-  execute_shell:
+  docker_shell:
     mcp: false
   document_inspector:
     mcp: false
