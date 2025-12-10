@@ -7,7 +7,6 @@ test.py
 ssrf_protect.py
 ssrf.patch
 test/
-# C extensions
 *.so
 
 memory/
