@@ -1,13 +1,7 @@
 llm:
   service: openai
-  #model: a6000mnt/Qwen-235B-A35B-thinking
-  #model: a6000mnt/Qwen_30B_code
-  #model: a6000mnt/Qwen_30B_thinking
-  #model: Qwen_30B_code
   model: qwen3-max
   openai_api_key:  
-  #openai_base_url: http://210.28.134.171:8000/v1
-  #openai_base_url: http://210.28.135.93:8000/v1
   openai_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
 
 agent : research
@@ -34,9 +28,8 @@ prompt:
     4. If more information is needed, consider using tools to search on the website to get more information.
     5. Pay attention that if you search in rag, please use English as the data of the rag is in English.
     6. If you think you have finished the research, use tool to exit the task with your final result.
-    7.When you want to exit the task, don't forget to pass your final research result as the param else the result will not be used by others.
-    8.Make sure the result you return is the most valuable information you have gathered during the research.
-    9.For some query for precise data, please ensure to provide specific data points or statistics in your final answer.
+    7. When you want to exit the task, don't forget to pass your final research result as the param else the result will not be used by others.
+    8. Make sure the result you return is the most valuable information you have gathered during the research.
 
 tools:
   finish:

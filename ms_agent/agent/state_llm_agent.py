@@ -103,8 +103,6 @@ class State_LLMAgent(LLMAgent):
     async def step(
         self, messages: List[Message]
     ) -> AsyncGenerator[List[Message], Any]:  # type: ignore
-        
-        print(messages)
         messages = deepcopy(messages)
         if (not self.load_cache) or messages[-1].role != "assistant":
             await self.on_generate_response(messages)

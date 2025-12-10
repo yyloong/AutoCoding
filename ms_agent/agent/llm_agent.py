@@ -445,7 +445,6 @@ class LLMAgent(Agent):
         Returns:
             List[Message]: Updated message history after this step.
         """
-        print(messages)
         messages = deepcopy(messages)
         if (not self.load_cache) or messages[-1].role != "assistant":
             tools = await self.tool_manager.get_tools()
