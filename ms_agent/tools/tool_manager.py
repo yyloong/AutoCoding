@@ -20,17 +20,18 @@ from ms_agent.tools.deepresearch_tool.deepresearch import DeepresearchTool
 from ms_agent.tools.document_inspector.document_inspector import document_inspector
 from ms_agent.tools.mcp_client import MCPClient
 from ms_agent.tools.rag_tool import RAGTool
-from ms_agent.tools.split_task.split_task import SplitTask
-
-# from ms_agent.tools.debug import Environment_set_up, run_code
+from ms_agent.tools.split_task.split_task import SplitTask 
 from ms_agent.tools.exit_task import Exit as exit_task
+from ms_agent.tools.query_human import Query_human
+from ms_agent.tools.docker_shell import docker_shell
 from ms_agent.utils import get_logger
 from ms_agent.utils.constants import TOOL_PLUGIN_NAME
+
 
 logger = get_logger()
 
 MAX_TOOL_NAME_LEN = int(os.getenv("MAX_TOOL_NAME_LEN", 64))
-TOOL_CALL_TIMEOUT = int(os.getenv("TOOL_CALL_TIMEOUT", 30))
+TOOL_CALL_TIMEOUT = int(os.getenv("TOOL_CALL_TIMEOUT", 300))
 MAX_CONCURRENT_TOOLS = int(os.getenv("MAX_CONCURRENT_TOOLS", 20))
 
 
@@ -88,6 +89,14 @@ class ToolManager:
         if hasattr(config, "tools") and hasattr(config.tools, "file_system"):
             self.extra_tools.append(
                 FileSystemTool(config, trust_remote_code=self.trust_remote_code)
+            )
+        if hasattr(config, "tools") and hasattr(config.tools, "query_human"):
+            self.extra_tools.append(
+                Query_human(config, trust_remote_code=self.trust_remote_code)
+            )
+        if hasattr(config, "tools") and hasattr(config.tools, "docker_shell"):
+            self.extra_tools.append(
+                docker_shell(config, trust_remote_code=self.trust_remote_code)
             )
         self.tool_call_timeout = getattr(config, "tool_call_timeout", TOOL_CALL_TIMEOUT)
         local_dir = self.config.local_dir if hasattr(self.config, "local_dir") else None
