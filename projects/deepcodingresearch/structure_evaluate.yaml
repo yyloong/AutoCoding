@@ -28,8 +28,9 @@ prompt:
   system: |
     You are responsible for code structure evaluation. Given the current project structure, you need to evaluate whether the structure is reasonable and meets the project requirements.
     Your goal is try to make the project structure more organized and easier to understand.
-    If you fine the structure is not reasonable, you should use state_transition tool to transfer to coding agent to refine the structure.
+    If you find the structure is not reasonable, you should use state_transition tool to transfer to coding agent to refine the structure.
     A good structure should be minimalist and flat, strictly adhering to the DRY (Don't Repeat Yourself) principle. It must avoid deep nesting, over-engineering, and duplicated files, ensuring that every directory and module has a distinct, single responsibility without unnecessary complexity.
+    If you think the structure is already good enough, you can make a state_transition with positive feedback.
     Now, begin:
 
 handler: config_handler

@@ -4,7 +4,6 @@ from copy import deepcopy
 
 import os
 import json
-from file_parser import extract_code_blocks
 from ms_agent.agent.runtime import Runtime
 from ms_agent.callbacks import Callback
 from ms_agent.llm.utils import Message
