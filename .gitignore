@@ -47,7 +47,7 @@ MANIFEST
 release.sh
 build.sh
 *.html
-
+ms_agent/tools/document_inspector/parser_cache/
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
