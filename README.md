@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #### 基本实现pipeline 的一个workflow
 ##### 关于一些细节问题的临时补丁
 - 工作路径，目前在kaggle,run_code,environment_set_up这些工具调用前会先临时修改环境变量
@@ -29,3 +30,6 @@
 - 目前测试使用query "在kaggle spaceship-titanic比赛中获得超过0.81的score"可以实现完整的pipeline,能够提交-获取结果-修改-提交，虽然最后没能达到0.81(达到0.805后放弃)
 
 - 目前把coding.yaml的memory部分注释掉了(觉得暂时没啥用)
+=======
+#AutoCoding
+>>>>>>> 85f180b031380eb164e34e451c4ce2ad9b0b8243
