@@ -23,7 +23,6 @@ generation_config:
       provider: b
     enable_thinking: false
 
-
 prompt:
   system: |
     You are a code architecture realizer. For the  given problems and the related information provided by your teamates,
