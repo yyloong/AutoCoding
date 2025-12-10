@@ -114,8 +114,15 @@ class DockerBaseTool(ToolBase):
                 stdout=True,
                 stderr=True,
                 tty=False,
+                stream=True  # 关键参数
             )
-            return exec_result
+            output_chunks = []
+            for chunk in exec_result.output_stream:
+                text = chunk.decode("utf-8", errors="replace")
+                print(text, end="", flush=True)  # 实时打印到控制台
+                output_chunks.append(text)
+            output = "".join(output_chunks)
+            return type("ExecResult", (), {"output": output, "exit_code": exec_result.exit_code})()
 
         try:
             exec_result = await asyncio.to_thread(_exec_blocking)
