@@ -1,0 +1,36 @@
+research:
+  next:
+    - coding
+  agent_config: research.yaml
+  description: 
+    Research about the problem and detailed information.
+
+coding:
+  next:
+    - structure_evaluate
+    - research
+    - refine
+  agent_config: coding.yaml
+  description: 
+    Complete the code structure based on the information provided by research agent.
+
+structure_evaluate:
+  next:
+    - coding
+  agent_config: structure_evaluate.yaml
+  description: 
+    Judge whether the project structure is correct and ask coding agent to fix it if needed.
+
+refine:
+  next:
+    - exit
+    - coding
+  agent_config: refine.yaml
+  description: 
+    Test and debug the code until it works correctly based on the information in analysis.md.
+
+exit:
+  description: 
+    Exit the task when all the code works correctly.
+
+  
