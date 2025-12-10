@@ -31,24 +31,27 @@ prompt:
       each time you try to write the code , you should think if there is a clearly root cause for the bug and fix it rather than write your own project.
       Your workflow is the process below:
         Step 1: Environment Setup. First,you should use the provided tools to set up the project environment. This involves installing all dependencies specified in the project's configuration files (package.json for Node.js projects, requirements.txt or pyproject.toml for Python projects) using the appropriate package manager command (npm install or uv install). You will be given the complete output from this step, including any error messages encountered during setup.
-        if it is a python project , you should use uv venv --python <python version> to create a virtual environment first before installing the dependencies.
-        Step 2: Code Execution and Observation. After step1,you should run the project using the provided tools. You will be provided with the full output from this execution, including any runtime errors or exceptions that occur.
+        If it is a python project , you should use uv venv --python <python version> to create a virtual environment first before installing the dependencies,and it is highly advised that you use uv run --python=.venv/bin/python <file> command or write it in your scripts to run the code because there may be a conda environment conflicting with the project environment,especially when the python version is not what you expect(it may means you use python in the conda environment).
+        Step 2: Requirements checking,you should focus on the requirements very carefully one by one if all requirements are med,including some location about the files.For example,if the requirement says that some file should be in some folder,you should check it carefully.
+        Step 3: Code Execution and Observation. After step1,you should run the project using the provided tools. You will be provided with the full output from this execution, including any runtime errors or exceptions that occur.
         If the task has a concrete metrics , you should make sure it satisfies the metrics.
+        You should not only check if it can be run,but also check if it is run as the required way,such as starting from some pointed files.
         For example,in the paper reproduction task, you should check whether all the experiments have been done,and whether the results are consistent with the paper.
-        Step 3: Analyze Errors and Read Files. Based on the error messages from the previous steps, you need to use tools to read the relevant files to analyze the problem:
+        Step 4: Analyze Errors and Read Files. Based on the error messages from the previous steps, you need to use tools to read the relevant files to analyze the problem:
         The error-reporting file.
         The upstream files that reference the error-reporting file.
         The project's configuration files, specifically package.json or requirements.txt / pyproject.toml.
         Remember: You need to analyze the problem end-to-end and consider all possibilities completely. If the current information is insufficient to locate the root cause, you should read more distant related files.
-        Step 4: Find the Root Cause and Fix It.
+        Step 5: Find the Root Cause and Fix It.
         If the problem is related to interfaces between different modules or functions, you should suspect whether function signatures, data formats, and return values are correctly aligned.
         If the problem is related to dependencies or modules not being found (often an error from Step 1 or Step 2), you must inspect the configuration files. For Node.js, check package.json for missing or incorrect dependencies. For Python, check requirements.txt to ensure all packages are listed for uv to install.
         If the problem is a runtime exception, carefully examine the error message and traceback to identify the exact line of code causing the issue.
         Pay attention to all arguments and import/require statements related to the error line, and whether there are related issues in the files; fix them also.
         Do a minimum change in case that the normal code is damaged. If you are doing a breaking change, change related files also.
         Fix other issues you discover while reading the code files, but only if you have clearly identified their root cause.
-        Step 5: Express Your Thinking and Fixes. Express your thinking in concise and clear language. And then use the provided tools to make the necessary code changes to fix the identified issues.
-        Step 6: Don't try to make a big change on the code structure,but you can try to contact other agents to do so.
+        Step 6: Express Your Thinking and Fixes. Express your thinking in concise and clear language. And then use the provided tools to make the necessary code changes to fix the identified issues.
+        Step 7: Don't try to make a big change on the code structure,but you can try to contact other agents to do so by using tool to make a state transition.
+        Tips: If you have forget some of the requirements or evaluation of the project,you can check them again. 
     Let's begin:
 
 agent: refine
@@ -72,7 +75,7 @@ tools:
   deepresearch:
     mcp: false
 
-max_chat_round: 100
+max_chat_round: 200
 
 tool_call_timeout: 30000
 

@@ -11,7 +11,7 @@ coding:
     - research
   agent_config: coding.yaml
   description: 
-    Implement the code to solve the problem step by step.
+    Complete the code structure based on the information provided by research agent.
 
 structure_arrange:
   next:

@@ -221,12 +221,12 @@ def _analyze_image_with_vlm(image_path: str, context: str = "") -> str:
 
     # 3. 构造 Prompt (针对 Coding 任务优化)
     prompt_text = (
-        f"你是一个高级软件架构师。请分析这张来自{context}的图片。\n"
-        "核心任务：提取图片中的逻辑结构，用于辅助代码生成。\n"
-        "1. **流程图**：请输出 Mermaid graph TD 代码，准确描述节点判定和跳转。\n"
-        "2. **架构图**：描述模块划分和数据流向。\n"
-        "3. **纯文本/表格**：提取关键数据。\n"
-        "如果不包含技术信息，请简短说明。"
+        f"你是一个图像分析师,通过分析图像更好地协助coding任务。请分析这张来自{context}的图片。\n"
+        "如果这是一张流程图，你需要提取其中的执行流程和依赖关系，并清晰表述出流程，可以用->等文本符号辅助表示"
+        "如果这是一张数据图表，比如折线图或者热力图等，你需要提取其中的指标用于一些复现或者数据分析任务,具体的，你需要提取出其中关键的数据点和一些整体特征."
+        "如果这是一张不含具体数据的图片，用语言描述其内容"
+        "如果图片中包含关键的数据信息比如图片标号之类的内容，你需要精准表述出来"
+        "输出格式为: 图片:<{分析结果}>"
     )
 
     try:
@@ -370,7 +370,7 @@ try:
 except ImportError:
     convert_from_path = None
 
-def parse_pdf(pdf_path: str, extract_image: bool = False) -> List[dict]:
+def parse_pdf(pdf_path: str, extract_image: bool = True) -> List[dict]:
     """
     解析 PDF：优先提取文本/表格，针对扫描件或图表页调用 VLM。
     """
@@ -871,7 +871,7 @@ if __name__ == "__main__":
     
     # 1. 设置待测试的真实文件路径 (支持 PDF, PPTX, DOCX 等)
     # Windows 用户请注意路径转义，例如 "D:\\Documents\\architecture_v1.pptx"
-    TEST_FILE_PATH = "/home/u-longyy/电脑维修证明.doc"  # <-- 修改为你的本地文件路径
+    TEST_FILE_PATH = "/home/u-longyy/ms-agent/new_output/paper.pdf"  # <-- 修改为你的本地文件路径
 
     # 2. 检查 API Key (如果你启用了 VLM 视觉分析)
     if not os.getenv("DASHSCOPE_API_KEY"):

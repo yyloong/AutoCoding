@@ -1,5 +1,6 @@
 # Copyright (c) Alibaba, Inc. and its affiliates.
 import subprocess
+import time
 import asyncio
 import os
 import shlex
@@ -168,7 +169,7 @@ class execute_shell(ToolBase):
 
             captured_output = []
             total_chars = 0
-            truncated = False
+            output_file_path = None # 用于标记是否转为文件输出
 
             # 实时读取输出
             while True:
@@ -176,40 +177,59 @@ class execute_shell(ToolBase):
                 if not line:
                     break
                 
-                decoded_line = line.decode(errors='replace') # 这里先不strip，为了计算准确长度
+                decoded_line = line.decode(errors='replace') 
                 line_len = len(decoded_line)
 
-                # 检查长度限制
-                if total_chars + line_len > MAX_OUTPUT_CHARS:
-                    # 计算剩余可允许的字符数
-                    remaining = MAX_OUTPUT_CHARS - total_chars
-                    captured_output.append(decoded_line[:remaining])
-                    
-                    msg = f"\n\n[SYSTEM WARNING] Output truncated. Exceeded limit of {MAX_OUTPUT_CHARS} characters."
-                    captured_output.append(msg)
-                    print(msg) # 打印到控制台
-                    
-                    truncated = True
-                    # 终止进程，避免后台继续消耗资源或卡死 pipe
-                    try:
-                        process.terminate()
-                    except ProcessLookupError:
-                        pass
-                    break
+                # 模式 A: 已经转为文件输出模式
+                if output_file_path:
+                    with open(output_file_path, "a", encoding="utf-8") as f:
+                        f.write(decoded_line)
                 
-                print(decoded_line.strip())
-                captured_output.append(decoded_line)
-                total_chars += line_len
+                # 模式 B: 还在内存捕获模式，检查是否超出限制
+                else:
+                    if total_chars + line_len > MAX_OUTPUT_CHARS:
+                        # --- 触发限制：切换到文件模式 ---
+                        
+                        # 1. 生成文件名 (例如: output_1715000000.txt)
+                        filename = f"cmd_output_{int(time.time())}.txt"
+                        output_file_path = os.path.join(os.getcwd(), filename) # 或者指定特定的 temp 目录
+                        
+                        # 2. 将内存中已有的内容写入文件
+                        with open(output_file_path, "w", encoding="utf-8") as f:
+                            f.write("".join(captured_output)) # 写入之前的历史
+                            f.write(decoded_line)             # 写入当前这行
+                        
+                        # 3. 清空内存以释放资源
+                        captured_output = [] 
+                        
+                        msg = f"\n[SYSTEM] Output exceeded {MAX_OUTPUT_CHARS} chars. Redirecting remaining output to file: {filename}"
+                        print(msg) # 控制台提示
+                        
+                        # 注意：这里不再 terminate 进程，而是继续循环直到进程结束，但后续内容都会进 if output_file_path 分支
+                    else:
+                        # 未超限，正常存入内存并打印
+                        print(decoded_line.strip())
+                        captured_output.append(decoded_line)
+                        total_chars += line_len
 
-            # 等待进程完全退出
-            if truncated:
-                # 如果是我们主动截断并terminate的，不需要等待正常退出码
-                await process.wait()
-                return "".join(captured_output)
+            # 等待进程退出
+            return_code = await process.wait()
+
+            # --- 5. 构造返回结果 ---
+            
+            # 情况 A: 输出被转存到了文件
+            if output_file_path:
+                status_msg = "Success" if return_code == 0 else f"Failed (Code {return_code})"
+                return (
+                    f"{status_msg}. Output length exceeded limit ({MAX_OUTPUT_CHARS} chars).\n"
+                    f"Full output has been saved to: {output_file_path}\n"
+                    f"It is advised that you don't read the entire file at once to avoid context overload."
+                    f" You can use shell tools like 'head', 'tail', or 'less' to view parts of the file."
+                )
+
+            # 情况 B: 输出未超限，直接返回字符串
             else:
-                return_code = await process.wait()
                 full_output = "".join(captured_output)
-
                 if return_code != 0:
                     return f"Command failed (Code {return_code}):\n{full_output}"
                 
