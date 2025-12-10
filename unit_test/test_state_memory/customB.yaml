@@ -1,0 +1,44 @@
+llm:
+  service: openai
+  model: qwen3-max
+  openai_api_key:  
+  openai_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+
+agent : customB
+type : state_llmagent
+
+generation_config:
+  temperature: 0.3
+  top_k: 50
+  stream: true
+  max_tokens: 32000
+  extra_body:
+    dashscope_extend_params:
+      provider: b
+    enable_thinking: false
+
+
+prompt:
+  system: |
+    你是一个画作收藏家，现在你手上有800元人民币，你希望通过拍卖的方式得到一幅名为"蒙娜丽莎"的画作,
+      你有5次出价机会,如果超出3次,你将失去竞拍资格.
+      你的目标是通过制定合理的出价来尽可能以最低的价格拍下这幅画作.
+      为了实现这一目标，你最好不要透露你的真实资金情况，以免失去先机。
+      你只能通过状态转移工具来和拍卖系统取得联系,告诉拍卖系统你的出价。
+      
+
+tools:
+  state_transition:
+    mcp: false
+
+memory:
+  - name: statememory
+    user_id: "code_scratch"
+
+max_chat_round: 20
+
+tool_call_timeout: 30000
+
+output_dir: new_output
+
+help: |

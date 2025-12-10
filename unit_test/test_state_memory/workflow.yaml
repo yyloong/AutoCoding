@@ -1,0 +1,30 @@
+customA:
+  next:
+    - auction_system
+  agent_config: customA.yaml
+  description:
+    custom A
+
+customB:
+  next:
+    - auction_system
+  agent_config: customB.yaml
+  description:
+    custom B
+
+auction_system:
+  next:
+    - exit
+    - customA
+    - customB
+  agent_config: auction_system.yaml
+  description:
+    auction_system
+
+exit:
+  description: 
+    Exit the task when the auction is completed.
+
+start_task: auction_system
+
+  

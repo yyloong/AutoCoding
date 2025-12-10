@@ -36,6 +36,7 @@ prompt:
     6. If you think you have finished the research, use tool to exit the task with your final result.
     7.When you want to exit the task, don't forget to pass your final research result as the param else the result will not be used by others.
     8.Make sure the result you return is the most valuable information you have gathered during the research.
+    9.For some query for precise data, please ensure to provide specific data points or statistics in your final answer.
 
 tools:
   finish:
