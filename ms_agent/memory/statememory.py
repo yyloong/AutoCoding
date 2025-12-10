@@ -131,7 +131,7 @@ class ExactStateMemory(Memory):
         self.initialize_condense_llm()
 
     def initialize_condense_llm(self):
-        # 强制指定 state memory 用 qwen3-coder-flash
+        # 强制指定 state memory 用 qwen-flash
         if hasattr(self.config, "llm"):
             self.config.llm.model = "qwen-flash"
         else:
