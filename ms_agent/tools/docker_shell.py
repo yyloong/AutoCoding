@@ -128,7 +128,11 @@ class DockerBaseTool(ToolBase):
             if len(joined) > MAX_OUTPUT_CHARS:
                 joined = joined[-MAX_OUTPUT_CHARS:]
             if len(output) > len(joined):
-                joined = f"\n[Output truncated to last {MAX_OUTPUT_LINES} lines or {MAX_OUTPUT_CHARS} characters]\n" + joined
+                # 将完整输出保存到文件
+                full_output_path = os.path.join(self.output_dir, "full_docker_output.txt")
+                with open(full_output_path, "w", encoding="utf-8") as f:
+                    f.write(output)
+                joined = f"\n[Output truncated to last {MAX_OUTPUT_LINES} lines or {MAX_OUTPUT_CHARS} characters. Full ouput have been saved to {full_output_path}, You can use shell tools like 'head', 'tail', or 'less' to view parts of the file if needed.]\n\n" +  joined
             return joined if joined.strip() else "Execution successful (no output)."
         except Exception as e:
             return f"Docker execution system error: {str(e)}"
