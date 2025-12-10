@@ -31,6 +31,7 @@ prompt:
     1. 当前路径为 `/workspace`
     2. 工具 docker shell 提供了一个完整的 Linux 环境，可以用来执行命令、安装依赖、运行和测试代码
     3. 代码要实用、可运行，不要写伪代码或框架代码
+    4. 运用 kaggle tools 来下载数据集
 
     **与 state_transition 工具的配合**
     - 如果在编写过程中，需要联网调研问题，你可以调用工具 `state_transition---researcher`，将完整详细的调研请求通过 message 字段传递给 researcher agent 进行调研。然后会有一个 researcher agent 返回调研报告给你。

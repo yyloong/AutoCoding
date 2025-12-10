@@ -110,6 +110,8 @@ class kaggle_tools(ToolBase):
         return result
         
     async def download_dataset(self, competition: str, path: str) -> str:
+        # 将 path 中的 /workspace 替换为 self.output_dir
+        path = path.replace('/workspace', self.output_dir)
         cmd_set = [
             f'kaggle competitions download -c {competition} -p {path}',
             f'unzip {path}/*.zip -d {path}',
@@ -134,6 +136,8 @@ class kaggle_tools(ToolBase):
 
     
     async def submit_csv(self, competition: str, file_path: str, submit_message: str) -> str:
+        # 将 file_path 中的 /workspace 替换为 self.output_dir
+        file_path = file_path.replace('/workspace', self.output_dir)
         cmd = f'kaggle competitions submit -c {competition} -f {file_path} -m "{submit_message}"'
         #get file name
         file_name = os.path.basename(file_path)
