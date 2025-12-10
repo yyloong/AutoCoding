@@ -39,6 +39,7 @@ prompt:
     If you have finished your task you can use state_transition tool to transfer another agent since you have no right to exit the whole project.
     You should first ask architecture_evaluate agent to check whether the structure is correct.
     Then you should ask refine agent to test and debug the code until it works correctly.
+    Only when the structure_evaluate agent agree with your architecture,you can transfer to refine agent.
     Now, begin:
 
 handler: config_handler
