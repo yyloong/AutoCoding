@@ -1,37 +1,19 @@
 llm:
   service: openai
-  #model: a6000mnt/Qwen-235B-A35B-thinking
-  #model: a6000mnt/Qwen_30B_code
-  #model: a6000mnt/Qwen_30B_thinking
-  #model: Qwen_30B_code
   model: qwen3-max
   openai_api_key:  
-  #openai_base_url: http://210.28.134.171:8000/v1
-  #openai_base_url: http://210.28.135.93:8000/v1
   openai_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
-
-agent: rag
-
-generation_config:
-  temperature: 0.2
-  top_k: 20
-  stream: true
-  max_tokens: 32000
-  extra_body:
-    dashscope_extend_params:
-      provider: b
-    enable_thinking: false
 
 rag:
   documents_dirs:
     path_list:
-      - /home/u-longyy/kaggle_data_code
-      - /home/u-longyy/kaggle_meta_data/processed/text
+      - raw_data_path_1
+      - raw_data_path_2
     name_list:
-      - kaggle_code
-      - kaggle_discussions
+      - rag_name_1
+      - rag_name_2
     description_list:
-      - code files from kaggle competitions
-      - discussion posts from kaggle competitions
+      - description for rag 1
+      - description for rag 2
   embedding: Qwen/Qwen3-Embedding-0.6B
-  use_storage: True
+  use_storage: False
