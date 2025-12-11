@@ -35,9 +35,7 @@ pip install -r requirements.txt
 以示例工作流 `projects/deepcodingresearch/workflow.yaml` 为例：
 
 ```bash
-python -m ms_agent.cli.cli run \
-	--config projects/deepcodingresearch/workflow.yaml \
-	--query "帮我完成论文复现的代码结构设计"
+PYTHONPATH=. python ms_agent/cli/cli.py run --config projects/deepcodingresearch --query '查看目录下的instructions.txt文件并执行相关任务' --trust_remote_code true
 ```
 
 - 若省略 `--query`，将进入交互模式。
@@ -51,19 +49,19 @@ python -m ms_agent.cli.cli run \
 定义节点关系与各节点使用的 agent 配置文件：
 ```yaml
 research:
-	next: [coding]
-	agent_config: research.yaml
+    next: [coding]
+    agent_config: research.yaml
 coding:
-	next: [structure_evaluate, research, refine]
-	agent_config: coding.yaml
+    next: [structure_evaluate, research, refine]
+    agent_config: coding.yaml
 structure_evaluate:
-	next: [coding]
-	agent_config: structure_evaluate.yaml
+    next: [coding]
+    agent_config: structure_evaluate.yaml
 refine:
-	next: [exit, coding]
-	agent_config: refine.yaml
+    next: [exit, coding]
+    agent_config: refine.yaml
 exit:
-	description: Exit the task when all the code works correctly.
+    description: Exit the task when all the code works correctly.
 ```
 
 ### 单 Agent (`*.yaml`)
@@ -117,8 +115,11 @@ output_dir: new_output
 ## 测试与开发
 ### 快速执行
 ```bash
-python -m unittest discover unit_test -v
+python -m unit_test.test_deepresearch
+python -m unit_test.test_rag
+...
 ```
+对于**test_state_memory**,可以通过前面的执行project的命令来执行，不过需要修改路径
 
 ### 单测覆盖点
 - `test_deepresearch.py`：调用 `DeepresearchTool` 的 research 能力示例。
