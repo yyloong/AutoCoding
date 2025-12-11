@@ -122,6 +122,7 @@ class DockerBaseTool(ToolBase):
             # 独立线程监听 /i 中断指令，并尽快 kill 当前会话容器
             cancel_event = threading.Event()
             stop_watch_event = threading.Event()
+            user_advice = ""  # 关键：先初始化，避免未赋值就被 return
 
             def _interrupt_watcher():
                 if not sys.stdin or not sys.stdin.isatty():
