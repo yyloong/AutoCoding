@@ -141,14 +141,19 @@ output_dir: new_output
 ```bash
 python -m unit_test.test_deepresearch
 python -m unit_test.test_rag
-...
+python -m unit_test.test_document_tool
+python -m unit_test.test_file_parser
 ```
 
 测试statememory 构建了一个模拟拍卖环境来测试agent之间的交互情况
 ```bash
-PYTHONPATH=. python ms_agent/cli/cli.py run --config unit_test/test_state_memory --query 'auction start' --trust_remote_code true --load_cache true
+sh unit_test/test_state_memory.sh
 ```
 
+测试 human-in-the-loop 功能，你可以随时打断agent，提出新的指令
+```bash
+sh unit_test/test_human_in_loop.sh
+```
 
 ### 单测覆盖点
 - `test_deepresearch.py`：调用 `DeepresearchTool` 的 research 能力示例。
@@ -156,6 +161,7 @@ PYTHONPATH=. python ms_agent/cli/cli.py run --config unit_test/test_state_memory
 - `test_rag.py`：初始化多路 `llama-index` RAG，构建索引后进行查询并打印调试信息。
 - `test_file_parser.py`：演示 `SingleFileParser` 真实文件解析与缓存命中校验（需将示例中的文件路径与缓存目录替换为本地可用路径）。
 - `test_state_memory/`：自定义拍卖工作流的状态迁移配置样例 (`workflow.yaml` 等)。
+- `test_human_in_loop.sh`：演示 human-in-the-loop 功能，用户可随时打断 agent 并输入新指令。
 
 > 部分测试需要外部依赖：
 > - LLM/RAG/视觉解析相关测试需有效的 OpenAI 兼容或 ModelScope API Key（放入 `.env` 或直接设环境变量）。
