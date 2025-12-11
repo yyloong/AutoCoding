@@ -21,44 +21,48 @@ unit_test/            # 单元测试样例
 ```
 
 ## 环境准备
-- Python 3.11（建议使用 conda/venv）
-- 已获取的 OpenAI 兼容 API Key 或 ModelScope API Key
+
+克隆仓库代码
+
+```bash
+git clone https://github.com/yyloong/AutoCoding.git
+cd AutoCoding
+```
+
+`Python 3.11`（建议使用 `conda/venv`）
 
 ```bash
 conda create -n autocoding python=3.11
-conda install poppler
 conda activate autocoding
 pip install -r requirements.txt
 ```
 
-## docker 环境
-用该命令构建 docker 镜像：
+如果需要提取文档图片，需要另外安装 poppler
+
+```bash
+conda install poppler
+```
+
+## `docker` 镜像
+
+本仓库已经准备好了 `Dockfile` 镜像，用该命令构建 docker 镜像：
+
 ```bash
 sh set_up.sh
 ```
-支持 cuda 环境，包含基本的开发依赖。
 
-设置相关api-key
+该 `docker image` 支持 `cuda` 环境，包含基本的开发依赖。用于 agent 在该 docker 环境下受控地执行命令。
+
+## API key 准备
+
 ```bash
-export SERPER_KEY_ID = xxx
 export OPENAI_API_KEY = xxx
+export SERPER_KEY_ID = xxx
 export JINA_API_KEYS = xxx
 ```
-google api 可以通过https://serper.dev/verify-email获取免费额度
-jina api 可以通过https://jina.ai/获取免费额度
 
-
-## 快速运行
-以示例工作流 `projects/deepcodingresearch/workflow.yaml` 为例：
-
-```bash
-PYTHONPATH=. python ms_agent/cli/cli.py run --config projects/deepcodingresearch --query '查看目录下的instructions.txt文件并执行相关任务' --trust_remote_code true
-```
-
-- 若省略 `--query`，将进入交互模式。
-- `--load_cache true`：复用上一次的对话/工具调用缓存。
-- `--trust_remote_code true`：信任远端模型仓库中的自定义代码（从 ModelScope 拉取配置时需显式开启）。
-- `--mcp_config` / `--mcp_server_file`：额外挂载 MCP server 配置。
+> `google api`  可以通过 https://serper.dev/verify-email 获取
+> `jina api`  可以通过 https://jina.ai/ 获取
 
 ## 配置说明
 ### 工作流 (`workflow.yaml`)
