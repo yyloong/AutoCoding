@@ -31,6 +31,13 @@ pip install -r requirements.txt
 # 可在项目根目录创建 .env，写入 OPENAI_API_KEY / OPENAI_BASE_URL / MODELSCOPE_API_KEY 等
 ```
 
+## docker 环境
+用该命令构建 docker 镜像：
+```bash
+sh set_up.sh
+```
+支持 cuda 环境，包含基本的开发依赖。
+
 ## 快速运行
 以示例工作流 `projects/deepcodingresearch/workflow.yaml` 为例：
 
@@ -131,4 +138,25 @@ python -m unit_test.test_rag
 > 部分测试需要外部依赖：
 > - LLM/RAG/视觉解析相关测试需有效的 OpenAI 兼容或 ModelScope API Key（放入 `.env` 或直接设环境变量）。
 > - `test_file_parser.py` 需要你提供真实的本地文件路径，并在有图片时准备视觉解析所需的 Key。
+
+
+## Examples
+
+### Kaggle 竞赛
+
+在 `run_kaggle.sh` 中配置你的 API Key 和 Kaggle API TOKEN 后运行：
+
+```bash
+sh run_kaggle.sh
+```
+
+即可启动一个多智能体工作流，自动下载数据集、分析任务、生成代码并提交结果。
+
+### miniGPT
+在 `run_gpt.sh` 中配置你的 API Key 后运行：
+
+```bash
+sh run_gpt.sh
+```
+
 

@@ -1,0 +1,36 @@
+researcher:
+  next:
+    - planner
+    - coder
+  agent_config: researcher.yaml
+  description: 
+    Research about the problem and detailed information.
+
+planner:
+  next:
+    - coder
+  agent_config: planner.yaml
+  description: 
+    Create a detailed plan for solving the problem.
+
+coder:
+  next:
+    - researcher
+    - refiner
+  agent_config: coder.yaml
+  description: 
+    Complete the code structure based on the plan created by the planner.
+
+refiner:
+  next:
+    - exit
+    - coder
+  agent_config: refiner.yaml
+  description: 
+    Test and debug the code until it works correctly based on the information in analysis.md.
+
+exit:
+  description: 
+    Exit the task when all the code works correctly.
+
+  

@@ -7,7 +7,6 @@ test.py
 ssrf_protect.py
 ssrf.patch
 test/
-# C extensions
 *.so
 
 memory/
@@ -164,3 +163,6 @@ neo4j.lock
 
 **/temp_workspace/
 ms_agent/app/temp_workspace/
+ms_agent/tools/document_inspector/parser_cache/
+
+tmp.sh

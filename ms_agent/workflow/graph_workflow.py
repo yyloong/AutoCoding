@@ -1,15 +1,11 @@
-# Copyright (c) Alibaba, Inc. and its affiliates.
-
 import os
 from collections import defaultdict
 from ms_agent.agent.loader import AgentLoader
 from ms_agent.utils import get_logger
-import tiktoken
 from ms_agent.workflow.base import Workflow
 from omegaconf import DictConfig
 
 logger = get_logger()
-
 
 class GraphWorkflow(Workflow):
     """A workflow implementation that executes tasks in a sequential chain."""

@@ -25,8 +25,12 @@ class State_transition(ToolBase):
                         "type": "object",
                         "properties": {
                             "message": {
-                                "type": "string",
-                                "description": "Detailed description about your purpose for transitioning to this state.If you want to ask for other state for help,please describe your request very clear.If you just finish your work,you can summary what you have done.",
+                            "type": "string",
+                            "description": (
+                                "Provide a detailed explanation of your reason for transitioning to this state. "
+                                "If you are requesting assistance from another state, please clearly describe your request. "
+                                "If you have completed your task, you may summarize what you have accomplished."
+                            ),
                             },
                         },
                         "required": ["message"],

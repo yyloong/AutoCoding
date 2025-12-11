@@ -1,10 +1,6 @@
-# Copyright (c) Alibaba, Inc. and its affiliates.
-import subprocess
 import asyncio
 import os
-import shutil
-from typing import Optional
-import subprocess
+from time import sleep
 
 from ms_agent.llm.utils import Tool
 from ms_agent.tools.base import ToolBase
@@ -109,6 +105,8 @@ class kaggle_tools(ToolBase):
         return result
         
     async def download_dataset(self, competition: str, path: str) -> str:
+        # 将 path 中的 /workspace 替换为 self.output_dir
+        path = path.replace('/workspace', self.output_dir)
         cmd_set = [
             f'kaggle competitions download -c {competition} -p {path}',
             f'unzip {path}/*.zip -d {path}',
@@ -133,6 +131,8 @@ class kaggle_tools(ToolBase):
 
     
     async def submit_csv(self, competition: str, file_path: str, submit_message: str) -> str:
+        # 将 file_path 中的 /workspace 替换为 self.output_dir
+        file_path = file_path.replace('/workspace', self.output_dir)
         cmd = f'kaggle competitions submit -c {competition} -f {file_path} -m "{submit_message}"'
         #get file name
         file_name = os.path.basename(file_path)
@@ -156,6 +156,7 @@ class kaggle_tools(ToolBase):
 
     async def get_scores(self, competition: str) -> str:
         cmd = f'kaggle competitions submissions -c {competition}'
+        sleep(5)  # Wait for 5 seconds to ensure the latest submission is processed
         process = await asyncio.create_subprocess_shell(
             cmd,
             stdout=asyncio.subprocess.PIPE,

@@ -1,9 +1,7 @@
-# Copyright (c) Alibaba, Inc. and its affiliates.
 from typing import List
 from copy import deepcopy
 
 import os
-import json
 from ms_agent.agent.runtime import Runtime
 from ms_agent.callbacks import Callback
 from ms_agent.llm.utils import Message

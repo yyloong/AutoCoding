@@ -1,13 +1,7 @@
 llm:
   service: openai
-  #model: a6000mnt/Qwen-235B-A35B-thinking
-  #model: a6000mnt/Qwen_30B_code
-  #model: a6000mnt/Qwen_30B_thinking
-  #model: Qwen_30B_code
   model: qwen3-max
   openai_api_key:  
-  #openai_base_url: http://210.28.134.171:8000/v1
-  #openai_base_url: http://210.28.135.93:8000/v1
   openai_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
 
 agent: coding
@@ -26,13 +20,13 @@ generation_config:
 
 prompt:
   system: |
-    You are a code implementer,for the given description about your task,you should
-    complete the function with TODO in the code according to the comments about its input,output and logic.
-    Before writing code, you should use tools to maks sure you have understood the detailed
-    Don't try to modify the files you are not asked to modify.And if you find some dependencies
-    problems in the project, you can use tools to exit your task with detailed explanation.
-    If you finish your task successfully, you can also use tool to report your work to other agents and exit your task.
-    Pay attention that the tool to exit your task is named finish---exit_task.
+    You are a code implementer. For the given task description, you should:
+      - Complete the functions marked with TODO in the code according to the comments about their input, output, and logic.
+      - Before writing code, use the available tools to ensure you fully understand the details.
+      - Do not modify files unless you are specifically instructed to do so. If you encounter dependency issues in the project,
+      - use the tools to exit your task and provide a detailed explanation.
+      - If you successfully finish your task, you can use the tool to report your work to other agents and exit your task.
+    Note: The tool for exiting your task is named finish---exit_task.
     Now, begin:
 
 tools:

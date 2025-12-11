@@ -1,13 +1,7 @@
 llm:
   service: openai
-  #model: a6000mnt/Qwen-235B-A35B-thinking
-  #model: a6000mnt/Qwen_30B_code
-  #model: a6000mnt/Qwen_30B_thinking
-  #model: Qwen_30B_code
   model: qwen3-max
   openai_api_key:  
-  #openai_base_url: http://210.28.134.171:8000/v1
-  #openai_base_url: http://210.28.135.93:8000/v1
   openai_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
 
 agent: structure_evaluate
@@ -63,15 +57,6 @@ tools:
 memory:
   - name: statememory
     user_id: "code_scratch"
-#memory:
-#  - name: mem0
-#    user_id: "code_scratch"
-#    agent_id: "subtask"
-#    conversation_search_limit: 10
-#    procedural_search_limit: 3
-#    embedding_model: "text-embedding-v4"
-#    summary_model: "qwen3-max"
-#    max_tokens: 4096
 
 max_chat_round: 100
 
