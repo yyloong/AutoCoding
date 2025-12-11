@@ -19,4 +19,5 @@ llama-index
 llama-index-retrievers-bm25
 llama-index-embeddings-huggingface
 llama-index-embeddings-openai
+pdf2image
 docker
