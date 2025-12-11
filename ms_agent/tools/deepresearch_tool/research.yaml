@@ -42,14 +42,14 @@ tools:
 rag:
   documents_dirs:
     path_list:
-      - /home/u-longyy/kaggle_data_code
-      - /home/u-longyy/kaggle_meta_data/processed/text
+      - raw_data1
+      - raw_data2
     name_list:
-      - kaggle_code
-      - kaggle_discussions
+      - rag_name1
+      - rag_name2
     description_list:
-      - code files from kaggle competitions
-      - discussion posts from kaggle competitions
+      - rag_description1
+      - rag_description2
   embedding: Qwen/Qwen3-Embedding-0.6B
   use_storage: True
 
