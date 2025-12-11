@@ -33,9 +33,8 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
 RUN printf "[global]\nindex-url = https://pypi.tuna.tsinghua.edu.cn/simple\ntrusted-host = pypi.tuna.tsinghua.edu.cn\n" > /etc/pip.conf
 
 # 安装 Python 包
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir \
-    pip-tools ipython jupyter numpy pandas black flake8 pytest
+RUN pip install --upgrade pip setuptools wheel && \
+    pip install pip-tools ipython jupyter numpy pandas black flake8 pytest
 
 # 安装 Node.js 工具
 RUN npm install -g yarn pnpm typescript ts-node nodemon

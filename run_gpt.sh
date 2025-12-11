@@ -1,4 +1,7 @@
 rm -rf memory
+rm -rf output
+mkdir output
+cp -r ./examples/gpt_data/data ./output/data
 export OPENAI_API_KEY="Your_OpenAI_API_Key_Here"
 export SERPER_KEY_ID="Your_Serper_API_Key_Here"
 export JINA_API_KEYS="Your_Jina_API_Keys_Here"
