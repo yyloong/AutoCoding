@@ -61,8 +61,9 @@ export SERPER_KEY_ID=xxx
 export JINA_API_KEYS=xxx
 ```
 
-> `google api`  可以通过 https://serper.dev/verify-email 获取
-> `jina api`  可以通过 https://jina.ai/ 获取
+> - `google api`  可以通过 https://serper.dev/verify-email 获取
+> - `jina api`  可以通过 https://jina.ai/ 获取
+> - 如果使用非 OpenAI 的 LLM 服务，需要设置 `export OPENAI_BASE_URL=xxx` 指向对应的兼容接口地址
 
 ## 配置说明
 ### 工作流 (`workflow.yaml`)
