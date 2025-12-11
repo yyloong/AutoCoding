@@ -1,4 +1,4 @@
 docker build -f Dockerfile -t my-dev-env:latest .
 
-# test
-docker run -it my-dev-env:latest /bin/bash
+# test with GPUs
+docker run -it --gpus all my-dev-env:latest /bin/bash

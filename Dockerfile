@@ -1,12 +1,16 @@
-FROM python:3.10-slim
+FROM nvidia/cuda:12.1.0-runtime-ubuntu22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV NODE_ENV=production
 
-# 安装系统依赖（包括常用文件工具）
+# 使用清华镜像源
+RUN sed -i 's|http://archive.ubuntu.com/ubuntu/|https://mirrors.tuna.tsinghua.edu.cn/ubuntu/|g; s|http://security.ubuntu.com/ubuntu/|https://mirrors.tuna.tsinghua.edu.cn/ubuntu/|g' /etc/apt/sources.list
+
+# 安装系统依赖 + Python3.10 + pip
 RUN apt-get update && apt-get install -y \
+    python3 python3-pip python3-venv \
     git curl wget vim nano less tree htop \
     file unzip zip tar gzip \
     build-essential gcc g++ make cmake pkg-config \
@@ -16,9 +20,13 @@ RUN apt-get update && apt-get install -y \
     ca-certificates gnupg lsb-release \
     && rm -rf /var/lib/apt/lists/*
 
+# 统一 python/pip 命令
+RUN ln -s /usr/bin/python3 /usr/local/bin/python && \
+    ln -s /usr/bin/pip3 /usr/local/bin/pip
+
 # 安装 Node.js
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get install -y nodejs && \
+    apt-get update && apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
 
 # 安装 Python 包
@@ -36,7 +44,10 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
 
 WORKDIR /workspace
 
-# 验证安装
+# （可选）安装一个 GPU 框架自检，比如 PyTorch
+# RUN pip install --no-cache-dir "torch==2.3.0+cu121" -f https://download.pytorch.org/whl/torch_stable.html
+
+# 验证安装（nvidia-smi 只在运行时有 GPU 时才会成功）
 RUN python --version && pip --version && uv --version && \
     node --version && npm --version && \
     git --version && file --version && \

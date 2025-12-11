@@ -3,6 +3,7 @@ import asyncio
 import os
 import docker
 from docker.errors import DockerException
+from docker.types import DeviceRequest
 from ms_agent.llm.utils import Tool
 from ms_agent.tools.base import ToolBase
 from ms_agent.utils import get_logger
@@ -75,6 +76,10 @@ class DockerBaseTool(ToolBase):
                 logger.info(f"Pulling image {self.image}...")
                 self.client.images.pull(self.image)
 
+            device_requests = [
+                DeviceRequest(count=-1, capabilities=[["gpu"]])
+            ]
+
             container = self.client.containers.run(
                 self.image,
                 command=["/bin/bash"],   # 长期 bash 会话
@@ -88,6 +93,7 @@ class DockerBaseTool(ToolBase):
                 stdout=True,
                 stderr=True,
                 auto_remove=False,
+                device_requests=device_requests,
             )
             return container
 
