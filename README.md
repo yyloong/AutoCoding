@@ -72,23 +72,23 @@ description: 该状态的描述，用于agent选择状态
 
 ```yaml
 research:
-	next: [coding]
-	agent_config: research.yaml
-	description: description for research
+    next: [coding]
+    agent_config: research.yaml
+    description: description for research
 coding:
-	next: [structure_evaluate, research, refine]
-	agent_config: coding.yaml
+    next: [structure_evaluate, research, refine]
+    agent_config: coding.yaml
     description: description for coding
 structure_evaluate:
-	next: [coding]
-	agent_config: structure_evaluate.yaml
+    next: [coding]
+    agent_config: structure_evaluate.yaml
     description: description for structure_evaluate
 refine:
-	next: [exit, coding]
-	agent_config: refine.yaml
-	description: description for refine
+    next: [exit, coding]
+    agent_config: refine.yaml
+    description: description for refine
 exit:
-	description: description for exit
+    description: description for exit
 ```
 
 ### 单 Agent (`*.yaml`)
@@ -106,7 +106,7 @@ generation_config:
     max_tokens: 32000
 prompt:
     system: |
-		# 系统指令...
+        # 系统指令...
 callbacks:
     - callbacks/tool_use_callback
 tools:
