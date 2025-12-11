@@ -188,7 +188,7 @@ python -m ms_agent.cli.cli run --config projects/kaggle --trust_remote_code true
 sh run_kaggle.sh
 ```
 
-![alt text](kaggle.png)
+![alt text](assets/kaggle.png)
 
 即可启动一个多智能体工作流，自动下载数据集、分析任务、生成代码并提交结果。
 
