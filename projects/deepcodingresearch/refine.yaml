@@ -78,8 +78,6 @@ tools:
     mcp: false
   document_inspector:
     mcp: false
-  kaggle_tools:
-    mcp: false
   deepresearch:
     mcp: false
 
