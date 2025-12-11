@@ -122,10 +122,8 @@ class DockerBaseTool(ToolBase):
             # 独立线程监听 /i 中断指令，并尽快 kill 当前会话容器
             cancel_event = threading.Event()
             stop_watch_event = threading.Event()
-            user_advice = ""
 
             def _interrupt_watcher():
-                nonlocal user_advice
                 if not sys.stdin or not sys.stdin.isatty():
                     return
                 while not stop_watch_event.is_set():
@@ -153,30 +151,6 @@ class DockerBaseTool(ToolBase):
                         logger.error(
                             f"Failed to kill session container on /i interrupt: {e}"
                         )
-
-                    print(
-                        "\n[docker_shell interrupt] '/i' detected. Interrupting the current Docker command execution.\n",
-                        flush=True,
-                    )
-                    banner = r"""
-╔═══════════════════════════════════════════════════════════════════════════════════════════════════╗
-║                                                                                                   ║
-║    ██╗  ██╗██╗   ██╗███╗   ███╗ █████╗ ███╗   ██╗    ██╗███╗   ██╗██████╗ ██╗   ██╗████████╗      ║
-║    ██║  ██║██║   ██║████╗ ████║██╔══██╗████╗  ██║    ██║████╗  ██║██╔══██╗██║   ██║╚══██╔══╝      ║
-║    ███████║██║   ██║██╔████╔██║███████║██╔██╗ ██║    ██║██╔██╗ ██║██████╔╝██║   ██║   ██║         ║
-║    ██╔══██║██║   ██║██║╚██╔╝██║██╔══██║██║╚██╗██║    ██║██║╚██╗██║██╔═══╝ ██║   ██║   ██║         ║
-║    ██║  ██║╚██████╔╝██║ ╚═╝ ██║██║  ██║██║ ╚████║    ██║██║ ╚████║██║     ╚██████╔╝   ██║         ║
-║    ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝    ╚═╝╚═╝  ╚═══╝╚═╝      ╚═════╝    ╚═╝         ║
-║                                                                                                   ║
-╚═══════════════════════════════════════════════════════════════════════════════════════════════════╝
-"""
-                    print(banner, flush=True)
-                    try:
-                        user_advice = input(
-                            "Please enter the reason for interruption and any suggestions for the agent (press Enter to skip): "
-                        ).strip()
-                    except EOFError:
-                        user_advice = ""
                     break
 
             watcher_thread = threading.Thread(
@@ -210,6 +184,29 @@ class DockerBaseTool(ToolBase):
                     interrupted = True
                 if interrupted:
                     chunks.append("\n[docker_shell] The command was interrupted by the user.\n")
+                    print(
+                        "\n[docker_shell interrupt] '/i' detected. Interrupting the current Docker command execution.\n",
+                        flush=True,
+                    )
+                    banner = r"""
+╔═══════════════════════════════════════════════════════════════════════════════════════════════════╗
+║                                                                                                   ║
+║    ██╗  ██╗██╗   ██╗███╗   ███╗ █████╗ ███╗   ██╗    ██╗███╗   ██╗██████╗ ██╗   ██╗████████╗      ║
+║    ██║  ██║██║   ██║████╗ ████║██╔══██╗████╗  ██║    ██║████╗  ██║██╔══██╗██║   ██║╚══██╔══╝      ║
+║    ███████║██║   ██║██╔████╔██║███████║██╔██╗ ██║    ██║██╔██╗ ██║██████╔╝██║   ██║   ██║         ║
+║    ██╔══██║██║   ██║██║╚██╔╝██║██╔══██║██║╚██╗██║    ██║██║╚██╗██║██╔═══╝ ██║   ██║   ██║         ║
+║    ██║  ██║╚██████╔╝██║ ╚═╝ ██║██║  ██║██║ ╚████║    ██║██║ ╚████║██║     ╚██████╔╝   ██║         ║
+║    ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝    ╚═╝╚═╝  ╚═══╝╚═╝      ╚═════╝    ╚═╝         ║
+║                                                                                                   ║
+╚═══════════════════════════════════════════════════════════════════════════════════════════════════╝
+"""
+                    print(banner, flush=True)
+                    try:
+                        user_advice = input(
+                            "Please enter the reason for interruption and any suggestions for the agent (press Enter to skip): "
+                        ).strip()
+                    except EOFError:
+                        user_advice = ""
                     if user_advice:
                         chunks.append("[User interruption feedback, please adjust accordingly:] " + user_advice + "\n")
                 # 返回完整输出字符串，以及中断相关状态
