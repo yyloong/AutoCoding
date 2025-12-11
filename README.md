@@ -56,13 +56,14 @@ sh set_up.sh
 ## API key 准备
 
 ```bash
-export OPENAI_API_KEY = xxx
-export SERPER_KEY_ID = xxx
-export JINA_API_KEYS = xxx
+export OPENAI_API_KEY=xxx
+export SERPER_KEY_ID=xxx
+export JINA_API_KEYS=xxx
 ```
 
-> `google api`  可以通过 https://serper.dev/verify-email 获取
-> `jina api`  可以通过 https://jina.ai/ 获取
+> - `google api`  可以通过 https://serper.dev/verify-email 获取
+> - `jina api`  可以通过 https://jina.ai/ 获取
+> - 如果使用非 OpenAI 的 LLM 服务，需要设置 `export OPENAI_BASE_URL=xxx` 指向对应的兼容接口地址
 
 ## 配置说明
 ### 工作流 (`workflow.yaml`)
@@ -74,15 +75,15 @@ description: 该状态的描述，用于agent选择状态
 research:
     next: [coding]
     agent_config: research.yaml
-	description: description for research
+    description: description for research
 coding:
     next: [structure_evaluate, research, refine]
     agent_config: coding.yaml
-	description: description for coding
+    description: description for coding
 structure_evaluate:
     next: [coding]
     agent_config: structure_evaluate.yaml
-	description: description for structure_evaluate
+    description: description for structure_evaluate
 refine:
     next: [exit, coding]
     agent_config: refine.yaml
@@ -95,28 +96,28 @@ exit:
 关键字段示例（摘自 `projects/deepcodingresearch/coding.yaml`）：
 ```yaml
 llm:
-	service: openai
-	model: qwen3-max
-	openai_api_key: 
-	openai_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+    service: openai
+    model: qwen3-max
+    openai_api_key: 
+    openai_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
 agent: coding
 type: state_llmagent
 generation_config:
-	temperature: 0.2
-	max_tokens: 32000
+    temperature: 0.2
+    max_tokens: 32000
 prompt:
-	system: |
-		# 系统指令...
+    system: |
+        # 系统指令...
 callbacks:
-	- callbacks/tool_use_callback
+    - callbacks/tool_use_callback
 tools:
-	state_transition: { mcp: false }
-	file_system:
-		mcp: false
-		ignore_files: [paper.md]
+    state_transition: { mcp: false }
+    file_system:
+        mcp: false
+        ignore_files: [paper.md]
 memory:
-	- name: statememory
-		user_id: "code_scratch"
+    - name: statememory
+        user_id: "code_scratch"
 max_chat_round: 100
 tool_call_timeout: 30000
 output_dir: new_output
@@ -140,14 +141,19 @@ output_dir: new_output
 ```bash
 python -m unit_test.test_deepresearch
 python -m unit_test.test_rag
-...
+python -m unit_test.test_document_tool
+python -m unit_test.test_file_parser
 ```
 
 测试statememory 构建了一个模拟拍卖环境来测试agent之间的交互情况
 ```bash
-PYTHONPATH=. python ms_agent/cli/cli.py run --config unit_test/test_state_memory --query 'auction start' --trust_remote_code true --load_cache true
+sh unit_test/test_state_memory.sh
 ```
 
+测试 human-in-the-loop 功能，你可以随时打断agent，提出新的指令
+```bash
+sh unit_test/test_human_in_loop.sh
+```
 
 ### 单测覆盖点
 - `test_deepresearch.py`：调用 `DeepresearchTool` 的 research 能力示例。
@@ -155,6 +161,7 @@ PYTHONPATH=. python ms_agent/cli/cli.py run --config unit_test/test_state_memory
 - `test_rag.py`：初始化多路 `llama-index` RAG，构建索引后进行查询并打印调试信息。
 - `test_file_parser.py`：演示 `SingleFileParser` 真实文件解析与缓存命中校验（需将示例中的文件路径与缓存目录替换为本地可用路径）。
 - `test_state_memory/`：自定义拍卖工作流的状态迁移配置样例 (`workflow.yaml` 等)。
+- `test_human_in_loop.sh`：演示 human-in-the-loop 功能，用户可随时打断 agent 并输入新指令。
 
 > 部分测试需要外部依赖：
 > - LLM/RAG/视觉解析相关测试需有效的 OpenAI 兼容或 ModelScope API Key（放入 `.env` 或直接设环境变量）。
