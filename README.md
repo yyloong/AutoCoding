@@ -132,3 +132,24 @@ python -m unit_test.test_rag
 > - LLM/RAG/视觉解析相关测试需有效的 OpenAI 兼容或 ModelScope API Key（放入 `.env` 或直接设环境变量）。
 > - `test_file_parser.py` 需要你提供真实的本地文件路径，并在有图片时准备视觉解析所需的 Key。
 
+
+### Examples
+
+#### Kaggle 竞赛
+
+在 `run_kaggle.sh` 中配置你的 API Key 和 Kaggle API TOKEN 后运行：
+
+```bash
+sh run_kaggle.sh
+```
+
+即可启动一个多智能体工作流，自动下载数据集、分析任务、生成代码并提交结果。
+
+#### miniGPT
+在 `run_gpt.sh` 中配置你的 API Key 后运行：
+
+```bash
+sh run_gpt.sh
+```
+
+

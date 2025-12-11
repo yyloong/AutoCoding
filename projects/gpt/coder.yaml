@@ -44,11 +44,6 @@ tools:
     mcp: false
   docker_shell:
     mcp: false
-  kaggle_tools:
-    mcp: false
-    exclude:
-      - submit_csv
-      - get_scores
   
 memory:
   - name: statememory
