@@ -115,7 +115,7 @@ tools:
         mcp: false
         ignore_files: [paper.md]
 memory:
-	- name: statememory
+    - name: statememory
         user_id: "code_scratch"
 max_chat_round: 100
 tool_call_timeout: 30000
