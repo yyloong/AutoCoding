@@ -143,18 +143,8 @@ class DockerBaseTool(ToolBase):
                     if not line or line != "/i":
                         # 不是 /i，当作普通输入丢弃，避免干扰
                         continue
-
-                    print(
-                        "\n[docker_shell interrupt] 检测到 /i，中断当前 Docker 命令。\n",
-                        flush=True,
-                    )
-                    try:
-                        user_advice = input(
-                            "请输入中断原因，以及给 agent 的指令建议（直接回车跳过）： "
-                        ).strip()
-                    except EOFError:
-                        user_advice = ""
-
+                    
+                    # 先发出中断信号 + kill 容器，尽快让主线程停掉输出
                     cancel_event.set()
                     try:
                         if self.session_container is not None:
@@ -163,9 +153,18 @@ class DockerBaseTool(ToolBase):
                         logger.error(
                             f"Failed to kill session container on /i interrupt: {e}"
                         )
-                    # 处理过一次 /i 就退出线程，避免多次弹输入
+
+                    print(
+                        "\n[docker_shell interrupt] '/i' detected. Interrupting the current Docker command execution.\n",
+                        flush=True,
+                    )
+                    try:
+                        user_advice = input(
+                            "Please enter the reason for interruption and any suggestions for the agent (press Enter to skip): "
+                        ).strip()
+                    except EOFError:
+                        user_advice = ""
                     break
-                # 线程自然结束
 
             watcher_thread = threading.Thread(
                 target=_interrupt_watcher,
@@ -197,9 +196,9 @@ class DockerBaseTool(ToolBase):
                 if cancel_event.is_set() and not interrupted:
                     interrupted = True
                 if interrupted:
-                    chunks.append("\n[docker_shell] 命令已被用户通过 /i 中断。\n")
+                    chunks.append("\n[docker_shell] The command was interrupted by the user.\n")
                     if user_advice:
-                        chunks.append("[用户的中断指令，请你接受反馈后调整:] " + user_advice + "\n")
+                        chunks.append("[User interruption feedback, please adjust accordingly:] " + user_advice + "\n")
                 # 返回完整输出字符串，以及中断相关状态
                 return "".join(chunks), interrupted, user_advice
             finally:
