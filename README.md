@@ -30,6 +30,10 @@ conda activate autocoding
 pip install -r requirements.txt
 # 可在项目根目录创建 .env，写入 OPENAI_API_KEY / OPENAI_BASE_URL / MODELSCOPE_API_KEY 等
 ```
+如果需要提取文档图片，需要另外安装 poppler
+```bash
+conda install poppler
+```
 
 ## docker 环境
 用该命令构建 docker 镜像：
@@ -146,6 +150,7 @@ python -m unit_test.test_rag
 
 在 `run_kaggle.sh` 中配置你的 API Key 和 Kaggle API TOKEN 后运行：
 
+对于特定的比赛，需要先在kaggle网站上点击参加，才能下载数据集
 ```bash
 sh run_kaggle.sh
 ```
