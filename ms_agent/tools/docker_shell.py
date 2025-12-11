@@ -1,7 +1,10 @@
 # Copyright (c) Nanjing University
 import asyncio
 import os
+import sys
 import docker
+import select
+import threading
 from docker.errors import DockerException
 from docker.types import DeviceRequest
 from ms_agent.llm.utils import Tool
@@ -13,6 +16,7 @@ logger = get_logger()
 
 MAX_OUTPUT_LINES = 1000  # 防止输出过多
 MAX_OUTPUT_CHARS = 10000  # 限制最大字符数
+
 
 class DockerBaseTool(ToolBase):
     def __init__(self, config, tool_name_key: str, **kwargs):
@@ -38,7 +42,7 @@ class DockerBaseTool(ToolBase):
             logger.error(f"Failed to initialize Docker client: {e}")
             self.client = None
 
-        # 新增：为该工具实例维护一个长期容器
+        # 为该工具实例维护一个长期容器
         self.session_container = None
 
     async def connect(self):
@@ -103,6 +107,7 @@ class DockerBaseTool(ToolBase):
     async def _exec_in_session(self, cmd: str, workdir: str = "/workspace") -> str:
         """
         Execute a command inside the long-lived session container.
+        支持在执行过程中通过 /i 中断，并让用户输入一段说明，这段说明会直接拼到 shell 输出里。
         """
         if not self.client:
             return "Error: Docker client not initialized."
@@ -114,33 +119,109 @@ class DockerBaseTool(ToolBase):
         cmd = " ".join(cmd) if isinstance(cmd, list) else cmd
 
         def _exec_blocking():
-            # 使用流式输出
-            exec_result = self.session_container.exec_run(
-                cmd=["/bin/bash", "-lc", cmd],
-                stdout=True,
-                stderr=True,
-                tty=False,
-                stream=True,
+            # 独立线程监听 /i 中断指令，并尽快 kill 当前会话容器
+            cancel_event = threading.Event()
+            stop_watch_event = threading.Event()
+            user_advice = ""
+
+            def _interrupt_watcher():
+                nonlocal user_advice
+                if not sys.stdin or not sys.stdin.isatty():
+                    return
+                while not stop_watch_event.is_set():
+                    try:
+                        rlist, _, _ = select.select([sys.stdin], [], [], 0.5)
+                    except Exception:
+                        break
+                    if not rlist:
+                        continue
+
+                    line = sys.stdin.readline()
+                    if not line:
+                        continue
+                    line = line.strip()
+                    if not line or line != "/i":
+                        # 不是 /i，当作普通输入丢弃，避免干扰
+                        continue
+                    
+                    # 先发出中断信号 + kill 容器，尽快让主线程停掉输出
+                    cancel_event.set()
+                    try:
+                        if self.session_container is not None:
+                            self.session_container.kill()
+                    except Exception as e:
+                        logger.error(
+                            f"Failed to kill session container on /i interrupt: {e}"
+                        )
+
+                    print(
+                        "\n[docker_shell interrupt] '/i' detected. Interrupting the current Docker command execution.\n",
+                        flush=True,
+                    )
+                    banner = r"""
+╔═══════════════════════════════════════════════════════════════════════════════════════════════════╗
+║                                                                                                   ║
+║    ██╗  ██╗██╗   ██╗███╗   ███╗ █████╗ ███╗   ██╗    ██╗███╗   ██╗██████╗ ██╗   ██╗████████╗      ║
+║    ██║  ██║██║   ██║████╗ ████║██╔══██╗████╗  ██║    ██║████╗  ██║██╔══██╗██║   ██║╚══██╔══╝      ║
+║    ███████║██║   ██║██╔████╔██║███████║██╔██╗ ██║    ██║██╔██╗ ██║██████╔╝██║   ██║   ██║         ║
+║    ██╔══██║██║   ██║██║╚██╔╝██║██╔══██║██║╚██╗██║    ██║██║╚██╗██║██╔═══╝ ██║   ██║   ██║         ║
+║    ██║  ██║╚██████╔╝██║ ╚═╝ ██║██║  ██║██║ ╚████║    ██║██║ ╚████║██║     ╚██████╔╝   ██║         ║
+║    ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝    ╚═╝╚═╝  ╚═══╝╚═╝      ╚═════╝    ╚═╝         ║
+║                                                                                                   ║
+╚═══════════════════════════════════════════════════════════════════════════════════════════════════╝
+"""
+                    print(banner, flush=True)
+                    try:
+                        user_advice = input(
+                            "Please enter the reason for interruption and any suggestions for the agent (press Enter to skip): "
+                        ).strip()
+                    except EOFError:
+                        user_advice = ""
+                    break
+
+            watcher_thread = threading.Thread(
+                target=_interrupt_watcher,
+                name="docker_shell_interrupt_watcher",
+                daemon=True,
             )
+            watcher_thread.start()
 
-            chunks = []
-            # 关键：迭代 exec_result.output，而不是 exec_result 本身
-            for chunk in exec_result.output:
-                if not chunk:
-                    continue
-                # chunk 是 bytes
-                text = chunk.decode("utf-8", errors="replace")
-                print(text, end="", flush=True)  # 实时打印
-                chunks.append(text)
-
-            # 返回完整输出字符串
-            return "".join(chunks)
+            try:
+                exec_result = self.session_container.exec_run(
+                    cmd=["/bin/bash", "-lc", cmd],
+                    stdout=True,
+                    stderr=True,
+                    tty=False,
+                    stream=True,
+                )
+                chunks = []
+                interrupted = False
+                for chunk in exec_result.output:
+                    if cancel_event.is_set():
+                        interrupted = True
+                        break
+                    if not chunk:
+                        continue
+                    text = chunk.decode("utf-8", errors="replace")
+                    print(text, end="", flush=True)
+                    chunks.append(text)
+                # 如果没有任何输出，但 cancel_event 已经被置位，也认为是中断
+                if cancel_event.is_set() and not interrupted:
+                    interrupted = True
+                if interrupted:
+                    chunks.append("\n[docker_shell] The command was interrupted by the user.\n")
+                    if user_advice:
+                        chunks.append("[User interruption feedback, please adjust accordingly:] " + user_advice + "\n")
+                # 返回完整输出字符串，以及中断相关状态
+                return "".join(chunks), interrupted, user_advice
+            finally:
+                stop_watch_event.set()
 
         try:
-            # 这里拿到的就是完整输出的字符串
-            output = await asyncio.to_thread(_exec_blocking)
+            # 这里拿到的是完整输出字符串 + 中断状态
+            output, interrupted, user_advice = await asyncio.to_thread(_exec_blocking)
 
-            # 下面保留原来的截断 + 保存逻辑，但不再 decode
+            # 截断 + 保存逻辑
             lines = output.splitlines(keepends=True)
             if len(lines) > MAX_OUTPUT_LINES:
                 lines = lines[-MAX_OUTPUT_LINES:]
@@ -157,6 +238,8 @@ class DockerBaseTool(ToolBase):
                     f"{full_output_path}, You can use shell tools like 'head', 'tail', "
                     f"or 'less' to view parts of the file if needed.]\n\n"
                 ) + joined
+
+            # 有任何实际文本（包括中断提示和你的输入）就直接返回
             return joined if joined.strip() else "Execution successful (no output)."
         except Exception as e:
             return f"Docker execution system error: {str(e)}"
@@ -176,9 +259,10 @@ class DockerBaseTool(ToolBase):
                 pass
             self.session_container = None
 
+
 class docker_shell(DockerBaseTool):
     """A tool for executing arbitrary shell commands inside Docker containers."""
-    
+
     def __init__(self, config, **kwargs):
         super().__init__(config, "docker_shell", **kwargs)
         self.exclude_func(getattr(config.tools, "docker_shell", None))
@@ -238,10 +322,10 @@ class docker_shell(DockerBaseTool):
     async def execute_bash(self, command: str) -> str:
         """
         Execute a bash command in Docker.
-        
+
         Args:
             command: The bash command to execute
-            
+
         Returns:
             Command output or error message
         """
@@ -251,16 +335,16 @@ class docker_shell(DockerBaseTool):
     async def execute_script(self, script: str) -> str:
         """
         Execute a multi-line shell script in Docker.
-        
+
         Args:
             script: Multi-line shell script content
-            
+
         Returns:
             Script output or error message
         """
         logger.info(f"Executing shell script in {self.image}")
         return await self._exec_in_session(script, workdir="/workspace")
-    
+
 
 if __name__ == "__main__":
     import asyncio
@@ -280,6 +364,17 @@ if __name__ == "__main__":
 
         # 在容器里简单跑两条命令：打印一句话 + 列一下 /workspace
         cmd = "cd /workspace && echo 'hello from docker_shell' && pwd && ls"
+        print(f"[Test] 执行命令: {cmd}")
+        result = await tool.execute_bash(cmd)
+
+        print("\n[Test] 工具返回的最终汇总输出（截断后）：")
+        print("--------------------------------------------------")
+        print(result)
+        print("--------------------------------------------------")
+
+        # 运行 sleep 30，测试 /i 中断功能
+        print("\n[Test] 现在测试 /i 中断功能。请在接下来 10 秒内输入 /i 来中断命令执行。")
+        cmd = "sleep 30 && echo 'This will not print if interrupted.'"
         print(f"[Test] 执行命令: {cmd}")
         result = await tool.execute_bash(cmd)
 

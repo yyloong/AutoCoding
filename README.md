@@ -21,39 +21,48 @@ unit_test/            # 单元测试样例
 ```
 
 ## 环境准备
-- Python 3.11（建议使用 conda/venv）
-- 已获取的 OpenAI 兼容 API Key 或 ModelScope API Key
+
+克隆仓库代码
+
+```bash
+git clone https://github.com/yyloong/AutoCoding.git
+cd AutoCoding
+```
+
+`Python 3.11`（建议使用 `conda/venv`）
 
 ```bash
 conda create -n autocoding python=3.11
-conda install poppler
 conda activate autocoding
 pip install -r requirements.txt
 ```
 
-## docker 环境
-用该命令构建 docker 镜像：
+如果需要提取文档图片，需要另外安装 poppler
+
+```bash
+conda install poppler
+```
+
+## `docker` 镜像
+
+本仓库已经准备好了 `Dockfile` 镜像，用该命令构建 docker 镜像：
+
 ```bash
 sh set_up.sh
 ```
-支持 cuda 环境，包含基本的开发依赖。
 
-设置相关api-key
+该 `docker image` 支持 `cuda` 环境，包含基本的开发依赖。用于 agent 在该 docker 环境下受控地执行命令。
+
+## API key 准备
+
 ```bash
-export SERPER_KEY_ID = xxx
 export OPENAI_API_KEY = xxx
+export SERPER_KEY_ID = xxx
 export JINA_API_KEYS = xxx
 ```
-google api 可以通过https://serper.dev/verify-email获取免费额度
-jina api 可以通过https://jina.ai/获取免费额度
 
-
-## 快速运行
-以示例工作流 `projects/deepcodingresearch/workflow.yaml` 为例：
-
-```bash
-PYTHONPATH=. python ms_agent/cli/cli.py run --config projects/deepcodingresearch --query '查看目录下的instructions.txt文件并执行相关任务' --trust_remote_code true
-```
+> `google api`  可以通过 https://serper.dev/verify-email 获取
+> `jina api`  可以通过 https://jina.ai/ 获取
 
 ## 配置说明
 ### 工作流 (`workflow.yaml`)
@@ -114,6 +123,7 @@ output_dir: new_output
 ```
 
 ## 常用工具能力
+- `docker_shell`：在容器内执行 shell 命令。
 - `state_transition`：在工作流节点间传递状态/结果。
 - `file_system`：读写/列目录等文件操作（可配置忽略/长度限制）。
 - `document_inspector`：agentic tool,结构化解析文档内容。
@@ -146,25 +156,68 @@ PYTHONPATH=. python ms_agent/cli/cli.py run --config unit_test/test_state_memory
 - `test_file_parser.py`：演示 `SingleFileParser` 真实文件解析与缓存命中校验（需将示例中的文件路径与缓存目录替换为本地可用路径）。
 - `test_state_memory/`：自定义拍卖工作流的状态迁移配置样例 (`workflow.yaml` 等)。
 
+> 部分测试需要外部依赖：
+> - LLM/RAG/视觉解析相关测试需有效的 OpenAI 兼容或 ModelScope API Key（放入 `.env` 或直接设环境变量）。
+> - `test_file_parser.py` 需要你提供真实的本地文件路径，并在有图片时准备视觉解析所需的 Key。
+
+
+## Human-in-the-Loop
+支持随时打断，用户输入新指令，调整任务方向或细节。
+
+用法为在 agent 每轮的输出时，或在调用 `docker_shell` 工具时，在终端输入命令 `/i` 即可进入人机交互模式，等待用户输入新指令，输入完成后，agent 会继续执行新的指令。
+
+效果gif示例：
+![alt text](assets/human_input.gif)
+
 
 ## Examples
 
 ### Kaggle 竞赛
-
-在 `run_kaggle.sh` 中配置你的 API Key 和 Kaggle API TOKEN 后运行：
-
 对于特定的比赛，需要先在kaggle网站上点击参加，才能下载数据集
+
+在 `run_kaggle.sh` 中配置你的 API Key 和 Kaggle API TOKEN 
+```bash
+rm -rf memory
+rm -rf output
+mkdir output
+export OPENAI_API_KEY="Your_OpenAI_API_Key_Here"
+export SERPER_KEY_ID="Your_Serper_API_Key_Here"
+export JINA_API_KEYS="Your_Jina_API_Keys_Here"
+export KAGGLE_API_TOKEN="Your_Kaggle_API_Token_Here"
+python -m ms_agent.cli.cli run --config projects/kaggle --trust_remote_code true --openai_api_key ${OPENAI_API_KEY} --query "请你参加 kaggle 竞赛 Spaceship Titanic: https://www.kaggle.com/competitions/spaceship-titanic/leaderboard。尽可能获得更高的排名（尽量将预测准确率提升到 0.81 以上）。最终你需要生成一个用于提交的 csv 文件，包含你的预测结果。"
+```
+
+然后运行：
 ```bash
 sh run_kaggle.sh
 ```
 
+![alt text](assets/kaggle.png)
+
 即可启动一个多智能体工作流，自动下载数据集、分析任务、生成代码并提交结果。
 
 ### miniGPT
-在 `run_gpt.sh` 中配置你的 API Key 后运行：
+在 `run_gpt.sh` 中配置你的 API Key 
+```bash
+rm -rf memory
+rm -rf output
+mkdir output
+cp -r ./examples/gpt_data/data ./output/data
+export OPENAI_API_KEY="Your_OpenAI_API_Key_Here"
+export SERPER_KEY_ID="Your_Serper_API_Key_Here"
+export JINA_API_KEYS="Your_Jina_API_Keys_Here"
+python -m ms_agent.cli.cli run --config projects/gpt --trust_remote_code true --openai_api_key ${OPENAI_API_KEY} --query "你需要基于 PyTorch 从零实现一个参数量约为 30M 的 Causal Transformer 模型（即 Mini-GPT），并使用我提供的文本进行训练。最终能使得你训练的模型能输出相对合理的文本。训练数据为金庸的多部小说，路径为 /workspace/data/, 格式为多个 .txt 文件。当前设备下有 GPU 可用，请使用 cuda 加速训练过程, 先运行一个快速训练，然后尽量利用多 gpu，调到合适的 batch size，加速训练。最后你需要能训练出一个输出正常文本的模型权重，并说明如何生成文本。需要保证已经有训练好的模型权重，用户可以直接使用该模型权重进行文本生成。"
+```
 
+然后运行：
 ```bash
 sh run_gpt.sh
 ```
+
+最终可以训练出一个“以金庸小说风格写作”的 miniGPT 模型。
+
+效果截图：
+![alt text](assets/minigpt.png)
+
 
 

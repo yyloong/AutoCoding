@@ -1,9 +1,12 @@
 import os.path
 import sys
 from copy import deepcopy
-from typing import Any, AsyncGenerator, List, Tuple, Union
-
+import asyncio
+from typing import Any, AsyncGenerator, List, Tuple, Union, Optional
+import contextlib
 import json
+import select
+
 from ms_agent.agent.runtime import Runtime
 from ms_agent.llm.utils import Message
 from ms_agent.memory import memory_mapping
@@ -35,13 +38,15 @@ class State_LLMAgent(LLMAgent):
             )
             llm_config = Config.from_task(default_yaml)
             config = OmegaConf.merge(llm_config, config)
-        super().__init__(config, tag, trust_remote_code,**kwargs)
+
+        super().__init__(config, tag, trust_remote_code, **kwargs)
         self.config.tag = self.tag
         self.config["next_tasks"] = kwargs.get("next_tasks", [])
         self.config["tasks_descriptions"] = kwargs.get("tasks_descriptions_map", {})
-        self.next_task = None
-        self.messages = None
-        self.exit_description = None
+
+        self.next_task: Optional[str] = None
+        self.messages: Optional[List[Message]] = None
+        self.exit_description: Optional[str] = None
 
     async def load_memory(self):
         """Initialize and append memory tool instances based on the configuration provided in the global config.
@@ -50,51 +55,106 @@ class State_LLMAgent(LLMAgent):
             AssertionError: If a specified memory type in the config does not exist in memory_mapping.
         """
         self.config: DictConfig
-        if hasattr(self.config, 'memory'):
-            for _memory in (self.config.memory or []):
-                memory_type = getattr(_memory, 'name', 'default_memory')
+        if hasattr(self.config, "memory"):
+            for _memory in self.config.memory or []:
+                memory_type = getattr(_memory, "name", "default_memory")
                 assert memory_type in memory_mapping, (
-                    f'{memory_type} not in memory_mapping, '
-                    f'which supports: {list(memory_mapping.keys())}')
+                    f"{memory_type} not in memory_mapping, "
+                    f"which supports: {list(memory_mapping.keys())}"
+                )
 
                 # Use LLM config if no special configuration is specified
-                llm_config = getattr(_memory, 'llm', None)
+                llm_config = getattr(_memory, "llm", None)
                 if llm_config is None:
                     service = self.config.llm.service
                     config_dict = {
-                        'model':
-                        _memory.summary_model if hasattr(
-                            _memory, 'summary_model') else getattr(
-                                self.config.llm, 'model', None),
-                        'provider':
-                        'openai',
-                        'openai_base_url':
-                        getattr(self.config.llm, f'{service}_base_url', None),
-                        'openai_api_key':
-                        getattr(self.config.llm, f'{service}_api_key', None),
-                        'max_tokens':
-                        getattr(_memory, 'max_tokens', 4096),
+                        "model": _memory.summary_model
+                        if hasattr(_memory, "summary_model")
+                        else getattr(self.config.llm, "model", None),
+                        "provider": "openai",
+                        "openai_base_url": getattr(
+                            self.config.llm, f"{service}_base_url", None
+                        ),
+                        "openai_api_key": getattr(
+                            self.config.llm, f"{service}_api_key", None
+                        ),
+                        "max_tokens": getattr(_memory, "max_tokens", 4096),
                     }
                     llm_config_obj = OmegaConf.create(config_dict)
-                    setattr(_memory, 'llm', llm_config_obj)
-                if memory_type == 'mem0':
-                    shared_memory = SharedMemoryManager.get_shared_memory(
-                        _memory)
+                    setattr(_memory, "llm", llm_config_obj)
+
+                if memory_type == "mem0":
+                    shared_memory = SharedMemoryManager.get_shared_memory(_memory)
                     self.memory_tools.append(shared_memory)
                 else:
-                    self.memory_tools.append(
-                        memory_mapping[memory_type](_memory))
+                    self.memory_tools.append(memory_mapping[memory_type](_memory))
 
-                for memory in self.memory_tools:
-                    # In case any memory tool need other information
-                    await memory.set_base_config(self.config)
+            for memory in self.memory_tools:
+                # In case any memory tool need other information
+                await memory.set_base_config(self.config)
 
+    def _maybe_interrupt(self) -> Optional[str]:
+        """在主线程中同步检查是否有 /i 中断指令，有的话立即读取并返回用户的新输入."""
+        # 非交互环境（非 TTY）直接跳过
+        if not sys.stdin or not sys.stdin.isatty():
+            return None
+
+        try:
+            # 非阻塞检查 stdin 是否有可读数据
+            rlist, _, _ = select.select([sys.stdin], [], [], 0)
+        except Exception:
+            return None
+
+        if not rlist:
+            return None
+
+        line = sys.stdin.readline()
+        if not line:
+            return None
+        line = line.strip()
+        if not line:
+            return None
+
+        # 纯 /i：立刻停住当前 step，同步询问新指令
+        if line == "/i":
+            banner = r"""
+╔═══════════════════════════════════════════════════════════════════════════════════════════════════╗
+║                                                                                                   ║
+║    ██╗  ██╗██╗   ██╗███╗   ███╗ █████╗ ███╗   ██╗    ██╗███╗   ██╗██████╗ ██╗   ██╗████████╗      ║
+║    ██║  ██║██║   ██║████╗ ████║██╔══██╗████╗  ██║    ██║████╗  ██║██╔══██╗██║   ██║╚══██╔══╝      ║
+║    ███████║██║   ██║██╔████╔██║███████║██╔██╗ ██║    ██║██╔██╗ ██║██████╔╝██║   ██║   ██║         ║
+║    ██╔══██║██║   ██║██║╚██╔╝██║██╔══██║██║╚██╗██║    ██║██║╚██╗██║██╔═══╝ ██║   ██║   ██║         ║
+║    ██║  ██║╚██████╔╝██║ ╚═╝ ██║██║  ██║██║ ╚████║    ██║██║ ╚████║██║     ╚██████╔╝   ██║         ║
+║    ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝    ╚═╝╚═╝  ╚═══╝╚═╝      ╚═════╝    ╚═╝         ║
+║                                                                                                   ║
+╚═══════════════════════════════════════════════════════════════════════════════════════════════════╝
+"""
+            print(banner, flush=True)
+            try:
+                user_text = input(
+                    "[interrupt] 请输入新的用户指令（直接回车取消）："
+                ).strip()
+            except EOFError:
+                return None
+            return user_text or None
+
+        # 其他普通输入忽略
+        return None
 
     @async_retry(max_attempts=Agent.retry_count, delay=1.0)
     async def step(
         self, messages: List[Message]
     ) -> AsyncGenerator[List[Message], Any]:  # type: ignore
         messages = deepcopy(messages)
+        original_len = len(messages)  # 新增：记录进入本 step 前的历史长度
+
+        # 进入本 step 前先处理可能存在的中断指令
+        interrupt_text = self._maybe_interrupt()
+        if interrupt_text:
+            messages.append(Message(role="user", content=interrupt_text))
+            yield messages
+            return
+
         if (not self.load_cache) or messages[-1].role != "assistant":
             await self.on_generate_response(messages)
             tools = await self.tool_manager.get_tools()
@@ -104,11 +164,28 @@ class State_LLMAgent(LLMAgent):
                 _content = ""
                 is_first = True
                 _response_message = None
+                
                 for _response_message in self.llm.generate(messages, tools=tools):
+                    # 每输出一段 token 前检查是否有中断指令
+                    interrupt_text = self._maybe_interrupt()
+                    if interrupt_text:
+                        sys.stdout.write(
+                            "\n[interrupt] 收到中断指令，切换为新的用户输入。\n"
+                        )
+                        sys.stdout.flush()
+
+                        # 丢弃本 step 新增的所有 assistant/tool 消息，回到 step 之前的历史
+                        messages = messages[:original_len]
+
+                        # 只追加一条全新的 user 消息体，里面只有文本
+                        messages.append(Message(role="user", content=interrupt_text))
+                        yield messages
+                        return
+
                     if is_first:
                         messages.append(_response_message)
                         is_first = False
-                    new_content = _response_message.content[len(_content) :]
+                    new_content = _response_message.content[len(_content):]
                     sys.stdout.write(new_content)
                     sys.stdout.flush()
                     _content = _response_message.content
@@ -129,15 +206,30 @@ class State_LLMAgent(LLMAgent):
             self.load_cache = False
             # Meaning the latest message is `assistant`, this prevents a different response if there are sub-tasks.
             _response_message = messages[-1]
+
         self.save_history(messages)
         messages = await self.condense_memory(messages)
+
+        # 工具调用前再检查一次中断，避免在工具还没启动时就错过用户的插话
+        interrupt_text = self._maybe_interrupt()
+        if interrupt_text:
+            # 如果上一条是带 tool_calls 的 assistant，把 tool_calls 清掉，避免违反 OpenAI 协议
+            if messages and messages[-1].role == "assistant":
+                last_assistant = messages[-1]
+                if getattr(last_assistant, "tool_calls", None):
+                    # 清空 tool_calls，保留已有文本内容
+                    last_assistant.tool_calls = []
+            messages.append(Message(role="user", content=interrupt_text))
+            yield messages
+            return
 
         if _response_message.tool_calls:
             messages = await self.parallel_tool_call(messages)
 
         if (
             _response_message.tool_calls
-            and _response_message.tool_calls[-1]["tool_name"] == "finish---exit_task"
+            and _response_message.tool_calls[-1]["tool_name"]
+            == "finish---exit_task"
         ):
             self.runtime.should_stop = True
 
@@ -149,10 +241,15 @@ class State_LLMAgent(LLMAgent):
             and messages[-1].content == "Successful"
         ):
             self.runtime.should_stop = True
-            self.next_task = _response_message.tool_calls[-1]["tool_name"].split("---")[-1]
+            self.next_task = (
+                _response_message.tool_calls[-1]["tool_name"].split("---")[-1]
+            )
             exit_message = _response_message.tool_calls[-1]["arguments"]
             exit_message = json.loads(exit_message)
-            self.exit_description = f"request to make a state transition to {self.next_task} with message" + exit_message.get("message", "")
+            self.exit_description = (
+                f"request to make a state transition to {self.next_task} with message"
+                + exit_message.get("message", "")
+            )
             self.messages = messages
 
         await self.after_tool_call(messages)
@@ -162,30 +259,25 @@ class State_LLMAgent(LLMAgent):
         )
         yield messages
 
-    async def run_loop(self, messages: Union[List[Message], str],
-                       **kwargs) -> AsyncGenerator[Any, Any]:
-        """Run the agent, mainly contains a llm calling and tool calling loop.
-
-        Args:
-            messages (Union[List[Message], str]): Input data for the agent. Can be a raw string prompt,
-                                               or a list of previous interaction messages.
-        Returns:
-            List[Message]: A list of message objects representing the agent's response or interaction history.
-        """
+    async def run_loop(
+        self, messages: Union[List[Message], str], **kwargs
+    ) -> AsyncGenerator[Any, Any]:
+        """Run the agent, mainly contains a llm calling and tool calling loop."""
         try:
-            self.max_chat_round = getattr(self.config, 'max_chat_round',
-                                          LLMAgent.DEFAULT_MAX_CHAT_ROUND)
+            self.max_chat_round = getattr(
+                self.config, "max_chat_round", LLMAgent.DEFAULT_MAX_CHAT_ROUND
+            )
             self.register_callback_from_config()
             self.prepare_llm()
             self.prepare_runtime()
             await self.prepare_tools()
             await self.load_memory()
-            
+
             self.runtime.tag = self.tag
 
             if messages is None:
                 messages = self.query
-            
+
             self.config, self.runtime, messages = self.read_history(messages)
 
             if self.runtime.round == 0:
@@ -194,8 +286,8 @@ class State_LLMAgent(LLMAgent):
                 await self.on_task_begin(messages)
 
             for message in messages:
-                if message.role != 'system':
-                    self.log_output('[' + message.role + ']:')
+                if message.role != "system":
+                    self.log_output("[" + message.role + "]:")
                     self.log_output(message.content)
 
             if not self.runtime.should_stop:
@@ -219,12 +311,16 @@ class State_LLMAgent(LLMAgent):
                     if not self.runtime.should_stop:
                         messages.append(
                             Message(
-                                role='assistant',
-                                content=
-                                f'Task {messages[1].content} was cutted off, because '
-                                f'max round({self.max_chat_round}) exceeded.'))
+                                role="assistant",
+                                content=(
+                                    f"Task {messages[1].content} was cutted off, because "
+                                    f"max round({self.max_chat_round}) exceeded."
+                                ),
+                            )
+                        )
                     self.runtime.should_stop = True
                     yield messages
+                    break
 
             # save memory
             self.save_memory(messages)
@@ -232,15 +328,17 @@ class State_LLMAgent(LLMAgent):
             await self.on_task_end(messages)
             await self.cleanup_tools()
             yield messages
+
         except Exception as e:
             import traceback
+
             logger.warning(traceback.format_exc())
-            if hasattr(self.config, 'help'):
+            if hasattr(self.config, "help"):
                 logger.error(
-                    f'[{self.tag}] Runtime error, please follow the instructions:\n\n {self.config.help}'
+                    f"[{self.tag}] Runtime error, please follow the instructions:\n\n {self.config.help}"
                 )
             raise e
-    
+
     async def exit_state(self):
         for memory_tool in self.memory_tools:
             if isinstance(memory_tool, ExactStateMemory):
@@ -253,48 +351,36 @@ class State_LLMAgent(LLMAgent):
         if self.next_task is None:
             logger.warning("Next task is None, try to debug it.")
             import pdb
+
             pdb.set_trace()
         return self.next_task
 
     def save_history(self, messages: List[Message], **kwargs):
         """
         Save current chat history to disk for future resuming.
-
-        Args:
-            messages (List[Message]): Current message history to save.
         """
         query = None
-        if len(messages) > 1 and messages[1].role == 'user':
+        if len(messages) > 1 and messages[1].role == "user":
             query = messages[1].content
         elif messages:
             query = messages[0].content
         if not query:
             return
 
-        if not getattr(self.config, 'save_history', True):
+        if not getattr(self.config, "save_history", True):
             return
 
         config: DictConfig = deepcopy(self.config)
         config.runtime = self.runtime.to_dict()
-        config.next_task = self.next_task 
-        ################33
-        #save_history(
-        #    self.output_dir, task=self.tag, config=config, messages=messages)
-        ##################
-        save_history(
-            "./", task=self.tag, config=config, messages=messages
-        )
-    
-    def read_history(self, messages: List[Message],
-                     **kwargs) -> Tuple[DictConfig, Runtime, List[Message]]:
+        config.next_task = self.next_task
+
+        save_history("./", task=self.tag, config=config, messages=messages)
+
+    def read_history(
+        self, messages: List[Message], **kwargs
+    ) -> Tuple[DictConfig, Runtime, List[Message]]:
         """
         Load previous chat history from disk if available.(断点重连作用)
-
-        Args:
-            messages (List[Message]): Input message or history to resume from.
-
-        Returns:
-            Tuple[DictConfig, Runtime, List[Message]]: Updated config, runtime, and message history.
         """
         if isinstance(messages, str):
             query = messages
@@ -303,21 +389,18 @@ class State_LLMAgent(LLMAgent):
         if not query or not self.load_cache:
             return self.config, self.runtime, messages
 
-        #config, _messages = read_history(self.output_dir, self.tag)
         config, _messages = read_history("./", self.tag)
         if config is not None and _messages is not None:
-            if hasattr(config, 'runtime'):
+            if hasattr(config, "runtime"):
                 runtime = Runtime(llm=self.llm)
                 runtime.from_dict(config.runtime)
-                delattr(config, 'runtime')
+                delattr(config, "runtime")
             else:
                 runtime = self.runtime
-            if hasattr(config, 'next_task'):
+            if hasattr(config, "next_task"):
                 self.next_task = config.next_task
-                delattr(config, 'next_task')
-            if _messages[-1].role == 'tool':
-                # Ignore and redo the last tool response
-                # This is because it's the last calling, the unhandled error may be started from here
+                delattr(config, "next_task")
+            if _messages and _messages[-1].role == "tool":
                 _messages = _messages[:-1]
             return config, runtime, _messages
         else:
