@@ -56,9 +56,9 @@ sh set_up.sh
 ## API key 准备
 
 ```bash
-export OPENAI_API_KEY = xxx
-export SERPER_KEY_ID = xxx
-export JINA_API_KEYS = xxx
+export OPENAI_API_KEY=xxx
+export SERPER_KEY_ID=xxx
+export JINA_API_KEYS=xxx
 ```
 
 > `google api`  可以通过 https://serper.dev/verify-email 获取
@@ -72,51 +72,51 @@ description: 该状态的描述，用于agent选择状态
 
 ```yaml
 research:
-    next: [coding]
-    agent_config: research.yaml
+	next: [coding]
+	agent_config: research.yaml
 	description: description for research
 coding:
-    next: [structure_evaluate, research, refine]
-    agent_config: coding.yaml
-	description: description for coding
+	next: [structure_evaluate, research, refine]
+	agent_config: coding.yaml
+    description: description for coding
 structure_evaluate:
-    next: [coding]
-    agent_config: structure_evaluate.yaml
-	description: description for structure_evaluate
+	next: [coding]
+	agent_config: structure_evaluate.yaml
+    description: description for structure_evaluate
 refine:
-    next: [exit, coding]
-    agent_config: refine.yaml
-    description: description for refine
+	next: [exit, coding]
+	agent_config: refine.yaml
+	description: description for refine
 exit:
-    description: description for exit
+	description: description for exit
 ```
 
 ### 单 Agent (`*.yaml`)
 关键字段示例（摘自 `projects/deepcodingresearch/coding.yaml`）：
 ```yaml
 llm:
-	service: openai
-	model: qwen3-max
-	openai_api_key: 
-	openai_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+    service: openai
+    model: qwen3-max
+    openai_api_key: 
+    openai_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
 agent: coding
 type: state_llmagent
 generation_config:
-	temperature: 0.2
-	max_tokens: 32000
+    temperature: 0.2
+    max_tokens: 32000
 prompt:
-	system: |
+    system: |
 		# 系统指令...
 callbacks:
-	- callbacks/tool_use_callback
+    - callbacks/tool_use_callback
 tools:
-	state_transition: { mcp: false }
-	file_system:
-		mcp: false
-		ignore_files: [paper.md]
+    state_transition: { mcp: false }
+    file_system:
+        mcp: false
+        ignore_files: [paper.md]
 memory:
 	- name: statememory
-		user_id: "code_scratch"
+        user_id: "code_scratch"
 max_chat_round: 100
 tool_call_timeout: 30000
 output_dir: new_output
