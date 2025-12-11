@@ -169,6 +169,7 @@ PYTHONPATH=. python ms_agent/cli/cli.py run --config unit_test/test_state_memory
 ## Examples
 
 ### Kaggle 竞赛
+对于特定的比赛，需要先在kaggle网站上点击参加，才能下载数据集
 
 在 `run_kaggle.sh` 中配置你的 API Key 和 Kaggle API TOKEN 
 ```bash
