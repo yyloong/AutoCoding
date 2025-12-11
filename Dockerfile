@@ -29,6 +29,9 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get update && apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
 
+# 为 pip 配置清华源（全局）
+RUN printf "[global]\nindex-url = https://pypi.tuna.tsinghua.edu.cn/simple\ntrusted-host = pypi.tuna.tsinghua.edu.cn\n" > /etc/pip.conf
+
 # 安装 Python 包
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
     pip install --no-cache-dir \
