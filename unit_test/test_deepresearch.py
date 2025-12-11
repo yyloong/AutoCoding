@@ -7,6 +7,6 @@ if __name__ == "__main__":
     deepresearch_tool = DeepresearchTool(config)
     asyncio.run(
         deepresearch_tool.research(
-            request="How many projects are there in the github repository ms-agent? "
+            request="How many projects are there in the github repository modelscope/ms-agent? "
         )
     )
