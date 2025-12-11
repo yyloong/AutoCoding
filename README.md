@@ -55,6 +55,11 @@ jina api 可以通过https://jina.ai/获取免费额度
 PYTHONPATH=. python ms_agent/cli/cli.py run --config projects/deepcodingresearch --query '查看目录下的instructions.txt文件并执行相关任务' --trust_remote_code true
 ```
 
+- 若省略 `--query`，将进入交互模式。
+- `--load_cache true`：复用上一次的对话/工具调用缓存。
+- `--trust_remote_code true`：信任远端模型仓库中的自定义代码（从 ModelScope 拉取配置时需显式开启）。
+- `--mcp_config` / `--mcp_server_file`：额外挂载 MCP server 配置。
+
 ## 配置说明
 ### 工作流 (`workflow.yaml`)
 定义节点关系与各节点使用的 agent 配置文件：
@@ -114,6 +119,7 @@ output_dir: new_output
 ```
 
 ## 常用工具能力
+- `docker_shell`：在容器内执行 shell 命令。
 - `state_transition`：在工作流节点间传递状态/结果。
 - `file_system`：读写/列目录等文件操作（可配置忽略/长度限制）。
 - `document_inspector`：agentic tool,结构化解析文档内容。
@@ -146,6 +152,19 @@ PYTHONPATH=. python ms_agent/cli/cli.py run --config unit_test/test_state_memory
 - `test_file_parser.py`：演示 `SingleFileParser` 真实文件解析与缓存命中校验（需将示例中的文件路径与缓存目录替换为本地可用路径）。
 - `test_state_memory/`：自定义拍卖工作流的状态迁移配置样例 (`workflow.yaml` 等)。
 
+> 部分测试需要外部依赖：
+> - LLM/RAG/视觉解析相关测试需有效的 OpenAI 兼容或 ModelScope API Key（放入 `.env` 或直接设环境变量）。
+> - `test_file_parser.py` 需要你提供真实的本地文件路径，并在有图片时准备视觉解析所需的 Key。
+
+
+## Human-in-the-Loop
+支持随时打断，用户输入新指令，调整任务方向或细节。
+
+用法为在 agent 每轮的输出时，或在调用 `docker_shell` 工具时，在终端输入命令 `/i` 即可进入人机交互模式，等待用户输入新指令，输入完成后，agent 会继续执行新的指令。
+
+效果gif示例：
+![alt text](assets/human_input.gif)
+
 
 ## Examples
 
@@ -168,7 +187,7 @@ python -m ms_agent.cli.cli run --config projects/kaggle --trust_remote_code true
 sh run_kaggle.sh
 ```
 
-TODO: upload screenshots
+![alt text](kaggle.png)
 
 即可启动一个多智能体工作流，自动下载数据集、分析任务、生成代码并提交结果。
 
